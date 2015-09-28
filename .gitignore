@@ -53,3 +53,4 @@ src/.deps/libzbxmodbus_la-modbus.Plo
 src/Makefile
 src/Makefile.in
 stamp-h1
+src/.libs/
