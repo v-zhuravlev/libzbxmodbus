@@ -30,3 +30,26 @@
 
 # Debug files
 *.dSYM/
+Makefile
+Makefile.in
+aclocal.m4
+config.guess
+config.h
+config.h.in
+config.status
+config.sub
+configure
+depcomp
+install-sh
+libtool
+ltmain.sh
+m4/libtool.m4
+m4/ltoptions.m4
+m4/ltsugar.m4
+m4/ltversion.m4
+m4/lt~obsolete.m4
+missing
+src/.deps/libzbxmodbus_la-modbus.Plo
+src/Makefile
+src/Makefile.in
+stamp-h1
