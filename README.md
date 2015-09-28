@@ -115,7 +115,11 @@ Item type:
 
   
     
+## 5. Troubleshooting and testing Modbus
 
+Testing Modbus connectivity is easy with modpoll command utility.  
+You may try to grab some modbus registers with it before you try to do it with Zabbix.  
+http://www.modbusdriver.com/modpoll.html
   
 
 
