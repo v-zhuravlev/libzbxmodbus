@@ -108,10 +108,10 @@ and some optional params can be provided as well:
 ```
   
 **Additional item parameters:**
-Item type:
+Item type:  
   
 * *Simple check* if you load module on zabbix_server or zabbix_proxy  
-* *Zabbix Agent* or *Zabbix Agent(proxy)* if you load module on zabbix_agent  
+* *Zabbix Agent* or *Zabbix Agent(active)* if you load module on zabbix_agent  
 
   
     
