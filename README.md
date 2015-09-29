@@ -108,7 +108,7 @@ and some optional params can be provided as well:
     modbus_read_registers[{$MODBUS_PORT},32,4,3,f,1,0]
 ```
   
-**Additional item parameters:**
+**Additional item parameters:**  
 Item type:  
   
 * *Simple check* if you load module on zabbix_server or zabbix_proxy  
@@ -118,7 +118,7 @@ Item type:
     
 ## 5. Troubleshooting and testing Modbus
 
-Testing Modbus connectivity is easy with modpoll command utility.  
+Testing Modbus connectivity is easy with *modpoll* command utility.  
 You may try to grab some modbus registers with it before you try to do it with Zabbix.  
 http://www.modbusdriver.com/modpoll.html
   
