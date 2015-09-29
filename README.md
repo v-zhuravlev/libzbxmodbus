@@ -27,6 +27,7 @@ RTU version also features:
   - `make install`  
   
 ## 2.B Install from tar.gz sources  
+Download from  https://share.zabbix.com/dir-libraries/zabbix-loadable-modules/modbus-loadable-module
   - `tar zxvpf libzbxmodbus-0.1.tar.gz`
   - `cd libzbxmodbus-0.1`
   - `./configure`
@@ -40,8 +41,8 @@ RTU version also features:
       LoadModulePath = /usr/local/lib
       LoadModule = libzbxmodbus.so
 ```
-  - (optional) If you plan to use Modbus RTU over serial port then add zabbix user to dialout group to gain proper access to ports:
-      adduser zabbix dialout
+  - (optional) If you plan to use Modbus RTU over serial port then add zabbix user to dialout group to gain proper access to ports:  
+      `adduser zabbix dialout`
   - Restart Zabbix daemon  
   
 ##  4. Configure Modbus polling in Zabbix
