@@ -96,7 +96,7 @@ and some optional params can be provided as well:
     default is LE  
     
 * **first_reg(optional):**  
-    Modbus addressing scheme
+    Modbus addressing scheme  
       0 - MODBUS_PDU_ADDRESSING is used. First data object has address 0. This is default value.  
       1 - MODBUS_PROTOCOL_ADDRESSING is used. First data object has address of 1.  
       
