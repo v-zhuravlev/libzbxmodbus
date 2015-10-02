@@ -41,8 +41,8 @@
 #define MODBUS_16BIT_LE 0
 #define MODBUS_16BIT_BE 1
 
-#define MODBUS_PROTOCOL_ADDRESS_0 0
-#define MODBUS_PDU_ADDRESS_1 1
+#define MODBUS_PDU_ADDRESS_0 0
+#define MODBUS_PROTOCOL_ADDRESS_1 1
 
 #define LOCK_SERIAL_PORT		sem_lock(MODBUS_SEM_ID)
 #define UNLOCK_SERIAL_PORT	sem_unlock(MODBUS_SEM_ID)
@@ -252,7 +252,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         datatype = *param5; // set datatype
 		param6 = get_rparam(request, 5); //16 endiannes
         if(param6) {
-            //endiannesto use
+            //endiannes to use
             errno = 0;
             end = strtol(param6,&endptr, 0);
             if ( (end != MODBUS_16BIT_LE && end != MODBUS_16BIT_BE) ||
@@ -269,14 +269,14 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
             errno = 0;
             int first_reg = strtol(param7,&endptr, 0);
-            if ( (first_reg != MODBUS_PROTOCOL_ADDRESS_0 && first_reg != MODBUS_PDU_ADDRESS_1) ||
+            if ( (first_reg != MODBUS_PROTOCOL_ADDRESS_1 && first_reg != MODBUS_PDU_ADDRESS_0) ||
                         (errno!=0 || *endptr != '\0') )  {
                 SET_MSG_RESULT(result, strdup("Check addressing scheme(PDU,PROTOCOL) used"));
                 modbus_free(ctx);
                 return SYSINFO_RET_FAIL;
             }
         
-            if (first_reg == MODBUS_PDU_ADDRESS_1){
+            if (first_reg == MODBUS_PROTOCOL_ADDRESS_1){
                     reg_start=reg_start-1;
             }
         }

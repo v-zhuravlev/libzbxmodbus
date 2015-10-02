@@ -90,15 +90,16 @@ and some optional params can be provided as well:
       MODBUS_INTEGER if modbus_function 3 or 4.  
   
 * **endianness(optional):**   
-    Modbus endianness. Provide integers:  
+    Modbus endianness for long and float 32bit datatypes:  
       0 - for MODBUS_16BIT_LE (16 bit little endian)  
       1 - for MODBUS_16BIT_BE (16 bit big endian)  
     default is LE  
     
 * **first_reg(optional):**  
-    Modbus first register address:  
-      0 - MODBUS_PROTOCOL_ADDRESSING is used. First register has address of 1.  
-      1 - MODBUS_PDU_ADDRESSING is used. First reference is 0 instead 1 of.  
+    Modbus addressing scheme
+      0 - MODBUS_PDU_ADDRESSING is used. First data object has address 0. This is default value.  
+      1 - MODBUS_PROTOCOL_ADDRESSING is used. First data object has address of 1.  
+      
     
 **Example keys:**  
 ```
