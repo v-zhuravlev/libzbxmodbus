@@ -33,28 +33,28 @@
 #define MODBUS_READ_H_REGISTERS_3 3
 #define MODBUS_READ_I_REGISTERS_4 4
 
-#define MODBUS_BIT 'b'
-#define MODBUS_INTEGER 'i'
-#define MODBUS_LONG 'l'
-#define MODBUS_FLOAT 'f'
+#define MODBUS_BIT      'b'
+#define MODBUS_INTEGER  'i'
+#define MODBUS_LONG     'l'
+#define MODBUS_FLOAT    'f'
 
 #define MODBUS_16BIT_LE 0
 #define MODBUS_16BIT_BE 1
 
-#define MODBUS_PDU_ADDRESS_0 0
-#define MODBUS_PROTOCOL_ADDRESS_1 1
+#define MODBUS_PDU_ADDRESS_0    0
+#define MODBUS_PROTOCOL_ADDRESS_1   1
 
-#define LOCK_SERIAL_PORT		sem_lock(MODBUS_SEM_ID)
-#define UNLOCK_SERIAL_PORT	sem_unlock(MODBUS_SEM_ID)
+#define LOCK_SERIAL_PORT    sem_lock(MODBUS_SEM_ID)
+#define UNLOCK_SERIAL_PORT  sem_unlock(MODBUS_SEM_ID)
 
 //semaphore constants
 #define MODBUS_SEM_KEY "."
 int MODBUS_SEM_ID = -1;
-#define ZBX_MUTEX		int
-#define ZBX_MUTEX_NULL		-1
-#define ZBX_MUTEX_ERROR		-1
-#define ZBX_MUTEX_OK		1
-#define ZBX_MUTEX_NAME		int
+#define ZBX_MUTEX   int
+#define ZBX_MUTEX_NULL  -1
+#define ZBX_MUTEX_ERROR 1
+#define ZBX_MUTEX_OK    1
+#define ZBX_MUTEX_NAME  int
 #define MAX_RETRIES 10
 
 union semun {
@@ -182,16 +182,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 		return SYSINFO_RET_FAIL;
 	}
 
-    /*
-    //## debug part:validate params
-    printf("DEBUG for request->key: %s\n",request->key);
-    printf("DEBUG Param number:%d\n", request->nparam);
-    printf("DEBUG Param1:%s\n", param1);
-    printf("DEBUG Param2:%s\n", param2);
-    printf("DEBUG Param3:%s\n", param3);
-    printf("DEBUG Param4:%s\n", param4);
-    //delete this part
-    */    
+    
     modbus_t *ctx;
     int lock_required;
         
@@ -237,11 +228,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     char datatype;	
     int end = MODBUS_16BIT_LE; //<endianness> endianness LE(0) BE(1) default LE
 	if (request->nparam > 4) { //optional params provided
-   /*
-        printf("DEBUG Param5:%s\n", param5);
-        printf("DEBUG Param6:%s\n", param6);
-        printf("DEBUG Param7:%s\n", param7);
-    */
+   
         param5 = get_rparam(request, 4); //datatype
         if(!validate_datatype_param(param5)) {
             SET_MSG_RESULT(result, strdup("Check datatype provided."));
@@ -252,7 +239,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         datatype = *param5; // set datatype
 		param6 = get_rparam(request, 5); //16 endiannes
         if(param6) {
-            //endiannes to use
+            //endianness to use
             errno = 0;
             end = strtol(param6,&endptr, 0);
             if ( (end != MODBUS_16BIT_LE && end != MODBUS_16BIT_BE) ||
