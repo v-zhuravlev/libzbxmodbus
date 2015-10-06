@@ -117,12 +117,14 @@ Item type:
 
   
     
-## 5. Troubleshooting and testing Modbus
+## 5. Troubleshooting and Testing Modbus
 
 Testing Modbus connectivity is easy with *modpoll* command utility.  
 You may try to grab some modbus registers with it before you try to do it with Zabbix.  
 http://www.modbusdriver.com/modpoll.html
   
-
-
- 
+## 6. Known Issues and Limitations  
+ - a) Semaphoreset is mapped to path '.' so this module could possible lead to the conflict with other applications using semaphores same reckless way  
+ - b) Because of *a)* If module is loaded to the Zabbix server and Zabbix agent on the same host - locking won't work properly  
+ - c) Any libmodbus error returned including CRC would lead to Unsupported Item in Zabbix, so minimizing 'Refresh unsupported items' parameter in Zabbix is recommended because CRC could be common in RS-485 env.  
+ - d) Single semaphoreset is created no matter how many physical ports are used. So if /dev/ttyS0 is in use by the module then another Zabbix poller cannot use /dev/ttyS1 simultaneously - it has to wait for unlock of another poller which is working with /dev/ttyS0.  
