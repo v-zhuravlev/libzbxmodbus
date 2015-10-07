@@ -7,13 +7,17 @@ RTU version also features:
   - uses serial ports (/dev/tty*). As Zabbix forked pollers tend to use it simultaneously, IPC semaphores are used.
 
 ## 1. Download and install libmodbus first  
-  - Download http://libmodbus.org/releases/libmodbus-3.1.2.tar.gz
+  - wget http://libmodbus.org/releases/libmodbus-3.1.2.tar.gz
   - `tar zxvpf libmodbus-3.1.2.tar.gz`
   - `cd libmodbus-3.1.2`
   - `./configure`
   - `make`
   - `make install`
-  - `ldconfig  `
+  - (if /usr/local/lib is not included in ld.so.conf.d/ (eg Centos6) ):  
+      `echo '/usr/local/lib'>> /etc/ld.so.conf`  
+  - `ldconfig`  
+  - (if /usr/local/lib/pkgconfig is not included in pkg-config default path):  
+`export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig`
   
 ## 2.A Install from github sources  
   - Tools required:
