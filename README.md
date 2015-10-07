@@ -107,6 +107,7 @@ and some optional params can be provided as well:
     
 **Example keys:**  
 ```
+    modbus_read_registers[{$MODBUS_PORT},{$MODBUS_SLAVE},59,3,f,1,0]
     modbus_read_registers[/dev/ttyS0 9600 N,32,4,3,f,1,0]
     modbus_read_registers[192.168.1.1,1,6,1]
     modbus_read_registers[192.168.1.1,1,5,1]
