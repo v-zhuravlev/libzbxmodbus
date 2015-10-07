@@ -39,14 +39,14 @@ Download from  https://share.zabbix.com/dir-libraries/zabbix-loadable-modules/mo
   - `make install`
 
 ## 3.Integrate into Zabbix  
-  - Module libzbxmodule.so can be loaded into zabbix_server, zabbix_proxy or zabbix_agent.
+  - Module libzbxmodule.so can be loaded into zabbix_server, zabbix_proxy or zabbix_agent(use passive mode).  
     Depending where you want to load you module edit appropriate zabbix configuration file:
 ```
       LoadModulePath = /usr/local/lib
       LoadModule = libzbxmodbus.so
 ```
   - (optional) If you plan to use Modbus RTU over serial port then add zabbix user to dialout group to gain proper access to ports:  
-      `adduser zabbix dialout`
+      `usermod -a -G dialout zabbix`
   - Restart Zabbix daemon  
   
 ##  4. Configure Modbus polling in Zabbix
