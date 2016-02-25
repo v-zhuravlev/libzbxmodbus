@@ -35,6 +35,7 @@
 
 #define MODBUS_BIT      'b'
 #define MODBUS_INTEGER  'i'
+#define MODBUS_SIGNED_INT  's'
 #define MODBUS_LONG     'l'
 #define MODBUS_FLOAT    'f'
 
@@ -347,6 +348,11 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     
     case MODBUS_INTEGER:
         SET_UI64_RESULT(result, tab_reg[0]);
+    break;
+    
+    case MODBUS_SIGNED_INT:
+        //use float type in zabbix item
+        SET_DBL_RESULT(result, (int16_t) tab_reg[0]);
     break;
 
     case MODBUS_FLOAT:

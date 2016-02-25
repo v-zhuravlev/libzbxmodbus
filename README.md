@@ -86,7 +86,8 @@ and some optional params can be provided as well:
 * **datatype(optional):**  
     provide datatype as single char:  
       b - for MODBUS_BIT  
-      i - for MODBUS_INTEGER  
+      i - for MODBUS_INTEGER (unsigned) 
+      s - for MODBUS_SIGNED_INT (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
       l - for MODBUS_LONG  
       f - for MODBUS_FLOAT  
     otherwise, defaults will be used:  
