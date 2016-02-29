@@ -27,6 +27,7 @@ RTU version also features:
     - pkg-config
   - Prereq: Download and install libmodbus
   - Run `autogen.sh`
+  - `./configure --enable-zabbix-3` or `./configure --enable-zabbix-2`
   - `make`
   - `make install`  
   
@@ -34,7 +35,7 @@ RTU version also features:
 Download from  https://share.zabbix.com/dir-libraries/zabbix-loadable-modules/modbus-loadable-module
   - `tar zxvpf libzbxmodbus-0.1.tar.gz`
   - `cd libzbxmodbus-0.1`
-  - `./configure`
+  - `./configure --enable-zabbix-3` or `./configure --enable-zabbix-2`
   - `make`
   - `make install`
 
@@ -86,7 +87,8 @@ and some optional params can be provided as well:
 * **datatype(optional):**  
     provide datatype as single char:  
       b - for MODBUS_BIT  
-      i - for MODBUS_INTEGER  
+      i - for MODBUS_INTEGER (unsigned)  
+      s - for MODBUS_SIGNED_INT (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
       l - for MODBUS_LONG  
       f - for MODBUS_FLOAT  
     otherwise, defaults will be used:  
