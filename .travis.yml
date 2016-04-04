@@ -1,2 +1,3 @@
 language: c
+before_install:chmod +x autogen.sh
 script: ./autogen.sh && ./configure --enable-zabbix-3 && make && make test
