@@ -1,0 +1,2 @@
+language: c
+script: ./autogen.sh && ./configure --enable-zabbix-3 && make && make test
