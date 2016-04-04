@@ -1,4 +1,5 @@
 # libzbxmodbus
+[![Build Status](https://travis-ci.org/v-zhuravlev/libzbxmodbus.svg?branch=master)](https://travis-ci.org/v-zhuravlev/libzbxmodbus)  
 Loadable module to integrate Modbus (RTU and TCP) protocol into Zabbix  
 libmodbus.org library is used in this integration of version 3.1.1 or higher.  
 Your Linux distro may contain lower version and this won't work.  
