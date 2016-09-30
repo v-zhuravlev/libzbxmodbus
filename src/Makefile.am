@@ -9,6 +9,9 @@ endif
 if ZABBIX_3
 libzbxmodbus_la_CFLAGS += -I../include/zabbix-3.0
 endif
+if ZABBIX_3_2
+libzbxmodbus_la_CFLAGS += -I../include/zabbix-3.2
+endif
 
 libzbxmodbus_la_LDFLAGS = $(LIBMODBUS_LIBS) \
     -module \

@@ -27,15 +27,15 @@ RTU version also features:
     - pkg-config
   - Prereq: Download and install libmodbus
   - Run `autogen.sh`
-  - `./configure --enable-zabbix-3` or `./configure --enable-zabbix-2`
+  - `./configure --enable-zabbix-3.2` or `./configure --enable-zabbix-3` or `./configure --enable-zabbix-2`
   - `make`
   - `make install`  
   
 ## 2.B Install from tar.gz sources  
 Download from  https://share.zabbix.com/dir-libraries/zabbix-loadable-modules/modbus-loadable-module
-  - `tar zxvpf libzbxmodbus-0.1.tar.gz`
-  - `cd libzbxmodbus-0.1`
-  - `./configure --enable-zabbix-3` or `./configure --enable-zabbix-2`
+  - `tar zxvpf libzbxmodbus-0.4.tar.gz`
+  - `cd libzbxmodbus-0.4`
+  - `./configure --enable-zabbix-3.2` or `./configure --enable-zabbix-3` or `./configure --enable-zabbix-2`
   - `make`
   - `make install`
 
