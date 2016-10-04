@@ -2,6 +2,7 @@ AC_INIT([libzbxmodbus], [0.4])
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/modbus.c])
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 # Checks for libraries.
 have_modbus=no
 AC_SEARCH_LIBS([modbus_get_float], [modbus], [have_modbus=yes])
