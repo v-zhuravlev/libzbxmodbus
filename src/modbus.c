@@ -287,7 +287,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     modbus_set_response_timeout(ctx, &response_timeout);
     */    
-    //modbus_set_response_timeout(ctx, 10, 0);
+    modbus_set_response_timeout(ctx, item_timeout, 0);
 
     //read part
     
