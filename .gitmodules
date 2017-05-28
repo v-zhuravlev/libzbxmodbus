@@ -1,0 +1,4 @@
+[submodule "libmodbus"]
+	path = libmodbus
+	url = https://github.com/stephane/libmodbus
+    branch = v3.1.4
