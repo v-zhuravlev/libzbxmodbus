@@ -447,7 +447,8 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
     char first_char = con_string[0];
     
     if (first_char == '/') {//then its rtu(serial con)
-        // -- next code is to parse first arg and find all required to connect to rtu successfully
+
+    	// -- next code is to parse first arg and find all required to connect to rtu successfully
         char rtu_port[100];
         int rtu_speed = 9600;
         char rtu_parity = 'N';
@@ -458,14 +459,28 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
         *lock_required_out = 1;
         *ctx_out = modbus_new_rtu(rtu_port, rtu_speed, rtu_parity, rtu_bits, rtu_stop_bit);
     }
-    else if (first_char == 'e'){//try modbus enc
-    	*lock_required_out = 1;
-    	memmove(con_string, con_string+1, strlen(con_string));
-    	*ctx_out = modbus_new_rtutcp(con_string, MODBUS_TCP_DEFAULT_PORT);
-    }
-    else {//try modbus_tcp
-        *lock_required_out = 0;
-        *ctx_out = modbus_new_tcp(con_string, MODBUS_TCP_DEFAULT_PORT);
+    else {//its TCP (encapsulated or Modbus TCP)
+
+		char host[100];
+		int port = MODBUS_TCP_DEFAULT_PORT;
+
+		if (strstr(con_string, "enc://") != NULL) {
+
+			memmove(con_string, con_string+6, strlen(con_string));
+			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+			*lock_required_out = 1;
+
+			*ctx_out = modbus_new_rtutcp(host, port);
+		} else if (strstr(con_string, "tcp://") != NULL) {
+			memmove(con_string, con_string+6, strlen(con_string));
+			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+			*ctx_out = modbus_new_tcp(host, port);
+		}
+		else {//try Modbus TCP
+			*lock_required_out = 0;
+			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+			*ctx_out = modbus_new_tcp(host, port);
+		}
     }
     
     return;
