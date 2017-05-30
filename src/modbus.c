@@ -458,9 +458,14 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
         *lock_required_out = 1;
         *ctx_out = modbus_new_rtu(rtu_port, rtu_speed, rtu_parity, rtu_bits, rtu_stop_bit);
     }
+    else if (first_char == 'e'){//try modbus enc
+    	*lock_required_out = 1;
+    	memmove(con_string, con_string+1, strlen(con_string));
+    	*ctx_out = modbus_new_rtutcp(con_string, MODBUS_TCP_DEFAULT_PORT);
+    }
     else {//try modbus_tcp
         *lock_required_out = 0;
-        *ctx_out = modbus_new_tcp(con_string, MODBUS_TCP_DEFAULT_PORT );
+        *ctx_out = modbus_new_tcp(con_string, MODBUS_TCP_DEFAULT_PORT);
     }
     
     return;
