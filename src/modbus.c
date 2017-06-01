@@ -293,13 +293,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         }
     }
 
-    /* 3.0.3
-    struct timeval response_timeout ;
-    response_timeout.tv_sec = 0;
-    response_timeout.tv_usec = 0;
 
-    modbus_set_response_timeout(ctx, &response_timeout);
-    */    
     modbus_set_response_timeout(ctx, item_timeout, 0);
 
     //read part
