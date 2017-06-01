@@ -83,6 +83,7 @@ static ZBX_METRIC keys[] =
 /*      KEY                     FLAG        FUNCTION            TEST PARAMETERS */
 {
     {"modbus_read_registers",   CF_HAVEPARAMS,  zbx_modbus_read_registers, NULL},
+	{"modbus_read",   CF_HAVEPARAMS,  zbx_modbus_read_registers, NULL},
     {NULL}
 };
 
