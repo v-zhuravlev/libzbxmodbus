@@ -109,6 +109,7 @@ and some optional params can be provided as well:
     
 **Example keys:**  
 ```
+    modbus_read[/dev/ttyS0,32,4,3]
     modbus_read[{$MODBUS_PORT},{$MODBUS_SLAVE},59,3,f,1,0]
     modbus_read[{HOST.CONN},{$MODBUS_SLAVE},59,3,f,1,0]
     modbus_read[/dev/ttyS0 9600 N,32,4,3,f,1,0]
