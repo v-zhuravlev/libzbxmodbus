@@ -45,15 +45,18 @@
 #define MODBUS_PDU_ADDRESS_0    0
 #define MODBUS_PROTOCOL_ADDRESS_1   1
 
-#define LOCK_SERIAL_PORT    sem_lock(MODBUS_SEM_ID)
-#define UNLOCK_SERIAL_PORT  sem_unlock(MODBUS_SEM_ID)
+#define NSEMS 128
+
+#define LOCK_PORT(x)    sem_lock(x)
+#define UNLOCK_PORT(x)  sem_unlock(x)
+
 
 //semaphore constants
 #define MODBUS_SEM_KEY "."
 int MODBUS_SEM_ID = -1;
 #define ZBX_MUTEX   int
 #define ZBX_MUTEX_NULL  -1
-#define ZBX_MUTEX_ERROR 1
+#define ZBX_MUTEX_ERROR -1
 #define ZBX_MUTEX_OK    1
 #define ZBX_MUTEX_NAME  int
 #define MAX_RETRIES 10
@@ -68,7 +71,7 @@ union semun {
 static int  item_timeout = 0;
 static ZBX_MUTEX serial_port_access = ZBX_MUTEX_NULL;
 int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result);
-void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out);
+void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out, short *lock_key);
 int param_is_empty(char *param_to_check);
 int validate_datatype_param (char *datatype_param);
 int initsem();
@@ -126,7 +129,17 @@ ZBX_METRIC  *zbx_module_item_list()
     return keys;
 }
 
+//generate hash for nsem pseudo unique number.
+unsigned long hash(unsigned char *str)
+{
+    unsigned long hash = 5381;
+    int c;
 
+    while (c = *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash;
+}
 
 /******************************************************************************
  *                                                                            *
@@ -183,14 +196,13 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 		return SYSINFO_RET_FAIL;
 	}
 
-    
+
     modbus_t *ctx;
     int lock_required;
-        
-  
+    short lock_key = 0;
     
-    
-    create_modbus_context(param1,&ctx,&lock_required);
+
+    create_modbus_context(param1,&ctx,&lock_required, &lock_key);
     if (ctx == NULL) {
             SET_MSG_RESULT(result, strdup("Unable to create the libmodbus context"));
             modbus_free(ctx);
@@ -296,12 +308,14 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     int regs_to_read = 1;
 	if (datatype == MODBUS_FLOAT || datatype == MODBUS_LONG) { regs_to_read=2;}
 
-    if (lock_required == 1 ) LOCK_SERIAL_PORT;
+
+
+	if (lock_required == 1 ) LOCK_PORT(lock_key);
 
     if (modbus_connect(ctx) == -1) {
         SET_MSG_RESULT(result, strdup(modbus_strerror(errno)));
         modbus_free(ctx);
-        if (lock_required == 1 ) UNLOCK_SERIAL_PORT;
+        if (lock_required == 1 ) UNLOCK_PORT(lock_key);
         return SYSINFO_RET_FAIL;
     }
     
@@ -323,14 +337,14 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
             SET_MSG_RESULT(result, strdup("Check function (1,2,3,4) used"));
             //close connection
             modbus_close(ctx);
-            if (lock_required == 1 ) UNLOCK_SERIAL_PORT;
+            if (lock_required == 1 ) UNLOCK_PORT(lock_key);
             modbus_free(ctx);
             return SYSINFO_RET_FAIL;
         break;
     }
     //close connection
     modbus_close(ctx);
-    if (lock_required == 1 ) UNLOCK_SERIAL_PORT;
+    if (lock_required == 1 ) UNLOCK_PORT(lock_key);
     modbus_free(ctx);
 
     if (rc == -1) {
@@ -407,7 +421,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 int zbx_module_init()
 {   
     if (ZBX_MUTEX_ERROR == (MODBUS_SEM_ID = initsem())) {       		
-            //"unable to create semaphore set for serial port"));
+            printf("libzbxmodbus: unable to create semaphores. Please check maximum allowed nsem, it must be no less than %d. See limits in /proc/sys/kernel/sem\n", NSEMS);
             return ZBX_MODULE_FAIL;
     }
 
@@ -442,12 +456,12 @@ int validate_datatype_param (char *datatype_param) {//checks that datatype provi
     return (datatype_param[1] == '\0') ? 1: 0;
 }
 
-void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out) {
+void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out, short *lock_key) {
 
     char first_char = con_string[0];
     
     if (first_char == '/') {//then its rtu(serial con)
-
+    	*lock_required_out = 1;
     	// -- next code is to parse first arg and find all required to connect to rtu successfully
         char rtu_port[100];
         int rtu_speed = 9600;
@@ -456,8 +470,9 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
         int rtu_stop_bit = 1;
 
         sscanf(con_string,"%s %d %c %d %d",rtu_port,&rtu_speed,&rtu_parity,&rtu_bits,&rtu_stop_bit);
-        *lock_required_out = 1;
+        *lock_key = hash(rtu_port) % 128;
         *ctx_out = modbus_new_rtu(rtu_port, rtu_speed, rtu_parity, rtu_bits, rtu_stop_bit);
+
     }
     else {//its TCP (encapsulated or Modbus TCP)
 
@@ -466,29 +481,40 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 
 		if (strstr(con_string, "enc://") != NULL) {
 
-			memmove(con_string, con_string+6, strlen(con_string));
-			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
 			*lock_required_out = 1;
-
-			*ctx_out = modbus_new_rtutcp(host, port);
-		} else if (strstr(con_string, "tcp://") != NULL) {
 			memmove(con_string, con_string+6, strlen(con_string));
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+			*lock_key = hash(host) % NSEMS;
+			*ctx_out = modbus_new_rtutcp(host, port);
+
+		} else if (strstr(con_string, "tcp://") != NULL) {
+
+			*lock_required_out = 0;
+			memmove(con_string, con_string+6, strlen(con_string));
+			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+			*lock_key = hash(host) % NSEMS;
 			*ctx_out = modbus_new_tcp(host, port);
+
 		}
 		else {//try Modbus TCP
+
 			*lock_required_out = 0;
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+			*lock_key = hash(host) % NSEMS;
 			*ctx_out = modbus_new_tcp(host, port);
+
 		}
     }
     
     return;
 }
 
+
+
+
 int initsem()  /* sem_key from ftok() */
 {
-    int nsems = 1;
+    int nsems = NSEMS;
     key_t sem_key;
     int semid;
     int i;
@@ -516,7 +542,7 @@ int initsem()  /* sem_key from ftok() */
                 int e = errno;
                 semctl(semid, 0, IPC_RMID); /* clean up */
                 errno = e;
-                return -1; /* error, check errno */
+                return ZBX_MUTEX_ERROR; /* error, check errno */
             }
         }
     } else if (errno == EEXIST) { /* someone else got it first */
@@ -536,7 +562,7 @@ int initsem()  /* sem_key from ftok() */
         }
         if (!ready) {
             errno = ETIME;
-            return -1;
+            return ZBX_MUTEX_ERROR;
         }
     } else {
         return semid; /* error, check errno */
@@ -545,10 +571,10 @@ int initsem()  /* sem_key from ftok() */
 }
 
 
-void sem_lock () {
+void sem_lock (int sem_num) {
     struct sembuf sb;
     
-    sb.sem_num = 0;
+    sb.sem_num = sem_num;
     sb.sem_op = -1;  /* set to allocate resource */
     sb.sem_flg = SEM_UNDO;
     
@@ -559,10 +585,10 @@ void sem_lock () {
 }
 
 
-void sem_unlock () {
+void sem_unlock (int sem_num) {
     struct sembuf sb;
     
-    sb.sem_num = 0;
+    sb.sem_num = sem_num;
     sb.sem_op = 1;  /* free resource */
     sb.sem_flg = SEM_UNDO;
     
@@ -577,5 +603,6 @@ void sem_uninit (int semid) {
     
      if (semctl(semid, 0, IPC_RMID) == -1) {
        //zabbix_log(LOG_LEVEL_ERROR, "Failed to destroy semaphore set for semid: %d",MODBUS_SEM_ID);
+    	 printf("libzbxmodbus: failed to destroy semaphore set for semid: %d",MODBUS_SEM_ID);
     }
 }
