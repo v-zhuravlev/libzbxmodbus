@@ -1,28 +1,11 @@
-AC_INIT([libzbxmodbus], [0.5])
+AC_INIT([libzbxmodbus], [0.6])
 AM_INIT_AUTOMAKE([foreign -Wall -Werror])
 AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_SUBDIRS([libmodbus])
 AC_CONFIG_SRCDIR([src/modbus.c])
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
-# Checks for libraries.
-have_modbus=no
-AC_SEARCH_LIBS([modbus_get_float], [modbus], [have_modbus=yes])
-if test "x${have_modbus}" = xno; then
-AC_MSG_ERROR([
-------------------------------------------
-The modbus library and header file
-required to build zbxmodbus. Stopping...
-Check 'config.log' for more information.
-------------------------------------------])
-fi
-PKG_CHECK_MODULES([LIBMODBUS], [libmodbus >= 3.1.1], [],
-[AC_MSG_ERROR([
-    ------------------------------------------
-    libmodbus 3.1.1 or higher is required.
-    Versions below that can cause serious performance issues with pollers
-    because of bugged timeout handling. Please download and build latest
-    libmodbus from http://libmodbus.org/
-    ------------------------------------------])
-])
+
+
 
 #Zabbix 2.4 / Zabbix 3.0 / 3.2 chooser
 AC_ARG_ENABLE([zabbix-2],
