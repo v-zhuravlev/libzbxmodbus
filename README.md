@@ -1,66 +1,65 @@
 # libzbxmodbus
 [![Build Status](https://travis-ci.org/v-zhuravlev/libzbxmodbus.svg?branch=master)](https://travis-ci.org/v-zhuravlev/libzbxmodbus)  
 Loadable module to integrate Modbus (RTU and TCP) protocol into Zabbix  
-libmodbus.org library is used in this integration of version 3.1.1 or higher.  
-Your Linux distro may contain lower version and this won't work.  
+'Encapsulated Modbus' (RTU over TCP) also supported since 0.6).  
+Patched libmodbus 3.1.4 library is used underneath and shipped as nested module. (Encapsulated Modbus added by the patch) is used in this integration.  
 
-RTU version also features:
-  - uses serial ports (/dev/tty*). As Zabbix forked pollers tend to use it simultaneously, IPC semaphores are used.
+Resource locking (via IPC semaphores) is used when using RTU or Encapsulated Modbus. So two or more zabbix pollers don't poll same serial port at the same time. No locking is used for Modbus TCP.  
 
-## 1. Download and install libmodbus first  
-  - wget http://libmodbus.org/releases/libmodbus-3.1.2.tar.gz
-  - `tar zxvpf libmodbus-3.1.2.tar.gz`
-  - `cd libmodbus-3.1.2`
-  - `./configure`
-  - `make`
-  - `make install`
-  - (if /usr/local/lib is not included in ld.so.conf.d/ (eg Centos6) ):  
-      `echo '/usr/local/lib'>> /etc/ld.so.conf`  
-  - `ldconfig`  
-  - (if /usr/local/lib/pkgconfig is not included in pkg-config default path):  
-`export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig`
-  
-## 2.A Install from github sources  
+## 1.A Install from Github  
   - Tools required:
     - autoconf
     - automake
     - libtool
     - pkg-config
-  - Prereq: Download and install libmodbus
+  - `git clone --recursive https://github.com/v-zhuravlev/libzbxmodbus.git`
   - Run `autogen.sh`
-  - `./configure --enable-zabbix-3.2` or `./configure --enable-zabbix-3` or `./configure --enable-zabbix-2`
+  - `./configure --prefix=/etc/zabbix --enable-zabbix-[2|3|3.2]`
   - `make`
   - `make install`  
   
-## 2.B Install from tar.gz sources  
+## 1.B Install from tar.gz distribute  
 Download from  https://share.zabbix.com/dir-libraries/zabbix-loadable-modules/modbus-loadable-module
-  - `tar zxvpf libzbxmodbus-0.4.tar.gz`
-  - `cd libzbxmodbus-0.4`
-  - `./configure --enable-zabbix-3.2` or `./configure --enable-zabbix-3` or `./configure --enable-zabbix-2`
+  - `tar zxvpf libzbxmodbus-0.6.tar.gz`
+  - `cd libzbxmodbus-0.6`
+  - `./configure --prefix=/etc/zabbix --enable-zabbix-[2|3|3.2]`
   - `make`
   - `make install`
 
-## 3.Integrate into Zabbix  
+## 2.Integrate into Zabbix  
   - Module libzbxmodule.so can be loaded into zabbix_server, zabbix_proxy or zabbix_agent(use passive mode).  
     Depending where you want to load you module edit appropriate zabbix configuration file:
 ```
-      LoadModulePath = /usr/local/lib
+      LoadModulePath = /etc/zabbix/lib
       LoadModule = libzbxmodbus.so
 ```
+  - Because of resource locking and that networks might be slow to respond, it is also recommended to tune `Timeout` to 10 seconds or more:
+```
+      Timeout = 10
+```  
   - (optional) If you plan to use Modbus RTU over serial port then add zabbix user to dialout group to gain proper access to ports:  
       `usermod -a -G dialout zabbix`
   - Restart Zabbix daemon  
   
-##  4. Configure Modbus polling in Zabbix
+## 3. Configure Modbus polling in Zabbix
   Configure the new item with the following key:
   
-`modbus_read_registers[<connection>,<slave_id>, <reg_to_read>, <modbus_function>, [<datatype>],[<endiannes>],[<first_reg>]]`  
+`modbus_read[<connection>,<slave_id>, <reg_to_read>, <modbus_function>, [<datatype>],[<endiannes>],[<first_reg>]]`  
 
 where:  
 
 * **connection:**  
-    IPv4 of Modbus client, for example: 192.168.1.1  
-      or  
+    for Modbus TCP: 
+    IPv4 of Modbus TCP client/gate, for example: `192.168.1.1`  
+    you mas also use this form: `tcp://192.168.1.1`  
+    TCP port may also be redefined (from Modbus TCP default 502) if needed: `192.168.1.1:5000`
+    
+    for Modbus Encapsulated (RTU over TCP): 
+    IPv4 of Modbus gate, for example: `enc://192.168.1.1`  
+    TCP port may also be redefined (from Modbus default 502) if needed: `enc://192.168.1.1:5000`
+    
+      
+    for Modbus RTU over serial:
     Serial connection parameters in a form of:  
       `portname [baudrate] [parity:N|E|O] [databits] [stopbits]`  
     for example  
@@ -110,12 +109,14 @@ and some optional params can be provided as well:
     
 **Example keys:**  
 ```
-    modbus_read_registers[{$MODBUS_PORT},{$MODBUS_SLAVE},59,3,f,1,0]
-    modbus_read_registers[{HOST.CONN},{$MODBUS_SLAVE},59,3,f,1,0]
-    modbus_read_registers[/dev/ttyS0 9600 N,32,4,3,f,1,0]
-    modbus_read_registers[192.168.1.1,1,6,1]
-    modbus_read_registers[192.168.1.1,1,5,1]
-    modbus_read_registers[{$MODBUS_PORT},32,4,3,f,1,0]
+    modbus_read[{$MODBUS_PORT},{$MODBUS_SLAVE},59,3,f,1,0]
+    modbus_read[{HOST.CONN},{$MODBUS_SLAVE},59,3,f,1,0]
+    modbus_read[/dev/ttyS0 9600 N,32,4,3,f,1,0]
+    modbus_read[192.168.1.1,1,6,1]
+    modbus_read[192.168.1.1:514,1,5,1]
+    modbus_read[{$MODBUS_PORT},32,4,3,f,1,0]
+    modbus_read[enc://192.168.1.1,1,6,1]
+    modbus_read[tcp://192.168.1.1:5000,1,5,1]
 ```
   
 **Additional item parameters:**  
@@ -126,14 +127,13 @@ Item type:
 
   
     
-## 5. Troubleshooting and Testing Modbus
+## 4. Troubleshooting and Testing Modbus
 
 Testing Modbus connectivity is easy with *modpoll* command utility.  
 You may try to grab some modbus registers with it before you try to do it with Zabbix.  
 http://www.modbusdriver.com/modpoll.html
   
-## 6. Known Issues and Limitations  
- - a) Semaphoreset is mapped to path '.' so this module could possible lead to the conflict with other applications using semaphores same reckless way  
- - b) Because of *a)* If module is loaded to the Zabbix server and Zabbix agent on the same host - locking won't work properly  
- - c) Any libmodbus error returned including CRC would lead to Unsupported Item in Zabbix, so minimizing 'Refresh unsupported items' parameter in Zabbix is recommended because CRC could be common in RS-485 env.  
- - d) Single semaphoreset is created no matter how many physical ports are used. So if /dev/ttyS0 is in use by the module then another Zabbix poller cannot use /dev/ttyS1 simultaneously - it has to wait for unlock of another poller which is working with /dev/ttyS0.  
+## 5. Known Issues and Limitations  
+ - Any libmodbus error returned including CRC errors would lead to Unsupported Item in Zabbix, so minimizing 'Refresh unsupported items' parameter in Zabbix is recommended because CRC could be common in RS-485 env.  
+ - If you have many different TCP gateways or serials ports in use then there are chances that Gate A will be locked while Gate B is being polled. This happens because the hash generated and assigned to resource is too small and might not always be unique. That should not be an issue though.
+ 
