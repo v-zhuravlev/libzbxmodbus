@@ -602,6 +602,7 @@ void sem_lock (int sem_num) {
     
     if (semop(MODBUS_SEM_ID, &sb, 1) == -1) {
         //zabbix_log(LOG_LEVEL_ERROR, "Failed to lock semaphore for semid: %d",MODBUS_SEM_ID);
+    	printf("libzbxmodbus: failed to lock semaphore for semid: %d",MODBUS_SEM_ID);
     }
 
 }
@@ -616,6 +617,7 @@ void sem_unlock (int sem_num) {
     
     if (semop(MODBUS_SEM_ID, &sb, 1) == -1) {
        //zabbix_log(LOG_LEVEL_ERROR, "Failed to unlock semaphore for semid: %d",MODBUS_SEM_ID);
+    	printf("libzbxmodbus: failed to unlock semaphore for semid: %d",MODBUS_SEM_ID);
     }
 }
 
