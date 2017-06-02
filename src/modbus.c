@@ -484,7 +484,7 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 
 		} else if (strstr(con_string, "tcp://") != NULL) {
 
-			*lock_required_out = 0;
+			*lock_required_out = 1;
 			memmove(con_string, con_string+6, strlen(con_string));
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
 			*lock_key = hash(host) % NSEMS;
@@ -493,7 +493,7 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 		}
 		else {//try Modbus TCP
 
-			*lock_required_out = 0;
+			*lock_required_out = 1;
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
 			*lock_key = hash(host) % NSEMS;
 			*ctx_out = modbus_new_tcp(host, port);
