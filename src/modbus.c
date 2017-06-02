@@ -420,6 +420,7 @@ int zbx_module_init()
             return ZBX_MODULE_FAIL;
     }
 
+    printf("libzbxmodbus: loaded version: %s\n",VERSION);
 /*This function should perform the necessary initialization for the module (if any). 
 If successful, it should return ZBX_MODULE_OK. Otherwise, it should return ZBX_MODULE_FAIL.*/
     return ZBX_MODULE_OK;
