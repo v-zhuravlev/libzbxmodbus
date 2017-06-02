@@ -413,7 +413,6 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     
     default :
         SET_MSG_RESULT(result, strdup("Check datatype provided."));
-        modbus_free(ctx);
         return SYSINFO_RET_FAIL;
     break;
     }
