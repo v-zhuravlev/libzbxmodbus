@@ -251,7 +251,8 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         }
         
         datatype = *param5; // set datatype
-		param6 = get_rparam(request, 5); //16 endiannes
+
+        param6 = get_rparam(request, 5); //16 endiannes
         if(param6) {
             //endianness to use
             errno = 0;
