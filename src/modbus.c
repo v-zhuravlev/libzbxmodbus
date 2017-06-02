@@ -336,7 +336,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         SET_MSG_RESULT(result, strdup(modbus_strerror(errno)));
         modbus_free(ctx);
         if (lock_required == 1 ) UNLOCK_PORT(lock_key);
-        if (lock_required == 1 ) printf("pid:%d hash:%d : %s Unlocking \n",getpid(),lock_key, param1);
+        if (lock_required == 1 ) printf("pid:%d hash:%d : %s Unlocking \n\n",getpid(),lock_key, param1);
         return SYSINFO_RET_FAIL;
     }
     
@@ -359,7 +359,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
             //close connection
             modbus_close(ctx);
             if (lock_required == 1 ) UNLOCK_PORT(lock_key);
-            if (lock_required == 1 ) printf("pid:%d hash:%d : %s Unlocking \n",getpid(),lock_key, param1);
+            if (lock_required == 1 ) printf("pid:%d hash:%d : %s Unlocking \n\n",getpid(),lock_key, param1);
             modbus_free(ctx);
             return SYSINFO_RET_FAIL;
         break;
@@ -367,7 +367,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     //close connection
     modbus_close(ctx);
     if (lock_required == 1 ) UNLOCK_PORT(lock_key);
-    if (lock_required == 1 ) printf("pid:%d hash:%d : %s Unlocking \n",getpid(),lock_key, param1);
+    if (lock_required == 1 ) printf("pid:%d hash:%d : %s Unlocking \n\n",getpid(),lock_key, param1);
     modbus_free(ctx);
 
     if (rc == -1) {
