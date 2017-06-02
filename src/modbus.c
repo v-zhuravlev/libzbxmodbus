@@ -45,6 +45,9 @@
 #define MODBUS_PDU_ADDRESS_0    0
 #define MODBUS_PROTOCOL_ADDRESS_1   1
 
+#define MODBUS_LOCKING    1
+#define MODBUS_NO_LOCKING   0
+
 #define NSEMS 128
 
 #define LOCK_PORT(x)    sem_lock(x)
@@ -168,7 +171,7 @@ unsigned long hash(unsigned char *str)
  ******************************************************************************/
 int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 {
-    char    *param1, *param2,*param3,*param4,*param5,*param6,*param7;
+    char    *param1, *param2,*param3,*param4,*param5,*param6,*param7, *param8;
 
     if (request->nparam <4) //check if mandatory params are provided
     {
@@ -281,6 +284,20 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
             if (first_reg == MODBUS_PROTOCOL_ADDRESS_1){
                     reg_start=reg_start-1;
             }
+        }
+
+        param8 = get_rparam(request, 7); //LOCKING
+        if(param8) {
+
+            errno = 0;
+            lock_required = strtol(param8,&endptr, 0);
+            if ( (lock_required != MODBUS_LOCKING && lock_required != MODBUS_NO_LOCKING) ||
+                        (errno!=0 || *endptr != '\0') )  {
+                SET_MSG_RESULT(result, strdup("Check locking flag provided"));
+                modbus_free(ctx);
+                return SYSINFO_RET_FAIL;
+            }
+
         }
 
 	}
@@ -456,9 +473,9 @@ int validate_datatype_param (char *datatype_param) {//checks that datatype provi
 void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out, short *lock_key) {
 
     char first_char = con_string[0];
-    
+    *lock_required_out = 1; //always lock by default
     if (first_char == '/') {//then its rtu(serial con)
-    	*lock_required_out = 1;
+
     	// -- next code is to parse first arg and find all required to connect to rtu successfully
         char rtu_port[100];
         int rtu_speed = 9600;
@@ -478,29 +495,30 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 
 		if (strstr(con_string, "enc://") != NULL) {
 
-			*lock_required_out = 1;
+
 			memmove(con_string, con_string+6, strlen(con_string));
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
-			*lock_key = hash(host) % NSEMS;
 			*ctx_out = modbus_new_rtutcp(host, port);
 
 		} else if (strstr(con_string, "tcp://") != NULL) {
 
-			*lock_required_out = 1;
+
 			memmove(con_string, con_string+6, strlen(con_string));
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
-			*lock_key = hash(host) % NSEMS;
+
 			*ctx_out = modbus_new_tcp(host, port);
 
 		}
 		else {//try Modbus TCP
 
-			*lock_required_out = 1;
+
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
-			*lock_key = hash(host) % NSEMS;
+
 			*ctx_out = modbus_new_tcp(host, port);
 
 		}
+
+		*lock_key = hash(host) % NSEMS;
     }
     
     return;
