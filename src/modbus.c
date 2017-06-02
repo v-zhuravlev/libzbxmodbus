@@ -213,6 +213,10 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
             return SYSINFO_RET_FAIL;
     }
     
+    //debug
+    modbus_set_debug(ctx, TRUE);
+
+
     //<slave_id> set slave id 
     char *endptr;
     errno = 0;
