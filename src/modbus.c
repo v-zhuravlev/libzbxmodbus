@@ -54,11 +54,10 @@
 //semaphore constants
 #define MODBUS_SEM_KEY "."
 int MODBUS_SEM_ID = -1;
-#define ZBX_MUTEX   int
-#define ZBX_MUTEX_NULL  -1
+
 #define ZBX_MUTEX_ERROR -1
-#define ZBX_MUTEX_OK    1
-#define ZBX_MUTEX_NAME  int
+
+
 #define MAX_RETRIES 10
 
 union semun {
@@ -69,7 +68,7 @@ union semun {
 
 /* the variable keeps timeout setting for item processing */
 static int  item_timeout = 0;
-static ZBX_MUTEX serial_port_access = ZBX_MUTEX_NULL;
+
 int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result);
 void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out, short *lock_key);
 int param_is_empty(char *param_to_check);
