@@ -239,7 +239,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     }
     
     char datatype;	
-    int end = MODBUS_16BIT_LE; //<endianness> endianness LE(0) BE(1) default LE
+    int end = MODBUS_16BIT_BE; //<endianness> endianness LE(0) BE(1) default BE
 	if (request->nparam > 4) { //optional params provided
    
         param5 = get_rparam(request, 4); //datatype
