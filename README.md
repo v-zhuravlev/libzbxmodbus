@@ -99,7 +99,7 @@ and some optional params can be provided as well:
     Modbus endianness for long and float 32bit datatypes:  
       0 - for MODBUS_16BIT_LE (16 bit little endian)  
       1 - for MODBUS_16BIT_BE (16 bit big endian)  
-    default is LE  
+    default is BE  
     
 * **first_reg(optional):**  
     Modbus addressing scheme  
