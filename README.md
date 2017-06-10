@@ -70,7 +70,7 @@ where:
     defaults are: *9600 N 8 1*  
     
 * **slave_id:**  
-    Modbus slave ID  
+    Modbus slave ID or Unit Identifier(for TCP)
 
 * **reg_to_read:**  
     First modbus register to read
