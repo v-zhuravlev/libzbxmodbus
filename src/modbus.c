@@ -39,6 +39,7 @@
 #define MODBUS_LONG     'l'
 #define MODBUS_FLOAT    'f'
 #define MODBUS_SIGNED_INT64    'S'
+#define MODBUS_INT64    'I'
 #define MODBUS_FLOAT64    'd'
 
 #define MODBUS_16BIT_LE 0
@@ -315,7 +316,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     uint8_t tab_reg_bits[64];
     int regs_to_read = 1;
 	if (datatype == MODBUS_FLOAT || datatype == MODBUS_LONG) { regs_to_read=2;}
-    else if (datatype == MODBUS_SIGNED_INT64 || datatype == MODBUS_FLOAT64) { regs_to_read=4;}
+    else if (datatype == MODBUS_SIGNED_INT64 || datatype == MODBUS_INT64 || datatype == MODBUS_FLOAT64) { regs_to_read=4;}
 
 
 
@@ -418,6 +419,24 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         }
         SET_DBL_RESULT(result, (int64_t)modbus_get_double(temp_arr));
     break;
+
+    case MODBUS_INT64:
+        //INT64
+        if (end == MODBUS_16BIT_LE) {
+            temp_arr[0] = tab_reg[3];
+            temp_arr[1] = tab_reg[2];
+            temp_arr[2] = tab_reg[1];
+            temp_arr[3] = tab_reg[0];
+        }
+        if (end == MODBUS_16BIT_BE) {
+            temp_arr[0] = tab_reg[0];
+            temp_arr[1] = tab_reg[1];
+            temp_arr[2] = tab_reg[2];
+            temp_arr[3] = tab_reg[3];
+        }
+
+        SET_UI64_RESULT(result, (uint64_t)modbus_get_double(temp_arr));
+    break;    
 
     case MODBUS_FLOAT64:
 
