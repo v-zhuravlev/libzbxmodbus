@@ -418,6 +418,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
             temp_arr[3] = tab_reg[3];
         }
         SET_DBL_RESULT(result, (int64_t)modbus_get_double(temp_arr));
+        SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_INT64_FROM_INT16(temp_arr,0)));
     break;
 
     case MODBUS_INT64:
@@ -435,7 +436,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
             temp_arr[3] = tab_reg[3];
         }
 
-        SET_UI64_RESULT(result, (uint64_t)modbus_get_double(temp_arr));
+        SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_INT64_FROM_INT16(temp_arr,0)));
     break;    
 
     case MODBUS_FLOAT64:
