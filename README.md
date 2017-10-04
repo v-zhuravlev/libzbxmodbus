@@ -89,11 +89,17 @@ and some optional params can be provided as well:
       b - for MODBUS_BIT  
       i - for MODBUS_INTEGER (unsigned)  
       s - for MODBUS_SIGNED_INT (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
-      l - for MODBUS_LONG  
-      f - for MODBUS_FLOAT  
+      l - for MODBUS_LONG, 32bit  
+      f - for MODBUS_FLOAT, 32bit  
+      S - for MODBUS_SIGNED_INT64 (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
+      I - for MODBUS_INT64 (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
+      d - for MODBUS_FLOAT64, 64 bit  
     otherwise, defaults will be used:  
       MODBUS_BIT if modbus function 1 or 2.  
       MODBUS_INTEGER if modbus_function 3 or 4.  
+    
+    Please also note Zabbix datatypes constraints when working with 64bit:  
+    https://www.zabbix.com/documentation/3.4/manual/config/items  
   
 * **endianness(optional):**   
     Modbus endianness for long and float 32bit datatypes:  
