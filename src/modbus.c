@@ -38,6 +38,8 @@
 #define MODBUS_SIGNED_INT  's'
 #define MODBUS_LONG     'l'
 #define MODBUS_FLOAT    'f'
+#define MODBUS_SIGNED_INT64    'S'
+#define MODBUS_FLOAT64    'd'
 
 #define MODBUS_16BIT_LE 0
 #define MODBUS_16BIT_BE 1
@@ -139,6 +141,18 @@ unsigned long hash(unsigned char *str)
         hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
 
     return hash;
+}
+
+/* Get a float from 8 bytes (Modbus) with swapped words (GH EF CD AB) */
+double modbus_get_double(const uint16_t *src)
+{
+    double d;
+    uint64_t i;
+
+    i = (((uint64_t)src[3]) << 48) + (((uint64_t)src[2]) << 32) + (((uint64_t)src[1]) << 16) + src[0];
+    memcpy(&d, &i, sizeof(double));
+
+    return d;
 }
 
 /******************************************************************************
@@ -301,6 +315,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     uint8_t tab_reg_bits[64];
     int regs_to_read = 1;
 	if (datatype == MODBUS_FLOAT || datatype == MODBUS_LONG) { regs_to_read=2;}
+    else if (datatype == MODBUS_SIGNED_INT64 || datatype == MODBUS_FLOAT64) { regs_to_read=4;}
 
 
 
@@ -347,7 +362,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     }
     
     //post-parsing
-    uint16_t temp_arr[2];     //output based on datatype
+    uint16_t temp_arr[4];     //output based on datatype
     switch(datatype){
     
     case MODBUS_BIT:
@@ -386,6 +401,39 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
             temp_arr[1] = tab_reg[1];
         }
         SET_UI64_RESULT(result, MODBUS_GET_INT32_FROM_INT16(temp_arr, 0));
+    break;
+
+    case MODBUS_SIGNED_INT64:
+        if (end == MODBUS_16BIT_LE) {
+            temp_arr[0] = tab_reg[3];
+            temp_arr[1] = tab_reg[2];
+            temp_arr[2] = tab_reg[1];
+            temp_arr[3] = tab_reg[0];
+        }
+        if (end == MODBUS_16BIT_BE) {
+            temp_arr[0] = tab_reg[0];
+            temp_arr[1] = tab_reg[1];
+            temp_arr[2] = tab_reg[2];
+            temp_arr[3] = tab_reg[3];
+        }
+        SET_DBL_RESULT(result, (int64_t)modbus_get_double(temp_arr));
+    break;
+
+    case MODBUS_FLOAT64:
+
+        if (end == MODBUS_16BIT_LE) {
+            temp_arr[0] = tab_reg[3];
+            temp_arr[1] = tab_reg[2];
+            temp_arr[2] = tab_reg[1];
+            temp_arr[3] = tab_reg[0];
+        }
+        if (end == MODBUS_16BIT_BE) {
+            temp_arr[0] = tab_reg[0];
+            temp_arr[1] = tab_reg[1];
+            temp_arr[2] = tab_reg[2];
+            temp_arr[3] = tab_reg[3];
+        }
+        SET_DBL_RESULT(result, modbus_get_double(temp_arr));
     break;
     
     default :
