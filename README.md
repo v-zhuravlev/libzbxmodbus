@@ -142,6 +142,9 @@ Item type:
 Testing Modbus connectivity is easy with *modpoll* command utility.  
 You may try to grab some modbus registers with it before you try to do it with Zabbix.  
 http://www.modbusdriver.com/modpoll.html
+
+If using libzbxmodbus with Zabbix agent, you can also save time and test responses first with `zabbix_get`, for example:
+`zabbix_get -s localhost -kmodbus_read["/dev/ttyS1 9600 N",9,0x1518,3,l,1,0]`
   
 ## 5. Known Issues and Limitations  
  - Any libmodbus error returned including CRC errors would lead to Unsupported Item in Zabbix, so minimizing 'Refresh unsupported items' parameter in Zabbix is recommended because CRC could be common in RS-485 env.  
