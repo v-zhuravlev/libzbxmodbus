@@ -20,8 +20,8 @@ Resource locking (via IPC semaphores) is used when using RTU or Encapsulated Mod
   
 ## 1.B Install from tar.gz
 Download from  https://share.zabbix.com/dir-libraries/zabbix-loadable-modules/modbus-loadable-module
-  - `tar zxvpf libzbxmodbus-0.6.tar.gz`
-  - `cd libzbxmodbus-0.6`
+  - `tar zxvpf libzbxmodbus-0.7.tar.gz`
+  - `cd libzbxmodbus-0.7`
   - `./configure --prefix=/etc/zabbix --enable-zabbix-[2|3|3.2]`
   - `make`
   - `make install`
@@ -86,14 +86,17 @@ and some optional params can be provided as well:
   
 * **datatype(optional):**  
     provide datatype as single char:  
-      b - for MODBUS_BIT  
-      i - for MODBUS_INTEGER (unsigned)  
-      s - for MODBUS_SIGNED_INT (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
-      l - for MODBUS_LONG, 32bit  
-      f - for MODBUS_FLOAT, 32bit  
-      S - for MODBUS_SIGNED_INT64 (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
-      I - for MODBUS_INT64 (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
-      d - for MODBUS_FLOAT64, 64 bit  
+      `b` - for MODBUS_BIT  
+      `i` - for MODBUS_INTEGER (unsigned)  
+      `s` - for MODBUS_SIGNED_INT (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
+      `l` - for MODBUS_LONG, 32bit  
+      `f` - for MODBUS_FLOAT, 32bit  
+      
+    There is also experimental support added for 64bit Modbus datatypes:  
+      `S` - for MODBUS_SIGNED_INT64 (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
+      `I` - for MODBUS_INT64 (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
+      `d` - for MODBUS_FLOAT64, 64 bit  
+    
     otherwise, defaults will be used:  
       MODBUS_BIT if modbus function 1 or 2.  
       MODBUS_INTEGER if modbus_function 3 or 4.  
@@ -102,7 +105,7 @@ and some optional params can be provided as well:
     https://www.zabbix.com/documentation/3.4/manual/config/items  
   
 * **endianness(optional):**   
-    Modbus endianness for long and float 32bit datatypes:  
+    Modbus endianness(word swap) for long and float 32bit/64bit datatypes:  
       0 - for MODBUS_16BIT_LE (16 bit little endian)  
       1 - for MODBUS_16BIT_BE (16 bit big endian)  
     default is BE  
