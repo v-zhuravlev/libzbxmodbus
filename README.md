@@ -149,6 +149,7 @@ If using libzbxmodbus with Zabbix agent, you can also save time and test respons
 ## 5. Known Issues and Limitations  
  - Any libmodbus error returned including CRC errors would lead to Unsupported Item in Zabbix, so minimizing 'Refresh unsupported items' parameter in Zabbix is recommended because CRC could be common in RS-485 env.  
  - If you have many different TCP gateways or serials ports in use then there are chances that Gate A will be locked while Gate B is being polled. This happens because the hash generated and assigned to resource is too small and might not always be unique. That should not be an issue though.
+ - If you already have libmodbus library installed then patched libmodbus 3.1.4 inside this ditribution might overwrite it.  
  
  ## 6. Read more  
  Use case example in IoT project: https://www.zabbix.com/files/zabconf2017/fabrizio_fantoni-zabbix_in_iot_architecture.pdf
