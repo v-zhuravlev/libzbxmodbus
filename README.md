@@ -142,8 +142,16 @@ Item type:
 Testing Modbus connectivity is easy with *modpoll* command utility.  
 You may try to grab some modbus registers with it before you try to do it with Zabbix.  
 http://www.modbusdriver.com/modpoll.html
+
+If using libzbxmodbus with Zabbix agent, you can also save time and test responses first with `zabbix_get`, for example:
+`zabbix_get -s localhost -kmodbus_read["/dev/ttyS1 9600 N",9,0x1518,3,l,1,0]`
   
 ## 5. Known Issues and Limitations  
  - Any libmodbus error returned including CRC errors would lead to Unsupported Item in Zabbix, so minimizing 'Refresh unsupported items' parameter in Zabbix is recommended because CRC could be common in RS-485 env.  
  - If you have many different TCP gateways or serials ports in use then there are chances that Gate A will be locked while Gate B is being polled. This happens because the hash generated and assigned to resource is too small and might not always be unique. That should not be an issue though.
+ - If you already have libmodbus library installed then patched libmodbus 3.1.4 inside this ditribution might overwrite it.  
+ 
+ ## 6. Read more  
+ Use case example in IoT project: https://www.zabbix.com/files/zabconf2017/fabrizio_fantoni-zabbix_in_iot_architecture.pdf
+ More examples in Habrhabr article (RU): https://habrahabr.ru/company/zabbix/blog/268119/
  
