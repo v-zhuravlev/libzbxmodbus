@@ -2,7 +2,13 @@
 [![Build Status](https://travis-ci.org/v-zhuravlev/libzbxmodbus.svg?branch=master)](https://travis-ci.org/v-zhuravlev/libzbxmodbus)  
 Loadable module to integrate Modbus (RTU and TCP) protocol into Zabbix  
 'Encapsulated Modbus' (RTU over TCP) also supported since 0.6).  
-Patched libmodbus 3.1.4 library is used underneath and shipped as nested module. (Encapsulated Modbus added by the patch) is used in this integration.  
+
+Patched libmodbus 3.1.4 library is used underneath and shipped as nested module.  
+Two patches are applied:
+- Encapsulated Modbus RTU over TCP ([libmodbus PR](https://github.com/stephane/libmodbus/pull/385))
+- Fix for MODBUS_GET_* macro ([libmodbus PR](https://github.com/stephane/libmodbus/pull/441))  
+
+Once these PRs are accepted - [upstream libmodbus](https://github.com/stephane/libmodbus) can be used instead.  
 
 Resource locking (via IPC semaphores) is used when using RTU or Encapsulated Modbus. So two or more zabbix pollers don't poll same serial port at the same time. No locking is used for Modbus TCP.  
 
