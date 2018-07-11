@@ -57,7 +57,7 @@ where:
 * **connection:**  
     for Modbus TCP: 
     IPv4 of Modbus TCP client/gate, for example: `192.168.1.1`  
-    you mas also use this form: `tcp://192.168.1.1`  
+    you may also use this form: `tcp://192.168.1.1`  
     TCP port may also be redefined (from Modbus TCP default 502) if needed: `192.168.1.1:5000`
     
     for Modbus Encapsulated (RTU over TCP): 
