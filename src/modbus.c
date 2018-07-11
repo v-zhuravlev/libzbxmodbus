@@ -538,18 +538,18 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 		char host[100];
 		int port = MODBUS_TCP_DEFAULT_PORT;
 
-		if (strstr(con_string, "enc://") != NULL) {
+		if (strncmp(con_string, "enc://", strlen("enc://")) == 0) {
 
 			*lock_required_out = 1;
-			memmove(con_string, con_string+6, strlen(con_string));
+			con_string += strlen("enc://");
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
 			*lock_key = hash(host) % NSEMS;
 			*ctx_out = modbus_new_rtutcp(host, port);
 
-		} else if (strstr(con_string, "tcp://") != NULL) {
+		} else if (strncmp(con_string, "tcp://", strlen("tcp://")) == 0) {
 
 			*lock_required_out = 0;
-			memmove(con_string, con_string+6, strlen(con_string));
+			con_string += strlen("tcp://");
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
 			*lock_key = hash(host) % NSEMS;
 			*ctx_out = modbus_new_tcp(host, port);
