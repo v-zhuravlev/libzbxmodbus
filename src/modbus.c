@@ -529,7 +529,7 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
         int rtu_stop_bit = 1;
 
         sscanf(con_string,"%s %d %c %d %d",rtu_port,&rtu_speed,&rtu_parity,&rtu_bits,&rtu_stop_bit);
-        *lock_key = hash(rtu_port) % 128;
+        *lock_key = hash(rtu_port) % NSEMS;
         *ctx_out = modbus_new_rtu(rtu_port, rtu_speed, rtu_parity, rtu_bits, rtu_stop_bit);
 
     }
