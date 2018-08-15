@@ -1,0 +1,39 @@
+version: '2'
+services:
+ zabbix-agent:
+    build: ../../
+    volumes:
+        - ../../lib:/var/lib/zabbix/modules:ro
+    ports:
+     - "10050:10050"
+    networks: 
+     zbx_net:
+      aliases: 
+       - zabbix-agentd
+#    environment: 
+#     - ZBX_SERVER_HOST=0.0.0.0/0
+#     - ZBX_LOADMODULE=libzbxmodbus.so
+ zabbix-agent2:
+    image: zabbix/zabbix-agent:alpine-latest
+    networks: 
+     zbx_net:
+      aliases: 
+       - zabbix-agentd  
+    #environment: 
+     #- ZBX_SERVER_HOST=localhost
+     #- ZBX_HOSTNAME=Zabbix server     
+ modbus-server:
+    build: ./modbus-server
+    ports: ["5020:5020"]
+    networks: 
+     zbx_net:
+      aliases: 
+       - modbus-server
+
+networks:
+  zbx_net:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default

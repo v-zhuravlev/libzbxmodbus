@@ -1,0 +1,7 @@
+#*/.settings
+#*/autom4te.cache
+*/lib/*
+*/src/.libs
+#*/tests/*
+.travis.yml
+.git*
