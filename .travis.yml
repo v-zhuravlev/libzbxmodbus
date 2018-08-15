@@ -1,17 +1,21 @@
 language: c
 sudo: required
+services:
+  - docker
 before_install:
-  - wget http://libmodbus.org/releases/libmodbus-3.1.2.tar.gz
-  - tar zxvpf libmodbus-3.1.2.tar.gz
-  - cd libmodbus-3.1.2
-  - ./configure && sudo make && sudo make install
-  - cd ..
+  - apt-get install zabbix-agent
   - chmod +x autogen.sh
+  - curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - pushd tests/docker && docker-compose up -d
+  - popd
+  - pushd bin  
 script:
   - ./autogen.sh 
   - ./configure --enable-zabbix-3.2
   - make && sudo make install
-  - ./configure --enable-zabbix-3
-  - make && sudo make install
-  - ./configure --enable-zabbix-2
-  - make && sudo make install
+  # - ./configure --enable-zabbix-3
+  # - make && sudo make install
+  # - ./configure --enable-zabbix-2
+  # - make && sudo make install

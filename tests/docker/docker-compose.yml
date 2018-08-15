@@ -1,6 +1,6 @@
 version: '2'
 services:
- zabbix-agent:
+ zabbix-agent-modbus:
     build: ../../
     volumes:
         - ../../lib:/var/lib/zabbix/modules:ro
@@ -19,9 +19,6 @@ services:
      zbx_net:
       aliases: 
        - zabbix-agentd  
-    #environment: 
-     #- ZBX_SERVER_HOST=localhost
-     #- ZBX_HOSTNAME=Zabbix server     
  modbus-server:
     build: ./modbus-server
     ports: ["5020:5020"]
