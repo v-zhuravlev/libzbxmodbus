@@ -10,7 +10,6 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
   - pushd tests/docker && docker-compose up -d
   - popd
-  - pushd bin  
 script:
   - ./autogen.sh 
   - ./configure --enable-zabbix-3.2
