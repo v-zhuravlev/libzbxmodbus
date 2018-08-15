@@ -2,7 +2,7 @@ ARG ZBX_VERSION=3.4.12
 FROM zabbix/zabbix-agent:ubuntu-${ZBX_VERSION}
 
 RUN apt-get update -q=2
-RUN apt-get install autoconf automake libtool pkg-config -q=2
+RUN apt-get make install autoconf automake libtool pkg-config -q=2
 COPY ./libmodbus .
 
 #only libmodbus(without libzbxmodbus) is installed
