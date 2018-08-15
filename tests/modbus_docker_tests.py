@@ -106,7 +106,7 @@ class ModbusTestCase(unittest.TestCase):
         self.assertEqual(self.zabbix_get(key),'-35.439999')
 
     #IMPLEMENT: 
-    # float (LittleEndian)(DCBA)
+    #float (LittleEndian)(DCBA)
     @unittest.skip("implement this first")
     def test_modbus_datatype_float_32bit_le_dcba_0(self):
             key = "modbus_read["+self.host+",1,0,3,f,0]"
@@ -145,26 +145,32 @@ class ModbusTestCase(unittest.TestCase):
             self.assertEqual(self.zabbix_get(key),'2411859394')    
 
 
+    #64bit signed
+    #https://github.com/v-zhuravlev/libzbxmodbus/issues/28#issuecomment-390718491
+    # 64bit signed integers(long):
+    # long,BigEndian
+    # testing for value 0xFFFFFFFFFFFFFDCE
+    def test_modbus_datatype_long_64bit_be_0(self):
+        key = "modbus_read["+self.host+",1,10,3,S]"
+        self.assertEqual(self.zabbix_get(key),'-562.000000')
+    # 64int signed,(LittleEndian with Wordswap),(CDAB)
+    def test_modbus_datatype_long_64bit_le_cdab_0(self):
+        key = "modbus_read["+self.host+",1,10,3,S,0]"
+        self.assertEqual(self.zabbix_get(key),'-157907461934678016.000000')
 
+    #IMPLEMENT:
+    # 64int signed (LittleEndian)(DCBA)
+    @unittest.skip("implement this first")
+    def test_modbus_datatype_long_64bit_le_dcba_0(self):
+            key = "modbus_read["+self.host+",1,10,3,S,0]"
+            self.assertEqual(self.zabbix_get(key),'-3531385057811890177')
+    #IMPLEMENT: 
+    # 64int signed (Big Endian with WordSwap) Mid-Big Endian (BADC)
+    @unittest.skip("implement this first")
+    def test_modbus_datatype_long_64bit_be_badc_0(self):
+            key = "modbus_read["+self.host+",1,10,3,S]"
+            self.assertEqual(self.zabbix_get(key),'-12547')
 
-    # test other things
-    def test_modbus_simple(self):
-        key = "modbus_read["+self.host+",1,2,3,i,1,1]"
-        self.assertEqual(self.zabbix_get(key),'49677')
-    
-    def test_upper(self):
-        self.assertEqual('foo'.upper(), 'FOO')
-
-    def test_isupper(self):
-        self.assertTrue('FOO'.isupper())
-        self.assertFalse('Foo'.isupper())
-
-    def test_split(self):
-        s = 'hello world'
-        self.assertEqual(s.split(), ['hello', 'world'])
-        # check that s.split fails when the separator is not a string
-        with self.assertRaises(TypeError):
-            s.split(2)
 
 if __name__ == '__main__':
     unittest.main()

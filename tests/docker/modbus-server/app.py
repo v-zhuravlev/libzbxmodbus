@@ -92,6 +92,11 @@ def run_server():
         
         1:0xC28F,
         2:0xC20D,
+
+        11:0xFFFF,
+        12:0xFFFF,
+        13:0xFFFF,
+        14:0xFDCE
     })
     store = ModbusSlaveContext(di=block, co=block, hr=block, ir=block)
 
