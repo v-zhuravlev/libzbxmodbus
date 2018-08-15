@@ -90,10 +90,10 @@ def run_server():
     #block = ModbusSequentialDataBlock(0x00, [16]*0xff)
     block = ModbusSparseDataBlock({
         
-        1:0xC28F,
-        2:0xC20D,
+        1:0xC28F,#PDU0
+        2:0xC20D,#PDU1
 
-        11:0xFFFF,
+        11:0xFFFF,#PDU10
         12:0xFFFF,
         13:0xFFFF,
         14:0xFDCE
