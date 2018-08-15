@@ -1,7 +1,7 @@
 FROM zabbix/zabbix-agent:ubuntu-trunk
 
-RUN apt-get update
-RUN apt-get install autoconf automake libtool pkg-config -y
+RUN apt-get update -q=2
+RUN apt-get install autoconf automake libtool pkg-config -q=2
 COPY . ./
 RUN ./autogen.sh
 
