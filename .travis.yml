@@ -1,11 +1,12 @@
+language: c
 sudo: required
 services:
   - docker
 env:
-  - ZABBIX_VERSION=3.4.12 ZABBIX_HEADERS_VERSION=3.2
-  - ZABBIX_VERSION=3.2.7 ZABBIX_HEADERS_VERSION=3.2  
-  - ZABBIX_VERSION=3.0.10 ZABBIX_HEADERS_VERSION=3
-  - ZABBIX_VERSION=2.2.19 ZABBIX_HEADERS_VERSION=2  
+  - ZBX_VERSION=3.4.12 ZBX_HEADERS_VERSION=3.2
+  - ZBX_VERSION=3.2.7 ZBX_HEADERS_VERSION=3.2  
+  - ZBX_VERSION=3.0.10 ZBX_HEADERS_VERSION=3
+  - ZBX_VERSION=2.2.19 ZBX_HEADERS_VERSION=2  
 before_install:
   - chmod +x autogen.sh
   - curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` > docker-compose
@@ -13,7 +14,7 @@ before_install:
   - sudo mv docker-compose /usr/local/bin
 script:
   - ./autogen.sh 
-  - ./configure --enable-zabbix-${ZABBIX_HEADERS_VERSION}
+  - ./configure --enable-zabbix-${ZBX_HEADERS_VERSION}
   - make && sudo make install
   - pushd tests/docker && docker-compose up -d
   - popd
