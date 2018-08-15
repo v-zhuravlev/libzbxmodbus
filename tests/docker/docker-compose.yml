@@ -1,7 +1,10 @@
 version: '2'
 services:
  zabbix-agent-modbus:
-    build: ../../
+    build: 
+      context: ../../
+      args: 
+        - ZBX_VERSION=${ZBX_VERSION}
     volumes:
         - /usr/local/lib:/var/lib/zabbix/modules:ro
     ports:
