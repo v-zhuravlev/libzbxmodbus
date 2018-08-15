@@ -1,7 +1,9 @@
-#*/.settings
-#*/autom4te.cache
-*/lib/*
-*/src/.libs
-#*/tests/*
-.travis.yml
-.git*
+#for zabbix-agent-modbus
+*
+!libmodbus
+libmodbus/src/.libs
+!src
+!include
+!Makefile.am
+!configure.ac
+!autogen.sh
