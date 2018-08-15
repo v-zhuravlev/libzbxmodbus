@@ -3,17 +3,18 @@ sudo: required
 services:
   - docker
 before_install:
-  - sudo apt-get install zabbix-agent
   - chmod +x autogen.sh
   - curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
-  - pushd tests/docker && docker-compose up -d
-  - popd
 script:
   - ./autogen.sh 
   - ./configure --enable-zabbix-3.2
   - make && sudo make install
+  - pushd tests/docker && docker-compose up -d
+  - docker ps
+  - popd
+  - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k agent.ping"
   # - ./configure --enable-zabbix-3
   # - make && sudo make install
   # - ./configure --enable-zabbix-2
