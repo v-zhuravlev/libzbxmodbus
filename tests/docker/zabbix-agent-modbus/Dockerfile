@@ -12,7 +12,7 @@ RUN make && make install
 #force LLD cache refresh
 RUN ldconfig
 
-ENV ZBX_SERVER_HOST=0.0.0.0/0
+ENV ZBX_SERVER_HOST=127.0.0.1
 ENV ZBX_LOADMODULE=libzbxmodbus.so
 
 EXPOSE 10050

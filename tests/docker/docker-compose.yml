@@ -2,7 +2,8 @@ version: '2'
 services:
  zabbix-agent-modbus:
     build: 
-      context: ../../
+      context: ../../.
+      dockerfile: tests/docker/zabbix-agent-modbus/Dockerfile
       args: 
         - ZBX_VERSION=${ZBX_VERSION}
     volumes:
