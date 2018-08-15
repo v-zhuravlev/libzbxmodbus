@@ -13,12 +13,12 @@ services:
 #    environment: 
 #     - ZBX_SERVER_HOST=0.0.0.0/0
 #     - ZBX_LOADMODULE=libzbxmodbus.so
- zabbix-agent2:
-    image: zabbix/zabbix-agent:alpine-latest
-    networks: 
-     zbx_net:
-      aliases: 
-       - zabbix-agentd  
+#  zabbix-agent2:
+#     image: zabbix/zabbix-agent:alpine-latest
+#     networks: 
+#      zbx_net:
+#       aliases: 
+#        - zabbix-agentd  
  modbus-server:
     build: ./modbus-server
     ports: ["5020:5020"]

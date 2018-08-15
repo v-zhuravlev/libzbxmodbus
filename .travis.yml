@@ -11,6 +11,7 @@ script:
   - ./autogen.sh 
   - ./configure --enable-zabbix-3.2
   - make && sudo make install
+  - ls -lah lib
   - pushd tests/docker && docker-compose up -d
   - docker ps
   - popd
