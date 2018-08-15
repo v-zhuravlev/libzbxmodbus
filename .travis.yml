@@ -14,6 +14,7 @@ script:
   - pushd tests/docker && docker-compose up -d
   - docker ps
   - popd
+  - docker logs docker_zabbix-agent-modbus_1
   - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k agent.ping"
   # - ./configure --enable-zabbix-3
   # - make && sudo make install
