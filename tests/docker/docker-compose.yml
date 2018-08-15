@@ -10,22 +10,13 @@ services:
      zbx_net:
       aliases: 
        - zabbix-agentd
-#    environment: 
-#     - ZBX_SERVER_HOST=0.0.0.0/0
-#     - ZBX_LOADMODULE=libzbxmodbus.so
-#  zabbix-agent2:
-#     image: zabbix/zabbix-agent:alpine-latest
-#     networks: 
-#      zbx_net:
-#       aliases: 
-#        - zabbix-agentd  
  modbus-server:
     build: ./modbus-server
     ports: ["5020:5020"]
-    networks: 
+    networks:
      zbx_net:
-      aliases: 
-       - modbus-server
+        ipv4_address: 172.16.238.2
+
 
 networks:
   zbx_net:
@@ -34,3 +25,6 @@ networks:
       com.docker.network.enable_ipv6: "false"
     ipam:
       driver: default
+      config:
+      - subnet: 172.16.238.0/24
+        gateway: 172.16.238.1

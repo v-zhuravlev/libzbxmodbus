@@ -11,7 +11,7 @@ RUN pip install --trusted-host pypi.python.org -r requirements.txt
 # Copy the current directory contents into the container at ./
 ADD  . ./
 
-# Make port 5000 available to the world outside this container
+# Make port 5020 available to the world outside this container
 EXPOSE 5020
 
 # Define environment variable
