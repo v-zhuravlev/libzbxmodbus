@@ -6,7 +6,7 @@ class TestModbus(unittest.TestCase):
     host = "172.16.238.2:5020"
     def zabbix_get(self, key):
         batchcmd = "docker exec docker_zabbix-agent-modbus_1 sh -c \"zabbix_get -s localhost -k"+key +"\""
-        result = subprocess.check_output(batchcmd)
+        result = subprocess.check_output(batchcmd, shell=True)
         return result.rstrip()
 
 
