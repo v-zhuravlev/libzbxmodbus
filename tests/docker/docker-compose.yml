@@ -6,7 +6,8 @@ services:
         - /usr/local/lib:/var/lib/zabbix/modules:ro
     ports:
      - "10050:10050"
-    depends_on: modbus-server
+    depends_on: 
+      - modbus-server
     networks: 
      zbx_net:
       aliases: 
