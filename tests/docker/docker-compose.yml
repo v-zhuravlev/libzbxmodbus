@@ -3,7 +3,7 @@ services:
  zabbix-agent-modbus:
     build: ../../
     volumes:
-        - ../../lib:/var/lib/zabbix/modules:ro
+        - /usr/local/lib:/var/lib/zabbix/modules:ro
     ports:
      - "10050:10050"
     networks: 
