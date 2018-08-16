@@ -152,8 +152,7 @@ from multiprocessing import Process
 if __name__ == "__main__":
 
     p = Process(target=run_server,args=('TCP',5020))
+    p.start()
     #add RTU over TCP mode for tests
     p2 = Process(target=run_server,args=('TCP_RTU',5021))
-    p.start()
     p2.start()
-    p.join()
