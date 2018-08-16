@@ -2,7 +2,7 @@ import unittest
 
 from zabbix_get import zabbix_get
 
-class ModbusErrorsCase(unittest.TestCase):
+class ModbusErrorsTestCase(unittest.TestCase):
 
     host = "172.16.238.2:5020"
     # test errors
