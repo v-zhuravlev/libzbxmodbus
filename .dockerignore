@@ -1,0 +1,9 @@
+#for zabbix-agent-modbus
+*
+!libmodbus
+libmodbus/src/.libs
+!src
+!include
+!Makefile.am
+!configure.ac
+!autogen.sh

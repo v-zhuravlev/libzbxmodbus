@@ -54,3 +54,4 @@ src/Makefile
 src/Makefile.in
 stamp-h1
 src/.libs/
+*.pyc

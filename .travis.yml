@@ -1,17 +1,28 @@
 language: c
 sudo: required
+services:
+  - docker
+env:
+  #ZBX_VERSION must be one of the tags for ubuntu here: https://hub.docker.com/r/zabbix/zabbix-agent/tags/
+  - ZBX_VERSION=3.4.12 ZBX_HEADERS_VERSION=3.2
+  - ZBX_VERSION=3.2.11 ZBX_HEADERS_VERSION=3.2  
+  - ZBX_VERSION=3.0.19 ZBX_HEADERS_VERSION=3
+  #- ZBX_VERSION=2.2.19 ZBX_HEADERS_VERSION=2  
 before_install:
-  - wget http://libmodbus.org/releases/libmodbus-3.1.2.tar.gz
-  - tar zxvpf libmodbus-3.1.2.tar.gz
-  - cd libmodbus-3.1.2
-  - ./configure && sudo make && sudo make install
-  - cd ..
   - chmod +x autogen.sh
+  - curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
 script:
   - ./autogen.sh 
-  - ./configure --enable-zabbix-3.2
+  - ./configure --enable-zabbix-${ZBX_HEADERS_VERSION}
   - make && sudo make install
-  - ./configure --enable-zabbix-3
-  - make && sudo make install
-  - ./configure --enable-zabbix-2
-  - make && sudo make install
+  - pushd tests/docker && docker-compose up -d
+  - popd
+  - docker logs docker_zabbix-agent-modbus_1
+  - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k agent.ping"
+  - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k modbus_read[172.16.238.2:5020,1,2,3,i,1,1]"
+  - python tests/test_modbus.py
+  - python tests/test_modbus_errors.py
+  - python tests/test_modbus_64bit.py
+  - python tests/test_modbus_connection_string.py
