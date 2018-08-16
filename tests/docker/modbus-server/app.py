@@ -31,7 +31,7 @@ log = logging.getLogger()
 log.setLevel(logging.DEBUG)
 
 
-def run_server():
+def run_server(modbus_type,port):
     # ----------------------------------------------------------------------- # 
     # initialize your data store
     # ----------------------------------------------------------------------- # 
@@ -119,11 +119,15 @@ def run_server():
     # run the server you want
     # ----------------------------------------------------------------------- # 
     # Tcp:
-    StartTcpServer(context, identity=identity, address=("0.0.0.0", 5020))
+    if (modbus_type == 'TCP'):
+        StartTcpServer(context, identity=identity, address=("0.0.0.0", port))
+    elif (modbus_type =='TCP_RTU'):
+        # TCP with different framer
+        StartTcpServer(context, identity=identity,
+                    framer=ModbusRtuFramer, address=("0.0.0.0", port))
 
-    # TCP with different framer
-    # StartTcpServer(context, identity=identity,
-    #                framer=ModbusRtuFramer, address=("0.0.0.0", 5020))
+
+    
 
     # Udp:
     # StartUdpServer(context, identity=identity, address=("0.0.0.0", 5020))
@@ -143,6 +147,13 @@ def run_server():
     #                   port='/dev/ttyp0',
     #                   timeout=1)
 
+from multiprocessing import Process
 
 if __name__ == "__main__":
-    run_server()
+
+    p = Process(target=run_server,args=('TCP',5020))
+    #add RTU over TCP mode for tests
+    p2 = Process(target=run_server,args=('TCP_RTU',5021))
+    p.start()
+    p2.start()
+    p.join()

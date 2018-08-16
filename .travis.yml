@@ -25,3 +25,4 @@ script:
   - python tests/test_modbus.py
   - python tests/test_modbus_errors.py
   - python tests/test_modbus_64bit.py
+  - python tests/test_modbus_connection_string.py
