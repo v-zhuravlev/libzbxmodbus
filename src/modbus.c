@@ -42,8 +42,14 @@
 #define MODBUS_INT64    'I'
 #define MODBUS_FLOAT64    'd'
 
-#define MODBUS_16BIT_LE 0
-#define MODBUS_16BIT_BE 1
+//Big Endian (ABCD)
+#define MODBUS_BE_ABCD 1
+//Little Endian (DCBA)
+#define MODBUS_LE_DCBA 0
+//Mid-Big Endian (BADC)
+#define MODBUS_MBE_BADC 2
+//Mid-Little Endian (CDAB)
+#define MODBUS_MLE_CDAB 3
 
 #define MODBUS_PDU_ADDRESS_0    0
 #define MODBUS_PROTOCOL_ADDRESS_1   1
@@ -254,7 +260,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     }
     
     char datatype;	
-    int end = MODBUS_16BIT_BE; //<endianness> endianness LE(0) BE(1) default BE
+    int end = MODBUS_BE_ABCD; //<endianness> endianness LE(0) BE(1) default BE
 	if (request->nparam > 4) { //optional params provided
    
         param5 = get_rparam(request, 4); //datatype
@@ -270,7 +276,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
             //endianness to use
             errno = 0;
             end = strtol(param6,&endptr, 0);
-            if ( (end != MODBUS_16BIT_LE && end != MODBUS_16BIT_BE) ||
+            if ( (end != MODBUS_LE_DCBA && end != MODBUS_BE_ABCD) ||
                         (errno!=0 || *endptr != '\0') )  {
                 SET_MSG_RESULT(result, strdup("Check endiannes used"));
                 modbus_free(ctx);
@@ -380,10 +386,10 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     break;
 
     case MODBUS_FLOAT:
-        if (end == MODBUS_16BIT_LE) {
+        if (end == MODBUS_LE_DCBA) {
             temp_arr[0] = tab_reg[0];
             temp_arr[1] = tab_reg[1];
-        } else if (end == MODBUS_16BIT_BE) {
+        } else if (end == MODBUS_BE_ABCD) {
             temp_arr[0] = tab_reg[1];
             temp_arr[1] = tab_reg[0];
         }
@@ -392,10 +398,10 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     case MODBUS_LONG:
         //MODBUS_GET_INT32_FROM_INT16 is doing BIG_ENDIAN for register pair, so inverse registers (sort of hack)
-        if (end == MODBUS_16BIT_LE) {//word swap
+        if (end == MODBUS_LE_DCBA) {//word swap
             temp_arr[0] = tab_reg[1];
             temp_arr[1] = tab_reg[0];
-        } else if (end == MODBUS_16BIT_BE) {
+        } else if (end == MODBUS_BE_ABCD) {
             temp_arr[0] = tab_reg[0];
             temp_arr[1] = tab_reg[1];
         }
@@ -403,13 +409,13 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     break;
 
     case MODBUS_SIGNED_INT64:
-        if (end == MODBUS_16BIT_LE) {
+        if (end == MODBUS_LE_DCBA) {
             temp_arr[0] = tab_reg[3];
             temp_arr[1] = tab_reg[2];
             temp_arr[2] = tab_reg[1];
             temp_arr[3] = tab_reg[0];
         }
-        if (end == MODBUS_16BIT_BE) {
+        if (end == MODBUS_BE_ABCD) {
             temp_arr[0] = tab_reg[0];
             temp_arr[1] = tab_reg[1];
             temp_arr[2] = tab_reg[2];
@@ -420,13 +426,13 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     case MODBUS_INT64:
         //INT64
-        if (end == MODBUS_16BIT_LE) {
+        if (end == MODBUS_LE_DCBA) {
             temp_arr[0] = tab_reg[3];
             temp_arr[1] = tab_reg[2];
             temp_arr[2] = tab_reg[1];
             temp_arr[3] = tab_reg[0];
         }
-        if (end == MODBUS_16BIT_BE) {
+        if (end == MODBUS_BE_ABCD) {
             temp_arr[0] = tab_reg[0];
             temp_arr[1] = tab_reg[1];
             temp_arr[2] = tab_reg[2];
@@ -438,13 +444,13 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     case MODBUS_FLOAT64:
 
-        if (end == MODBUS_16BIT_LE) {
+        if (end == MODBUS_LE_DCBA) {
             temp_arr[0] = tab_reg[3];
             temp_arr[1] = tab_reg[2];
             temp_arr[2] = tab_reg[1];
             temp_arr[3] = tab_reg[0];
         }
-        if (end == MODBUS_16BIT_BE) {
+        if (end == MODBUS_BE_ABCD) {
             temp_arr[0] = tab_reg[0];
             temp_arr[1] = tab_reg[1];
             temp_arr[2] = tab_reg[2];
