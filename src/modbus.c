@@ -150,7 +150,7 @@ unsigned long hash(unsigned char *str)
     return hash;
 }
 
-/* Get a float from 8 bytes (Modbus) with swapped words (GH EF CD AB) */
+/* Get a double from 8 bytes (Modbus) with swapped words (GH EF CD AB) */
 double modbus_get_double(const uint16_t *src)
 {
     double d;
@@ -320,6 +320,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     
     uint16_t tab_reg[64];//temp vars
     uint8_t tab_reg_bits[64];
+
     int regs_to_read = 1;
 	if (datatype == MODBUS_FLOAT || datatype == MODBUS_LONG) { regs_to_read=2;}
     else if (datatype == MODBUS_SIGNED_INT64 || datatype == MODBUS_INT64 || datatype == MODBUS_FLOAT64) { regs_to_read=4;}
