@@ -460,7 +460,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     case MODBUS_LONG:
         //MODBUS_GET_INT32_FROM_INT16 is doing BIG_ENDIAN for register pair, so inverse registers (sort of hack)
-        if (end == MODBUS_LE_DCBA) {//word swap
+        if (end == MODBUS_MLE_CDAB) {//word swap
             temp_arr[0] = tab_reg[1];
             temp_arr[1] = tab_reg[0];
         } else if (end == MODBUS_BE_ABCD) {
@@ -471,7 +471,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     break;
 
     case MODBUS_SIGNED_INT64:
-        if (end == MODBUS_LE_DCBA) {
+        if (end == MODBUS_MLE_CDAB) {
             temp_arr[0] = tab_reg[3];
             temp_arr[1] = tab_reg[2];
             temp_arr[2] = tab_reg[1];
@@ -488,7 +488,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     case MODBUS_INT64:
         //INT64
-        if (end == MODBUS_LE_DCBA) {
+        if (end == MODBUS_MLE_CDAB) {
             temp_arr[0] = tab_reg[3];
             temp_arr[1] = tab_reg[2];
             temp_arr[2] = tab_reg[1];
@@ -506,7 +506,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     case MODBUS_FLOAT64:
 
-        if (end == MODBUS_LE_DCBA) {
+        if (end == MODBUS_MLE_CDAB) {
             temp_arr[0] = tab_reg[3];
             temp_arr[1] = tab_reg[2];
             temp_arr[2] = tab_reg[1];

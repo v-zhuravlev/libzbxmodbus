@@ -45,7 +45,7 @@ class ModbusErrorsTestCase(unittest.TestCase):
 
 
     def test_bad_LE_flag_integer(self):
-        key = "modbus_read_registers["+self.host+",3,14,3,l,2,0]"
+        key = "modbus_read_registers["+self.host+",3,14,3,l,5,0]"
         self.assertEqual(zabbix_get(key),'ZBX_NOTSUPPORTED: Check endiannes used')
 
     def test_bad_LE_flag_string(self):

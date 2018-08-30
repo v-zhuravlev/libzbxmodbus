@@ -35,13 +35,13 @@ class ModbusTestCase(unittest.TestCase):
         self.assertEqual(zabbix_get(key),'-71.879005')
     # float,(LittleEndian with Wordswap),Mid-Little Endian (CDAB)
     def test_modbus_datatype_float_32bit_mle_cdab_0(self):
-        key = "modbus_read["+self.host+",1,4,3,f,3]"
+        key = "modbus_read["+self.host+",1,4,3,f,0]"
         self.assertEqual(zabbix_get(key),'-71.879005')
     # float (Big Endian with WordSwap) Mid-Big Endian (BADC)
     def test_modbus_datatype_float_32bit_mbe_badc_0(self):
             key = "modbus_read["+self.host+",1,2,3,f,2]"
             self.assertEqual(zabbix_get(key),'-71.879005')
-    #float (LittleEndian)(DCBA)
+    # float (LittleEndian)(DCBA)
     def test_modbus_datatype_float_32bit_le_dcba_0(self):
             key = "modbus_read["+self.host+",1,6,3,f,3]"
             self.assertEqual(zabbix_get(key),'-71.879005')
