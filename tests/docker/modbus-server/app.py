@@ -89,10 +89,20 @@ def run_server(modbus_type,port):
     
     #block = ModbusSequentialDataBlock(0x00, [16]*0xff)
     block = ModbusSparseDataBlock({
-        
-        1:0xC28F,#PDU0
-        2:0xC20D,#PDU1
+        #this block is to test 32bits
+        1:0xC28F,#PDU0 - BE
+        2:0xC20D,
 
+        3:0x8FC2,#PDU2 - MBE
+        4:0x0DC2,
+
+        5:0xC20D,#PDU4 - MLE
+        6:0xC28F,
+
+        7:0x0DC2,#PDU6 - LE
+        8:0x8FC2,
+        
+        # this block is to test 64bits
         11:0xFFFF,#PDU10
         12:0xFFFF,
         13:0xFFFF,

@@ -42,14 +42,11 @@
 #define MODBUS_INT64    'I'
 #define MODBUS_FLOAT64    'd'
 
-//Big Endian (ABCD)
-#define MODBUS_BE_ABCD 1
-//Little Endian (DCBA)
-#define MODBUS_LE_DCBA 0
-//Mid-Big Endian (BADC)
-#define MODBUS_MBE_BADC 2
-//Mid-Little Endian (CDAB)
-#define MODBUS_MLE_CDAB 3
+
+#define MODBUS_BE_ABCD 1 //Big Endian (ABCD)
+#define MODBUS_MLE_CDAB 0 //Mid-Little Endian (CDAB)
+#define MODBUS_MBE_BADC 2 //Mid-Big Endian (BADC)
+#define MODBUS_LE_DCBA 3 //Little Endian (DCBA)
 
 #define MODBUS_PDU_ADDRESS_0    0
 #define MODBUS_PROTOCOL_ADDRESS_1   1
@@ -162,6 +159,56 @@ double modbus_get_double(const uint16_t *src)
     return d;
 }
 
+/*override of function from libmodbus: removed ntohl()*/
+float modbus_get_float_abcd(const uint16_t *src)
+{
+    float f;
+    uint32_t i;
+
+    i = (((uint32_t)src[0]) << 16) + src[1];
+    memcpy(&f, &i, sizeof(float));
+
+    return f;
+}
+/*override of function from libmodbus: removed ntohl()*/
+float modbus_get_float_cdab(const uint16_t *src)
+{
+    float f;
+    uint32_t i;
+
+    i = (((uint32_t)src[1]) << 16) + src[0];
+    memcpy(&f, &i, sizeof(float));
+
+    return f;
+}
+/*override of function from libmodbus: removed ntohl()*/
+float modbus_get_float_badc(const uint16_t *src)
+{
+
+    float f;
+    uint32_t i;
+    
+    uint16_t b0 = (src[0] >> 8) | (src[0] << 8);
+    uint16_t b1 = (src[1] >> 8) | (src[1] << 8);
+    i = (((uint32_t)b0) << 16) + b1;
+    memcpy(&f, &i, sizeof(float));
+    return f;    
+}
+/*override of function from libmodbus: removed ntohl()*/
+float modbus_get_float_dcba(const uint16_t *src)
+{
+
+    float f;
+    uint32_t i;
+    
+    uint16_t b0 = (src[0] >> 8) | (src[0] << 8);
+    uint16_t b1 = (src[1] >> 8) | (src[1] << 8);
+    i = (((uint32_t)b1) << 16) + b0;
+    memcpy(&f, &i, sizeof(float));
+    return f;    
+}
+
+
 /******************************************************************************
  *                                                                            *
  * Function: zbx_modbus_read_registers                                          *
@@ -260,7 +307,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     }
     
     char datatype;	
-    int end = MODBUS_BE_ABCD; //<endianness> endianness LE(0) BE(1) default BE
+    int end = MODBUS_BE_ABCD; //<endianness> endianness LE(0) BE(1) MBE(2) LBE(3) default BE
 	if (request->nparam > 4) { //optional params provided
    
         param5 = get_rparam(request, 4); //datatype
@@ -271,12 +318,15 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         }
         
         datatype = *param5; // set datatype
-		param6 = get_rparam(request, 5); //16 endiannes
+		param6 = get_rparam(request, 5); //16-32bit endiannes
         if(param6) {
             //endianness to use
             errno = 0;
             end = strtol(param6,&endptr, 0);
-            if ( (end != MODBUS_LE_DCBA && end != MODBUS_BE_ABCD) ||
+            if ( (end != MODBUS_LE_DCBA &&
+                  end != MODBUS_BE_ABCD && 
+                  end != MODBUS_MBE_BADC &&
+                  end != MODBUS_MLE_CDAB ) ||
                         (errno!=0 || *endptr != '\0') )  {
                 SET_MSG_RESULT(result, strdup("Check endiannes used"));
                 modbus_free(ctx);
@@ -387,14 +437,25 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     break;
 
     case MODBUS_FLOAT:
-        if (end == MODBUS_LE_DCBA) {
-            temp_arr[0] = tab_reg[0];
-            temp_arr[1] = tab_reg[1];
-        } else if (end == MODBUS_BE_ABCD) {
-            temp_arr[0] = tab_reg[1];
-            temp_arr[1] = tab_reg[0];
+
+        switch( end )
+        {
+            case MODBUS_LE_DCBA:
+                SET_DBL_RESULT(result, modbus_get_float_dcba(tab_reg));
+                break;
+            case MODBUS_BE_ABCD:
+                SET_DBL_RESULT(result, modbus_get_float_abcd(tab_reg));
+                break;
+            case MODBUS_MBE_BADC:
+                SET_DBL_RESULT(result, modbus_get_float_badc(tab_reg));
+                break;
+            case MODBUS_MLE_CDAB:
+                SET_DBL_RESULT(result, modbus_get_float_cdab(tab_reg));
+                break;
+            default:
+                return SYSINFO_RET_FAIL;
+                break;
         }
-        SET_DBL_RESULT(result, modbus_get_float(temp_arr));
     break;
 
     case MODBUS_LONG:
