@@ -44,7 +44,7 @@ class ModbusTestCase(unittest.TestCase):
     #float (LittleEndian)(DCBA)
     def test_modbus_datatype_float_32bit_le_dcba_0(self):
             key = "modbus_read["+self.host+",1,6,3,f,3]"
-            self.assertEqual(zabbix_get(key),'-71.879005')            
+            self.assertEqual(zabbix_get(key),'-71.879005')
 
     
     # 32bit unsigned integers(long):
