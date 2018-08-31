@@ -43,8 +43,8 @@
 #define MODBUS_FLOAT64    'd'
 
 
-#define MODBUS_BE_ABCD 1 //Big Endian (ABCD)
 #define MODBUS_MLE_CDAB 0 //Mid-Little Endian (CDAB)
+#define MODBUS_BE_ABCD 1 //Big Endian (ABCD)
 #define MODBUS_MBE_BADC 2 //Mid-Big Endian (BADC)
 #define MODBUS_LE_DCBA 3 //Little Endian (DCBA)
 
