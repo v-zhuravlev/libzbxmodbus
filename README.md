@@ -113,10 +113,12 @@ and some optional params can be provided as well:
     https://www.zabbix.com/documentation/3.4/manual/config/items  
   
 * **endianness(optional):**   
-    Modbus endianness(word swap) for long and float 32bit/64bit datatypes:  
-      0 - for MODBUS_16BIT_LE (16 bit little endian)  
-      1 - for MODBUS_16BIT_BE (16 bit big endian)  
-    default is BE  
+    Modbus endianness for 32bit/64bit datatypes:  
+      0 - for MODBUS_MLE_CDAB (Mid-Little Endian (CDAB))  
+      1 - for MODBUS_BE_ABCD (Big Endian (ABCD))  
+      2 - for MODBUS_MBE_BADC (Mid-Big Endian (BADC))  
+      3 - for MODBUS_LE_DCBA (Little Endian (DCBA))  
+    default is BE(1)  
     
 * **first_reg(optional):**  
     Modbus addressing scheme  
