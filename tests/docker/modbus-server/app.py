@@ -101,6 +101,10 @@ def run_server(modbus_type,port):
 
         7:0x0DC2,#PDU6 - LE
         8:0x8FC2,
+
+        # test int32
+        13:0xFFFF,#PDU12
+        14:0xFDCE,
         
         # this block is to test 64bits
         #BE

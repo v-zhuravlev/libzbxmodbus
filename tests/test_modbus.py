@@ -61,11 +61,31 @@ class ModbusTestCase(unittest.TestCase):
     def test_modbus_datatype_long_32bit_le_dcba_0(self):
             key = "modbus_read["+self.host+",1,0,3,l,3]"
             self.assertEqual(zabbix_get(key),'230854594')
-    #IMPLEMENT:
     # long (Big Endian with WordSwap) Mid-Big Endian (BADC)
     def test_modbus_datatype_long_32bit_mbe_badc_0(self):
             key = "modbus_read["+self.host+",1,0,3,l,2]"
             self.assertEqual(zabbix_get(key),'2411859394')    
+    
+    #INT32(Signed)
+    #BigEndian
+    def test_modbus_datatype_int32_be_0(self):
+        key = "modbus_read["+self.host+",1,12,3,S]"
+        self.assertEqual(zabbix_get(key),'-562.000000')
+    # Mid-Little Endian
+    def test_modbus_datatype_int32_mle_0(self):
+        key = "modbus_read["+self.host+",1,12,3,S,0]"
+        self.assertEqual(zabbix_get(key),'-36765697.000000')
+
+    #LittleEndian
+    def test_modbus_datatype_int32_le_0(self):
+        key = "modbus_read["+self.host+",1,12,3,S,3]"
+        self.assertEqual(zabbix_get(key),'-822214657.000000')
+
+    #Mid-Big Endian
+    def test_modbus_datatype_int32_mbe_0(self):
+        key = "modbus_read["+self.host+",1,12,3,S,2]"
+        self.assertEqual(zabbix_get(key),'-12547.000000')
+            
 
 
 

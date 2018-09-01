@@ -95,22 +95,17 @@ and some optional params can be provided as well:
 * **datatype(optional):**  
     provide datatype as single char:  
       `b` - for MODBUS_BIT  
-      `i` - for MODBUS_INTEGER (unsigned)  
-      `s` - for MODBUS_SIGNED_INT (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
+      `i` - for MODBUS_INTEGER, 16bit (unsigned)  
+      `s` - for MODBUS_SIGNED_INT, 16bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
       `l` - for MODBUS_LONG, 32bit (unsigned)  
       `f` - for MODBUS_FLOAT, 32bit  
-      
-    There is also experimental support added for 64bit Modbus datatypes:  
-      `S` - for MODBUS_SIGNED_INT64 (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
-      `I` - for MODBUS_UINT64 (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
-      `d` - for MODBUS_FLOAT64, 64 bit  
+      `S` - for MODBUS_SIGNED_INT32, 32bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
+      `I` - for MODBUS_UINT64, 64bit (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
+      `d` - for MODBUS_FLOAT64, 64bit  
     
     otherwise, defaults will be used:  
       MODBUS_BIT if modbus function 1 or 2.  
       MODBUS_INTEGER if modbus_function 3 or 4.  
-    
-    Please also note Zabbix datatypes constraints when working with 64bit:  
-    https://www.zabbix.com/documentation/3.4/manual/config/items  
   
 * **endianness(optional):**   
     Modbus endianness for 32bit/64bit datatypes:  
@@ -118,7 +113,7 @@ and some optional params can be provided as well:
       1 - for MODBUS_BE_ABCD (Big Endian (ABCD))  
       2 - for MODBUS_MBE_BADC (Mid-Big Endian (BADC))  
       3 - for MODBUS_LE_DCBA (Little Endian (DCBA))  
-    default is BE(1)  
+    Default is BE(1). Normaly, you don't need to change this.  
     
 * **first_reg(optional):**  
     Modbus addressing scheme  

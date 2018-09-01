@@ -6,28 +6,28 @@ class Modbus64BitTestCase(unittest.TestCase):
 
     host = "172.16.238.2:5020"
     
-    #INT64(Signed)
+    #INT64(Signed) NOT IMLEMENTED
     #BigEndian
-    @unittest.skip("Broken")
+    @unittest.skip("Implement first")
     def test_modbus_datatype_int64_64bit_be_0(self):
-        key = "modbus_read["+self.host+",1,14,3,S]"
+        key = "modbus_read["+self.host+",1,14,3,X]"
         self.assertEqual(zabbix_get(key),'-4629812106207628676')
     # Mid-Little Endian
-    @unittest.skip("Broken")
+    @unittest.skip("Implement first")
     def test_modbus_datatype_int64_64bit_mle_0(self):
-        key = "modbus_read["+self.host+",1,22,3,S,0]"
+        key = "modbus_read["+self.host+",1,22,3,X,0]"
         self.assertEqual(zabbix_get(key),'-4629812106207628676')
 
     #LittleEndian
     @unittest.skip("Implement first")
     def test_modbus_datatype_int64_64bit_le_0(self):
-        key = "modbus_read["+self.host+",1,18,3,S,3]"
+        key = "modbus_read["+self.host+",1,18,3,X,3]"
         self.assertEqual(zabbix_get(key),'-4629812106207628676')
 
     #Mid-Big Endian
     @unittest.skip("Implement first")
     def test_modbus_datatype_int64_64bit_mbe_0(self):
-        key = "modbus_read["+self.host+",1,26,3,S,2]"
+        key = "modbus_read["+self.host+",1,26,3,X,2]"
         self.assertEqual(zabbix_get(key),'-4629812106207628676')
 
     #UNSIGNED INT64

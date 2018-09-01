@@ -40,7 +40,7 @@
 #define MODBUS_SIGNED_INT  's'
 #define MODBUS_LONG     'l'
 #define MODBUS_FLOAT    'f'
-#define MODBUS_SIGNED_INT64    'S'
+#define MODBUS_SIGNED_INT32    'S'
 #define MODBUS_UINT64    'I'
 #define MODBUS_FLOAT64    'd'
 
@@ -330,8 +330,8 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     uint8_t tab_reg_bits[64];
 
     int regs_to_read = 1;
-	if (datatype == MODBUS_FLOAT || datatype == MODBUS_LONG) { regs_to_read=2;}
-    else if (datatype == MODBUS_SIGNED_INT64 || datatype == MODBUS_UINT64 || datatype == MODBUS_FLOAT64) { regs_to_read=4;}
+	if (datatype == MODBUS_FLOAT || datatype == MODBUS_LONG || datatype == MODBUS_SIGNED_INT32) { regs_to_read=2;}
+    else if (datatype == MODBUS_UINT64 || datatype == MODBUS_FLOAT64) { regs_to_read=4;}
 
 
 
@@ -440,25 +440,30 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         }
     break;    
 
-    case MODBUS_SIGNED_INT64:
+    case MODBUS_SIGNED_INT32:
         switch( end )
         {
-            case MODBUS_LE_DCBA:
-                SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_LE_64BIT(tab_reg,0)));
-                break;
             case MODBUS_BE_ABCD:
-                SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_BE_64BIT(tab_reg,0)));
+                temp_arr[0] = tab_reg[0];
+                temp_arr[1] = tab_reg[1];
+                break;
+            case MODBUS_LE_DCBA:
+                temp_arr[0] = bswap_16(tab_reg[1]);
+                temp_arr[1] = bswap_16(tab_reg[0]);
                 break;
             case MODBUS_MBE_BADC:
-                SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_MBE_64BIT(tab_reg,0)));
+                temp_arr[0] = bswap_16(tab_reg[0]);
+                temp_arr[1] = bswap_16(tab_reg[1]);
                 break;
             case MODBUS_MLE_CDAB:
-                SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_MLE_64BIT(tab_reg,0)));
+                temp_arr[0] = tab_reg[1];
+                temp_arr[1] = tab_reg[0];
                 break;
             default:
                 return SYSINFO_RET_FAIL;
                 break;
         }
+        SET_DBL_RESULT(result, ((int32_t)MODBUS_GET_INT32_FROM_INT16(temp_arr,0)));
     break;
     case MODBUS_UINT64:
         switch( end )
