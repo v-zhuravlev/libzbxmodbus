@@ -42,6 +42,13 @@
 #define MODBUS_INT64    'I'
 #define MODBUS_FLOAT64    'd'
 
+#define MODBUS_GET_ABCD(tab_int16, index) (((uint32_t)tab_int16[(index)]) << 16) + tab_int16[(index) + 1]
+#define MODBUS_GET_CDAB(tab_int16, index) (((uint32_t)tab_int16[(index) + 1]) << 16) + tab_int16[(index)]
+#define MODBUS_GET_BADC(tab_int16, index) ( (uint32_t)(uint16_t) ( (tab_int16[(index)] >> 8) | (tab_int16[(index)] << 8) ) << 16) \
+    + (uint16_t)((tab_int16[(index) + 1] >> 8) | (tab_int16[(index) + 1] << 8))
+#define MODBUS_GET_DCBA(tab_int16, index) ( (uint32_t)(uint16_t) ( (tab_int16[(index) + 1] >> 8) | (tab_int16[(index) + 1] << 8) ) << 16) \
+    + (uint16_t)((tab_int16[(index)] >> 8) | (tab_int16[(index)] << 8))
+
 
 #define MODBUS_MLE_CDAB 0 //Mid-Little Endian (CDAB)
 #define MODBUS_BE_ABCD 1 //Big Endian (ABCD)
@@ -159,54 +166,6 @@ double modbus_get_double(const uint16_t *src)
     return d;
 }
 
-/*override of function from libmodbus: removed ntohl()*/
-float modbus_get_float_abcd(const uint16_t *src)
-{
-    float f;
-    uint32_t i;
-
-    i = (((uint32_t)src[0]) << 16) + src[1];
-    memcpy(&f, &i, sizeof(float));
-
-    return f;
-}
-/*override of function from libmodbus: removed ntohl()*/
-float modbus_get_float_cdab(const uint16_t *src)
-{
-    float f;
-    uint32_t i;
-
-    i = (((uint32_t)src[1]) << 16) + src[0];
-    memcpy(&f, &i, sizeof(float));
-
-    return f;
-}
-/*override of function from libmodbus: removed ntohl()*/
-float modbus_get_float_badc(const uint16_t *src)
-{
-
-    float f;
-    uint32_t i;
-    
-    uint16_t b0 = (src[0] >> 8) | (src[0] << 8);
-    uint16_t b1 = (src[1] >> 8) | (src[1] << 8);
-    i = (((uint32_t)b0) << 16) + b1;
-    memcpy(&f, &i, sizeof(float));
-    return f;    
-}
-/*override of function from libmodbus: removed ntohl()*/
-float modbus_get_float_dcba(const uint16_t *src)
-{
-
-    float f;
-    uint32_t i;
-    
-    uint16_t b0 = (src[0] >> 8) | (src[0] << 8);
-    uint16_t b1 = (src[1] >> 8) | (src[1] << 8);
-    i = (((uint32_t)b1) << 16) + b0;
-    memcpy(&f, &i, sizeof(float));
-    return f;    
-}
 
 
 /******************************************************************************
@@ -435,40 +394,52 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         //use float type in zabbix item
         SET_DBL_RESULT(result, (int16_t) tab_reg[0]);
     break;
-
+    float f;
+    uint32_t i;
     case MODBUS_FLOAT:
-
         switch( end )
         {
             case MODBUS_LE_DCBA:
-                SET_DBL_RESULT(result, modbus_get_float_dcba(tab_reg));
+                i = MODBUS_GET_DCBA(tab_reg, 0);
                 break;
             case MODBUS_BE_ABCD:
-                SET_DBL_RESULT(result, modbus_get_float_abcd(tab_reg));
+                i = MODBUS_GET_ABCD(tab_reg, 0);
                 break;
             case MODBUS_MBE_BADC:
-                SET_DBL_RESULT(result, modbus_get_float_badc(tab_reg));
+                i = MODBUS_GET_BADC(tab_reg, 0);
                 break;
             case MODBUS_MLE_CDAB:
-                SET_DBL_RESULT(result, modbus_get_float_cdab(tab_reg));
+                i = MODBUS_GET_CDAB(tab_reg, 0);
                 break;
             default:
                 return SYSINFO_RET_FAIL;
                 break;
         }
+        memcpy(&f, &i, sizeof(float));
+        SET_DBL_RESULT(result, f);
     break;
 
     case MODBUS_LONG:
-        //MODBUS_GET_INT32_FROM_INT16 is doing BIG_ENDIAN for register pair, so inverse registers (sort of hack)
-        if (end == MODBUS_MLE_CDAB) {//word swap
-            temp_arr[0] = tab_reg[1];
-            temp_arr[1] = tab_reg[0];
-        } else if (end == MODBUS_BE_ABCD) {
-            temp_arr[0] = tab_reg[0];
-            temp_arr[1] = tab_reg[1];
+
+        switch( end )
+        {
+            case MODBUS_LE_DCBA://3
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_DCBA(tab_reg, 0));
+                break;
+            case MODBUS_BE_ABCD://1
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_ABCD(tab_reg, 0));
+                break;
+            case MODBUS_MBE_BADC:
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_BADC(tab_reg, 0));
+                break;
+            case MODBUS_MLE_CDAB://0
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_CDAB(tab_reg, 0));
+                break;
+            default:
+                return SYSINFO_RET_FAIL;
+                break;
         }
-        SET_UI64_RESULT(result, MODBUS_GET_INT32_FROM_INT16(temp_arr, 0));
-    break;
+    break;    
 
     case MODBUS_SIGNED_INT64:
         if (end == MODBUS_MLE_CDAB) {

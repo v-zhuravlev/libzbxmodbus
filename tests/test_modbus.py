@@ -49,25 +49,21 @@ class ModbusTestCase(unittest.TestCase):
     
     # 32bit unsigned integers(long):
     # long,BigEndian (ABCD)
-    @unittest.skip("Seems to be broken 32bit long")
     def test_modbus_datatype_long_32bit_be_abcd_0(self):
         key = "modbus_read["+self.host+",1,0,3,l]"
         self.assertEqual(zabbix_get(key),'3264201229')
     # long,(LittleEndian with Wordswap),Mid-Little Endian (CDAB)
-    @unittest.skip("Seems to be broken with 32bit long")
     def test_modbus_datatype_long_32bit_mle_cdab_0(self):
         key = "modbus_read["+self.host+",1,0,3,l,0]"
         self.assertEqual(zabbix_get(key),'3255681679')
 
     #IMPLEMENT:
     # long (LittleEndian)(DCBA)
-    @unittest.skip("implement this first")
     def test_modbus_datatype_long_32bit_le_dcba_0(self):
             key = "modbus_read["+self.host+",1,0,3,l,3]"
             self.assertEqual(zabbix_get(key),'230854594')
     #IMPLEMENT:
     # long (Big Endian with WordSwap) Mid-Big Endian (BADC)
-    @unittest.skip("implement this first")
     def test_modbus_datatype_long_32bit_mbe_badc_0(self):
             key = "modbus_read["+self.host+",1,0,3,l,2]"
             self.assertEqual(zabbix_get(key),'2411859394')    
