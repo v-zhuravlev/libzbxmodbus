@@ -97,12 +97,12 @@ and some optional params can be provided as well:
       `b` - for MODBUS_BIT  
       `i` - for MODBUS_INTEGER (unsigned)  
       `s` - for MODBUS_SIGNED_INT (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
-      `l` - for MODBUS_LONG, 32bit (unsigned)
+      `l` - for MODBUS_LONG, 32bit (unsigned)  
       `f` - for MODBUS_FLOAT, 32bit  
       
     There is also experimental support added for 64bit Modbus datatypes:  
       `S` - for MODBUS_SIGNED_INT64 (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
-      `I` - for MODBUS_INT64 (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
+      `I` - for MODBUS_UINT64 (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
       `d` - for MODBUS_FLOAT64, 64 bit  
     
     otherwise, defaults will be used:  

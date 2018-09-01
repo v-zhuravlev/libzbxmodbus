@@ -41,7 +41,7 @@
 #define MODBUS_LONG     'l'
 #define MODBUS_FLOAT    'f'
 #define MODBUS_SIGNED_INT64    'S'
-#define MODBUS_INT64    'I'
+#define MODBUS_UINT64    'I'
 #define MODBUS_FLOAT64    'd'
 
 #define MODBUS_GET_BE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index)]) << 16) + tab_int16[(index) + 1]
@@ -330,7 +330,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     int regs_to_read = 1;
 	if (datatype == MODBUS_FLOAT || datatype == MODBUS_LONG) { regs_to_read=2;}
-    else if (datatype == MODBUS_SIGNED_INT64 || datatype == MODBUS_INT64 || datatype == MODBUS_FLOAT64) { regs_to_read=4;}
+    else if (datatype == MODBUS_SIGNED_INT64 || datatype == MODBUS_UINT64 || datatype == MODBUS_FLOAT64) { regs_to_read=4;}
 
 
 
@@ -454,7 +454,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         }
         SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_INT64_FROM_INT16(temp_arr,0)));
     break;
-    case MODBUS_INT64:
+    case MODBUS_UINT64:
         switch( end )
         {
             case MODBUS_LE_DCBA:
