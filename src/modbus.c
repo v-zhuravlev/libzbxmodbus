@@ -44,21 +44,22 @@
 #define MODBUS_UINT64    'I'
 #define MODBUS_FLOAT64    'd'
 
-#define MODBUS_GET_BE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index)]) << 16) + tab_int16[(index) + 1]
-#define MODBUS_GET_MLE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index) + 1]) << 16) + tab_int16[(index)]
-#define MODBUS_GET_MBE_32BIT(tab_int16, index) (((uint32_t)bswap_16(tab_int16[(index)])) << 16) + bswap_16(tab_int16[(index) + 1])
-#define MODBUS_GET_LE_32BIT(tab_int16, index) (((uint32_t)bswap_16(tab_int16[(index) + 1])) << 16) + bswap_16(tab_int16[(index)])
+#define MODBUS_GET_BE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index)]) << 16) | tab_int16[(index) + 1]
+#define MODBUS_GET_MLE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index) + 1]) << 16) | tab_int16[(index)]
+#define MODBUS_GET_MBE_32BIT(tab_int16, index) (((uint32_t)bswap_16(tab_int16[(index)])) << 16) | bswap_16(tab_int16[(index) + 1])
+#define MODBUS_GET_LE_32BIT(tab_int16, index) (((uint32_t)bswap_16(tab_int16[(index) + 1])) << 16) | bswap_16(tab_int16[(index)])
 
-#define MODBUS_GET_BE_64BIT(tab_int16, index) (((uint64_t)tab_int16[index]) << 48) + (((uint64_t)tab_int16[index + 1]) << 32) + (((uint64_t)tab_int16[index + 2]) << 16) + tab_int16[index + 3]
-#define MODBUS_GET_MLE_64BIT(tab_int16, index) (((uint64_t)tab_int16[index + 3]) << 48) + (((uint64_t)tab_int16[index + 2]) << 32) + (((uint64_t)tab_int16[index + 1]) << 16) + tab_int16[index]
+
+#define MODBUS_GET_BE_64BIT(tab_int16, index) (((uint64_t)tab_int16[index]) << 48) | (((uint64_t)tab_int16[index + 1]) << 32) | (((uint64_t)tab_int16[index + 2]) << 16) | tab_int16[index + 3]
+#define MODBUS_GET_MLE_64BIT(tab_int16, index) (((uint64_t)tab_int16[index + 3]) << 48) | (((uint64_t)tab_int16[index + 2]) << 32) | (((uint64_t)tab_int16[index + 1]) << 16) | tab_int16[index]
 #define MODBUS_GET_MBE_64BIT(tab_int16, index) (((uint64_t)bswap_16(tab_int16[index])) << 48) \
-    + (((uint64_t)bswap_16(tab_int16[index + 1])) << 32) \
-    + (((uint64_t)bswap_16(tab_int16[index + 2])) << 16) \
-    + bswap_16(tab_int16[index + 3])
+    | (((uint64_t)bswap_16(tab_int16[index + 1])) << 32) \
+    | (((uint64_t)bswap_16(tab_int16[index + 2])) << 16) \
+    | bswap_16(tab_int16[index + 3])
 #define MODBUS_GET_LE_64BIT(tab_int16, index) (((uint64_t)bswap_16(tab_int16[index + 3])) << 48) \
-    + (((uint64_t)bswap_16(tab_int16[index + 2])) << 32) \
-    + (((uint64_t)bswap_16(tab_int16[index + 1])) << 16) \
-    + bswap_16(tab_int16[index])    
+    | (((uint64_t)bswap_16(tab_int16[index + 2])) << 32) \
+    | (((uint64_t)bswap_16(tab_int16[index + 1])) << 16) \
+    | bswap_16(tab_int16[index])    
 
 
 #define MODBUS_MLE_CDAB 0 //Mid-Little Endian (CDAB)
@@ -421,16 +422,16 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
         switch( end )
         {
-            case MODBUS_LE_DCBA://3
+            case MODBUS_LE_DCBA:
                 SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_LE_32BIT(tab_reg, 0));
                 break;
-            case MODBUS_BE_ABCD://1
+            case MODBUS_BE_ABCD:
                 SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_BE_32BIT(tab_reg, 0));
                 break;
             case MODBUS_MBE_BADC:
                 SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_MBE_32BIT(tab_reg, 0));
                 break;
-            case MODBUS_MLE_CDAB://0
+            case MODBUS_MLE_CDAB:
                 SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_MLE_32BIT(tab_reg, 0));
                 break;
             default:
@@ -440,19 +441,24 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     break;    
 
     case MODBUS_SIGNED_INT64:
-        if (end == MODBUS_MLE_CDAB) {
-            temp_arr[0] = tab_reg[3];
-            temp_arr[1] = tab_reg[2];
-            temp_arr[2] = tab_reg[1];
-            temp_arr[3] = tab_reg[0];
+        switch( end )
+        {
+            case MODBUS_LE_DCBA:
+                SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_LE_64BIT(tab_reg,0)));
+                break;
+            case MODBUS_BE_ABCD:
+                SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_BE_64BIT(tab_reg,0)));
+                break;
+            case MODBUS_MBE_BADC:
+                SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_MBE_64BIT(tab_reg,0)));
+                break;
+            case MODBUS_MLE_CDAB:
+                SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_MLE_64BIT(tab_reg,0)));
+                break;
+            default:
+                return SYSINFO_RET_FAIL;
+                break;
         }
-        if (end == MODBUS_BE_ABCD) {
-            temp_arr[0] = tab_reg[0];
-            temp_arr[1] = tab_reg[1];
-            temp_arr[2] = tab_reg[2];
-            temp_arr[3] = tab_reg[3];
-        }
-        SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_INT64_FROM_INT16(temp_arr,0)));
     break;
     case MODBUS_UINT64:
         switch( end )
