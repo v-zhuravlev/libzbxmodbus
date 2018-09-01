@@ -28,6 +28,8 @@
 #include <stdlib.h>
 #include <errno.h>
 
+#include <byteswap.h>
+
 #define MODBUS_READ_COIL_1 1
 #define MODBUS_READ_DINPUTS_2 2
 #define MODBUS_READ_H_REGISTERS_3 3
@@ -42,12 +44,21 @@
 #define MODBUS_INT64    'I'
 #define MODBUS_FLOAT64    'd'
 
-#define MODBUS_GET_ABCD(tab_int16, index) (((uint32_t)tab_int16[(index)]) << 16) + tab_int16[(index) + 1]
-#define MODBUS_GET_CDAB(tab_int16, index) (((uint32_t)tab_int16[(index) + 1]) << 16) + tab_int16[(index)]
-#define MODBUS_GET_BADC(tab_int16, index) ( (uint32_t)(uint16_t) ( (tab_int16[(index)] >> 8) | (tab_int16[(index)] << 8) ) << 16) \
-    + (uint16_t)((tab_int16[(index) + 1] >> 8) | (tab_int16[(index) + 1] << 8))
-#define MODBUS_GET_DCBA(tab_int16, index) ( (uint32_t)(uint16_t) ( (tab_int16[(index) + 1] >> 8) | (tab_int16[(index) + 1] << 8) ) << 16) \
-    + (uint16_t)((tab_int16[(index)] >> 8) | (tab_int16[(index)] << 8))
+#define MODBUS_GET_BE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index)]) << 16) + tab_int16[(index) + 1]
+#define MODBUS_GET_MLE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index) + 1]) << 16) + tab_int16[(index)]
+#define MODBUS_GET_MBE_32BIT(tab_int16, index) (((uint32_t)bswap_16(tab_int16[(index)])) << 16) + bswap_16(tab_int16[(index) + 1])
+#define MODBUS_GET_LE_32BIT(tab_int16, index) (((uint32_t)bswap_16(tab_int16[(index) + 1])) << 16) + bswap_16(tab_int16[(index)])
+
+#define MODBUS_GET_BE_64BIT(tab_int16, index) (((uint64_t)tab_int16[index]) << 48) + (((uint64_t)tab_int16[index + 1]) << 32) + (((uint64_t)tab_int16[index + 2]) << 16) + tab_int16[index + 3]
+#define MODBUS_GET_MLE_64BIT(tab_int16, index) (((uint64_t)tab_int16[index + 3]) << 48) + (((uint64_t)tab_int16[index + 2]) << 32) + (((uint64_t)tab_int16[index + 1]) << 16) + tab_int16[index]
+#define MODBUS_GET_MBE_64BIT(tab_int16, index) (((uint64_t)bswap_16(tab_int16[index])) << 48) \
+    + (((uint64_t)bswap_16(tab_int16[index + 1])) << 32) \
+    + (((uint64_t)bswap_16(tab_int16[index + 2])) << 16) \
+    + bswap_16(tab_int16[index + 3])
+#define MODBUS_GET_LE_64BIT(tab_int16, index) (((uint64_t)bswap_16(tab_int16[index + 3])) << 48) \
+    + (((uint64_t)bswap_16(tab_int16[index + 2])) << 32) \
+    + (((uint64_t)bswap_16(tab_int16[index + 1])) << 16) \
+    + bswap_16(tab_int16[index])    
 
 
 #define MODBUS_MLE_CDAB 0 //Mid-Little Endian (CDAB)
@@ -153,19 +164,6 @@ unsigned long hash(unsigned char *str)
 
     return hash;
 }
-
-/* Get a double from 8 bytes (Modbus) with swapped words (GH EF CD AB) */
-double modbus_get_double(const uint16_t *src)
-{
-    double d;
-    uint64_t i;
-
-    i = (((uint64_t)src[3]) << 48) + (((uint64_t)src[2]) << 32) + (((uint64_t)src[1]) << 16) + src[0];
-    memcpy(&d, &i, sizeof(double));
-
-    return d;
-}
-
 
 
 /******************************************************************************
@@ -400,16 +398,16 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         switch( end )
         {
             case MODBUS_LE_DCBA:
-                i = MODBUS_GET_DCBA(tab_reg, 0);
+                i = MODBUS_GET_LE_32BIT(tab_reg, 0);
                 break;
             case MODBUS_BE_ABCD:
-                i = MODBUS_GET_ABCD(tab_reg, 0);
+                i = MODBUS_GET_BE_32BIT(tab_reg, 0);
                 break;
             case MODBUS_MBE_BADC:
-                i = MODBUS_GET_BADC(tab_reg, 0);
+                i = MODBUS_GET_MBE_32BIT(tab_reg, 0);
                 break;
             case MODBUS_MLE_CDAB:
-                i = MODBUS_GET_CDAB(tab_reg, 0);
+                i = MODBUS_GET_MLE_32BIT(tab_reg, 0);
                 break;
             default:
                 return SYSINFO_RET_FAIL;
@@ -424,16 +422,16 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         switch( end )
         {
             case MODBUS_LE_DCBA://3
-                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_DCBA(tab_reg, 0));
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_LE_32BIT(tab_reg, 0));
                 break;
             case MODBUS_BE_ABCD://1
-                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_ABCD(tab_reg, 0));
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_BE_32BIT(tab_reg, 0));
                 break;
             case MODBUS_MBE_BADC:
-                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_BADC(tab_reg, 0));
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_MBE_32BIT(tab_reg, 0));
                 break;
             case MODBUS_MLE_CDAB://0
-                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_CDAB(tab_reg, 0));
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_MLE_32BIT(tab_reg, 0));
                 break;
             default:
                 return SYSINFO_RET_FAIL;
@@ -456,40 +454,50 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         }
         SET_DBL_RESULT(result, ((int64_t)MODBUS_GET_INT64_FROM_INT16(temp_arr,0)));
     break;
-
     case MODBUS_INT64:
-        //INT64
-        if (end == MODBUS_MLE_CDAB) {
-            temp_arr[0] = tab_reg[3];
-            temp_arr[1] = tab_reg[2];
-            temp_arr[2] = tab_reg[1];
-            temp_arr[3] = tab_reg[0];
+        switch( end )
+        {
+            case MODBUS_LE_DCBA:
+                SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_LE_64BIT(tab_reg,0)));
+                break;
+            case MODBUS_BE_ABCD:
+                SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_BE_64BIT(tab_reg,0)));
+                break;
+            case MODBUS_MBE_BADC:
+                SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_MBE_64BIT(tab_reg,0)));
+                break;
+            case MODBUS_MLE_CDAB:
+                SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_MLE_64BIT(tab_reg,0)));
+                break;
+            default:
+                return SYSINFO_RET_FAIL;
+                break;
         }
-        if (end == MODBUS_BE_ABCD) {
-            temp_arr[0] = tab_reg[0];
-            temp_arr[1] = tab_reg[1];
-            temp_arr[2] = tab_reg[2];
-            temp_arr[3] = tab_reg[3];
-        }
+    break;
 
-        SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_INT64_FROM_INT16(temp_arr,0)));
-    break;    
-
+    double d;
+    uint64_t i64;
     case MODBUS_FLOAT64:
-
-        if (end == MODBUS_MLE_CDAB) {
-            temp_arr[0] = tab_reg[3];
-            temp_arr[1] = tab_reg[2];
-            temp_arr[2] = tab_reg[1];
-            temp_arr[3] = tab_reg[0];
+        switch( end )
+        {
+            case MODBUS_LE_DCBA:
+                i64 = MODBUS_GET_LE_64BIT(tab_reg, 0);
+                break;
+            case MODBUS_BE_ABCD:
+                i64 = MODBUS_GET_BE_64BIT(tab_reg, 0);
+                break;
+            case MODBUS_MBE_BADC:
+                i64 = MODBUS_GET_MBE_64BIT(tab_reg, 0);
+                break;
+            case MODBUS_MLE_CDAB:
+                i64 = MODBUS_GET_MLE_64BIT(tab_reg, 0);
+                break;
+            default:
+                return SYSINFO_RET_FAIL;
+                break;
         }
-        if (end == MODBUS_BE_ABCD) {
-            temp_arr[0] = tab_reg[0];
-            temp_arr[1] = tab_reg[1];
-            temp_arr[2] = tab_reg[2];
-            temp_arr[3] = tab_reg[3];
-        }
-        SET_DBL_RESULT(result, modbus_get_double(temp_arr));
+        memcpy(&d, &i64, sizeof(double));
+        SET_DBL_RESULT(result, d);
     break;
     
     default :

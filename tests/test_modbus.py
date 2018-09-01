@@ -57,7 +57,6 @@ class ModbusTestCase(unittest.TestCase):
         key = "modbus_read["+self.host+",1,0,3,l,0]"
         self.assertEqual(zabbix_get(key),'3255681679')
 
-    #IMPLEMENT:
     # long (LittleEndian)(DCBA)
     def test_modbus_datatype_long_32bit_le_dcba_0(self):
             key = "modbus_read["+self.host+",1,0,3,l,3]"

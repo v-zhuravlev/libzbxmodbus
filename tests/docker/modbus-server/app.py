@@ -103,10 +103,29 @@ def run_server(modbus_type,port):
         8:0x8FC2,
         
         # this block is to test 64bits
-        11:0xFFFF,#PDU10
-        12:0xFFFF,
-        13:0xFFFF,
-        14:0xFDCE
+        #BE
+        15:0xBFBF,#PDU14
+        16:0x9A6B,
+        17:0x50B0,
+        18:0xF27C,
+
+        #LE
+        19:0x7CF2,#PDU18
+        20:0xB050,
+        21:0x6B9A,
+        22:0xBFBF,
+
+        #MLE
+        23:0xF27C,#PDU22
+        24:0x50B0,
+        25:0x9A6B,
+        26:0xBFBF,
+
+        #MBE
+        27:0xBFBF,#PDU26
+        28:0x6B9A,
+        29:0xB050,
+        30:0x7CF2
     })
     store = ModbusSlaveContext(di=block, co=block, hr=block, ir=block)
 
