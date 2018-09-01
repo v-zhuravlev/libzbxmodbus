@@ -265,7 +265,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     }
     
     char datatype;	
-    int end = MODBUS_BE_ABCD; //<endianness> endianness LE(0) BE(1) MBE(2) LBE(3) default BE
+    int end = MODBUS_BE_ABCD; //<endianness> endianness LE(0) BE(1) MBE(2) MLE(3) default BE
 	if (request->nparam > 4) { //optional params provided
    
         param5 = get_rparam(request, 4); //datatype
@@ -276,7 +276,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         }
         
         datatype = *param5; // set datatype
-		param6 = get_rparam(request, 5); //16-32bit endiannes
+		param6 = get_rparam(request, 5); //32-64bit endiannes
         if(param6) {
             //endianness to use
             errno = 0;
