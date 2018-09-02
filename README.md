@@ -113,7 +113,7 @@ and some optional params can be provided as well:
       1 - for MODBUS_BE_ABCD (Big Endian (ABCD))  
       2 - for MODBUS_MBE_BADC (Mid-Big Endian (BADC))  
       3 - for MODBUS_LE_DCBA (Little Endian (DCBA))  
-    Default is BE(1). Normaly, you don't need to change this.  
+    Default is BE(1). Normally, you don't need to change this.  
     
 * **first_reg(optional):**  
     Modbus addressing scheme  
