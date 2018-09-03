@@ -75,9 +75,14 @@
 
 
 #define MODBUS_MLE_CDAB 0 //Mid-Little Endian (CDAB)
+#define MODBUS_MLE_CDAB_STR "MLE"
 #define MODBUS_BE_ABCD 1 //Big Endian (ABCD)
+#define MODBUS_BE_ABCD_STR "BE"
 #define MODBUS_MBE_BADC 2 //Mid-Big Endian (BADC)
+#define MODBUS_MBE_BADC_STR "MBE"
 #define MODBUS_LE_DCBA 3 //Little Endian (DCBA)
+#define MODBUS_LE_DCBA_STR "LE"
+
 
 #define MODBUS_PDU_ADDRESS_0    0
 #define MODBUS_PROTOCOL_ADDRESS_1   1
@@ -320,17 +325,29 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         param6 = get_rparam(request, 5); //32-64bit endiannes
         if(param6) {
             //endianness to use
-            errno = 0;
-            end = strtol(param6,&endptr, 0);
-            if ( (end != MODBUS_LE_DCBA &&
-                  end != MODBUS_BE_ABCD && 
-                  end != MODBUS_MBE_BADC &&
-                  end != MODBUS_MLE_CDAB ) ||
-                        (errno!=0 || *endptr != '\0') )  {
-                SET_MSG_RESULT(result, strdup("Check endiannes used"));
-                modbus_free(ctx);
-                return SYSINFO_RET_FAIL;
+            if (!strcmp(MODBUS_BE_ABCD_STR,param6))
+                end = MODBUS_BE_ABCD;
+            else if (!strcmp(MODBUS_MBE_BADC_STR, param6))
+                end = MODBUS_MBE_BADC;
+            else if (!strcmp(MODBUS_MLE_CDAB_STR, param6))
+                end = MODBUS_MLE_CDAB;
+            else if (!strcmp(MODBUS_LE_DCBA_STR, param6))
+                end = MODBUS_LE_DCBA;
+            else {
+                errno = 0;
+                end = strtol(param6,&endptr, 0);
+                if ( (end != MODBUS_LE_DCBA &&
+                    end != MODBUS_BE_ABCD && 
+                    end != MODBUS_MBE_BADC &&
+                    end != MODBUS_MLE_CDAB ) ||
+                    (errno!=0 || *endptr != '\0') )  {
+                    SET_MSG_RESULT(result, strdup("Check endiannes used: BE,LE,MLE,MBE."));
+                    modbus_free(ctx);
+                    return SYSINFO_RET_FAIL;
+                }
+
             }
+            
         }
         
         param7 = get_rparam(request, 6); //PDU

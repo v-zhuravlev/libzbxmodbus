@@ -124,12 +124,12 @@ and some optional params can be provided as well:
 **Example keys:**  
 ```
     modbus_read[/dev/ttyS0,32,4,3]
-    modbus_read[{$MODBUS_PORT},{$MODBUS_SLAVE},59,3,float,1,0]
-    modbus_read[{HOST.CONN},{$MODBUS_SLAVE},59,3,float,1,0]
-    modbus_read[/dev/ttyS0 9600 N,32,4,3,float,1,0]
+    modbus_read[{$MODBUS_PORT},{$MODBUS_SLAVE},59,3,float,BE,0]
+    modbus_read[{HOST.CONN},{$MODBUS_SLAVE},59,3,float,BE,0]
+    modbus_read[/dev/ttyS0 9600 N,32,4,3,float,BE,0]
     modbus_read[192.168.1.1,1,6,1]
     modbus_read[192.168.1.1:514,1,5,1]
-    modbus_read[{$MODBUS_PORT},32,4,3,uint32,1,0]
+    modbus_read[{$MODBUS_PORT},32,4,3,uint32,BE,0]
     modbus_read[enc://192.168.1.1,1,6,1]
     modbus_read[tcp://192.168.1.1:5000,1,5,1]
 ```

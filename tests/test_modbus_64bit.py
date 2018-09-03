@@ -15,19 +15,19 @@ class Modbus64BitTestCase(unittest.TestCase):
     # Mid-Little Endian
     @unittest.skip("Implement first")
     def test_modbus_datatype_int64_64bit_mle_0(self):
-        key = "modbus_read["+self.host+",1,22,3,int64,0]"
+        key = "modbus_read["+self.host+",1,22,3,int64,MLE]"
         self.assertEqual(zabbix_get(key),'-4629812106207628676')
 
     # Little Endian
     @unittest.skip("Implement first")
     def test_modbus_datatype_int64_64bit_le_0(self):
-        key = "modbus_read["+self.host+",1,18,3,int64,3]"
+        key = "modbus_read["+self.host+",1,18,3,int64,LE]"
         self.assertEqual(zabbix_get(key),'-4629812106207628676')
 
     # Mid-Big Endian
     @unittest.skip("Implement first")
     def test_modbus_datatype_int64_64bit_mbe_0(self):
-        key = "modbus_read["+self.host+",1,26,3,int64,2]"
+        key = "modbus_read["+self.host+",1,26,3,int64,MBE]"
         self.assertEqual(zabbix_get(key),'-4629812106207628676')
 
     #UNSIGNED INT64
@@ -37,17 +37,17 @@ class Modbus64BitTestCase(unittest.TestCase):
         self.assertEqual(zabbix_get(key),'13816931967501922940')
     # Mid-Little Endian
     def test_modbus_datatype_uint64_64bit_mle_0(self):
-        key = "modbus_read["+self.host+",1,22,3,uint64,0]"
+        key = "modbus_read["+self.host+",1,22,3,uint64,MLE]"
         self.assertEqual(zabbix_get(key),'13816931967501922940')
 
     # Little Endian
     def test_modbus_datatype_uint64_64bit_le_0(self):
-        key = "modbus_read["+self.host+",1,18,3,uint64,3]"
+        key = "modbus_read["+self.host+",1,18,3,uint64,LE]"
         self.assertEqual(zabbix_get(key),'13816931967501922940')
 
     # Mid-Big Endian
     def test_modbus_datatype_uint64_64bit_mbe_0(self):
-        key = "modbus_read["+self.host+",1,26,3,uint64,2]"
+        key = "modbus_read["+self.host+",1,26,3,uint64,MBE]"
         self.assertEqual(zabbix_get(key),'13816931967501922940')
 
     
@@ -58,17 +58,17 @@ class Modbus64BitTestCase(unittest.TestCase):
         self.assertEqual(zabbix_get(key),'-0.123450')
     # Mid-Little Endian
     def test_modbus_datatype_double_64bit_mle_0(self):
-        key = "modbus_read["+self.host+",1,22,3,double,0]"
+        key = "modbus_read["+self.host+",1,22,3,double,MLE]"
         self.assertEqual(zabbix_get(key),'-0.123450')
 
     # Little Endian
     def test_modbus_datatype_double_64bit_le_0(self):
-        key = "modbus_read["+self.host+",1,18,3,double,3]"
+        key = "modbus_read["+self.host+",1,18,3,double,LE]"
         self.assertEqual(zabbix_get(key),'-0.123450')
 
     # Mid-Big Endian
     def test_modbus_datatype_double_64bit_mbe_0(self):
-        key = "modbus_read["+self.host+",1,26,3,double,2]"
+        key = "modbus_read["+self.host+",1,26,3,double,MBE]"
         self.assertEqual(zabbix_get(key),'-0.123450')
 
 
