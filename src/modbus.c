@@ -85,7 +85,7 @@
 
 
 #define MODBUS_PDU_ADDRESS_0    0
-#define MODBUS_PROTOCOL_ADDRESS_1   1
+#define MODBUS_PROTOCOL_ADDRESS_1    1
 
 #define NSEMS 128
 
@@ -124,7 +124,7 @@ static ZBX_METRIC keys[] =
 /*      KEY                     FLAG        FUNCTION            TEST PARAMETERS */
 {
     {"modbus_read_registers",   CF_HAVEPARAMS,  zbx_modbus_read_registers, NULL},
-	{"modbus_read",   CF_HAVEPARAMS,  zbx_modbus_read_registers, NULL},
+    {"modbus_read",   CF_HAVEPARAMS,  zbx_modbus_read_registers, NULL},
     {NULL}
 };
 
@@ -214,30 +214,30 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     if (request->nparam <4) //check if mandatory params are provided
     {
-		SET_MSG_RESULT(result, strdup("Invalid number of parameters."));
-		return SYSINFO_RET_FAIL;
-	}
+        SET_MSG_RESULT(result, strdup("Invalid number of parameters."));
+        return SYSINFO_RET_FAIL;
+    }
 
     param1 = get_rparam(request, 0);
-	if(param_is_empty(param1)) {
-		SET_MSG_RESULT(result, strdup("No connection address provided."));
-		return SYSINFO_RET_FAIL;
-	}
-	param2 = get_rparam(request, 1);
+    if(param_is_empty(param1)) {
+        SET_MSG_RESULT(result, strdup("No connection address provided."));
+        return SYSINFO_RET_FAIL;
+    }
+    param2 = get_rparam(request, 1);
     if(param_is_empty(param2)) {
-		SET_MSG_RESULT(result, strdup("No slave id provided."));
-		return SYSINFO_RET_FAIL;
-	}
+        SET_MSG_RESULT(result, strdup("No slave id provided."));
+        return SYSINFO_RET_FAIL;
+    }
     param3 = get_rparam(request, 2);
-	if(param_is_empty(param3)) {
-		SET_MSG_RESULT(result, strdup("No register to read provided."));
-		return SYSINFO_RET_FAIL;
-	}
-	param4 = get_rparam(request, 3);
+    if(param_is_empty(param3)) {
+        SET_MSG_RESULT(result, strdup("No register to read provided."));
+        return SYSINFO_RET_FAIL;
+    }
+    param4 = get_rparam(request, 3);
     if(param_is_empty(param4)) {
-		SET_MSG_RESULT(result, strdup("No Modbus function provided! Please provide either 1,2,3,4."));
-		return SYSINFO_RET_FAIL;
-	}
+        SET_MSG_RESULT(result, strdup("No Modbus function provided! Please provide either 1,2,3,4."));
+        return SYSINFO_RET_FAIL;
+    }
 
 
     modbus_t *ctx;
@@ -281,18 +281,18 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         return SYSINFO_RET_FAIL;
     }
     
-    char datatype;	
+    char datatype;  
     int end = MODBUS_BE_ABCD; //<endianness> endianness LE(0) BE(1) MBE(2) MLE(3) default BE
-	if (request->nparam > 4) { //optional params provided
-   
+    if (request->nparam > 4) { //optional params provided
+
         param5 = get_rparam(request, 4); //datatype
-    
+
         if (!strcmp(MODBUS_BIT_STR,param5))
-			datatype = MODBUS_BIT;
-		else if (!strcmp(MODBUS_UINT16_STR, param5))
-			datatype = MODBUS_UINT16;
+            datatype = MODBUS_BIT;
+        else if (!strcmp(MODBUS_UINT16_STR, param5))
+            datatype = MODBUS_UINT16;
         else if (!strcmp(MODBUS_SIGNED_INT_STR, param5))
-			datatype = MODBUS_SIGNED_INT;
+            datatype = MODBUS_SIGNED_INT;
         else if (!strcmp(MODBUS_UINT32_STR, param5))
             datatype = MODBUS_UINT32;
         else if (!strcmp(MODBUS_SIGNED_INT32_STR, param5))
@@ -308,20 +308,19 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
             datatype = MODBUS_UINT64;
         else if (!strcmp(MODBUS_FLOAT64_STR, param5))
             datatype = MODBUS_FLOAT64;
-		else
-		{ 
+        else
+        { 
             if(!validate_datatype_param(param5)) {
                 SET_MSG_RESULT(result, strdup("Check datatype provided."));
                 modbus_free(ctx);
                 return SYSINFO_RET_FAIL;
             }
-			
+            
             datatype = *param5; // set datatype
-		}
+        }
 
-        
-        
-		
+
+
         param6 = get_rparam(request, 5); //32-64bit endiannes
         if(param6) {
             //endianness to use
@@ -347,9 +346,9 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
                 }
 
             }
-            
+
         }
-        
+
         param7 = get_rparam(request, 6); //PDU
         if(param7) {//PDU <first reg> check
             //int first_reg=atoi(param7); 
@@ -362,13 +361,13 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
                 modbus_free(ctx);
                 return SYSINFO_RET_FAIL;
             }
-        
+
             if (first_reg == MODBUS_PROTOCOL_ADDRESS_1){
                     reg_start=reg_start-1;
             }
         }
 
-	}
+    }
     else {//no datatype set, place defaults
     
         if (function==MODBUS_READ_COIL_1 || function == MODBUS_READ_DINPUTS_2) {
@@ -383,17 +382,17 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     modbus_set_response_timeout(ctx, item_timeout, 0);
 
     //read part
-    
+
     uint16_t tab_reg[64];//temp vars
     uint8_t tab_reg_bits[64];
 
     int regs_to_read = 1;
-	if (datatype == MODBUS_FLOAT || datatype == MODBUS_UINT32 || datatype == MODBUS_SIGNED_INT32) { regs_to_read=2;}
+    if (datatype == MODBUS_FLOAT || datatype == MODBUS_UINT32 || datatype == MODBUS_SIGNED_INT32) { regs_to_read=2;}
     else if (datatype == MODBUS_UINT64 || datatype == MODBUS_FLOAT64) { regs_to_read=4;}
 
 
 
-	if (lock_required == 1 ) LOCK_PORT(lock_key);
+    if (lock_required == 1 ) LOCK_PORT(lock_key);
 
     if (modbus_connect(ctx) == -1) {
         SET_MSG_RESULT(result, strdup(modbus_strerror(errno)));
@@ -401,7 +400,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         if (lock_required == 1 ) UNLOCK_PORT(lock_key);
         return SYSINFO_RET_FAIL;
     }
-    
+
     int rc;//modbus return_code
     switch (function) {
         case MODBUS_READ_COIL_1:
@@ -434,19 +433,19 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         SET_MSG_RESULT(result, strdup(modbus_strerror(errno)));
         return SYSINFO_RET_FAIL;
     }
-    
+
     //post-parsing
     uint16_t temp_arr[4];     //output based on datatype
     switch(datatype){
-    
+
     case MODBUS_BIT:
         SET_UI64_RESULT(result, tab_reg_bits[0]);
     break;
-    
+
     case MODBUS_UINT16:
         SET_UI64_RESULT(result, tab_reg[0]);
     break;
-    
+
     case MODBUS_SIGNED_INT:
         //use float type in zabbix item
         SET_DBL_RESULT(result, (int16_t) tab_reg[0]);
@@ -496,7 +495,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
                 return SYSINFO_RET_FAIL;
                 break;
         }
-    break;    
+    break;
 
     case MODBUS_SIGNED_INT32:
         switch( end )
@@ -568,7 +567,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         memcpy(&d, &i64, sizeof(double));
         SET_DBL_RESULT(result, d);
     break;
-    
+
     default :
         SET_MSG_RESULT(result, strdup("Check datatype provided."));
         return SYSINFO_RET_FAIL;
@@ -593,14 +592,14 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
  *                                                                            *
  ******************************************************************************/
 int zbx_module_init()
-{   
-    if (ZBX_MUTEX_ERROR == (MODBUS_SEM_ID = initsem())) {       		
+{
+    if (ZBX_MUTEX_ERROR == (MODBUS_SEM_ID = initsem())) {               
             printf("libzbxmodbus: unable to create semaphores. Please check maximum allowed nsem, it must be no less than %d. See limits in /proc/sys/kernel/sem\n", NSEMS);
             return ZBX_MODULE_FAIL;
     }
 
     printf("libzbxmodbus: loaded version: %s\n",VERSION);
-/*This function should perform the necessary initialization for the module (if any). 
+/*This function should perform the necessary initialization for the module (if any).
 If successful, it should return ZBX_MODULE_OK. Otherwise, it should return ZBX_MODULE_FAIL.*/
     return ZBX_MODULE_OK;
 }
@@ -618,7 +617,7 @@ If successful, it should return ZBX_MODULE_OK. Otherwise, it should return ZBX_M
  ******************************************************************************/
 int zbx_module_uninit()
 {
-    
+
     sem_uninit(MODBUS_SEM_ID);
     return ZBX_MODULE_OK;
 }
@@ -634,10 +633,10 @@ int validate_datatype_param (char *datatype_param) {//checks that datatype provi
 void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out, short *lock_key) {
 
     char first_char = con_string[0];
-    
+
     if (first_char == '/') {//then its rtu(serial con)
-    	*lock_required_out = 1;
-    	// -- next code is to parse first arg and find all required to connect to rtu successfully
+        *lock_required_out = 1;
+        // -- next code is to parse first arg and find all required to connect to rtu successfully
         char rtu_port[100];
         int rtu_speed = 9600;
         char rtu_parity = 'N';
@@ -651,36 +650,36 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
     }
     else {//its TCP (encapsulated or Modbus TCP)
 
-		char host[100];
-		int port = MODBUS_TCP_DEFAULT_PORT;
+        char host[100];
+        int port = MODBUS_TCP_DEFAULT_PORT;
 
-		if (strncmp(con_string, "enc://", strlen("enc://")) == 0) {
+        if (strncmp(con_string, "enc://", strlen("enc://")) == 0) {
 
-			*lock_required_out = 1;
-			con_string += strlen("enc://");
-			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
-			*lock_key = hash(host) % NSEMS;
-			*ctx_out = modbus_new_rtutcp(host, port);
+            *lock_required_out = 1;
+            con_string += strlen("enc://");
+            sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+            *lock_key = hash(host) % NSEMS;
+            *ctx_out = modbus_new_rtutcp(host, port);
 
-		} else if (strncmp(con_string, "tcp://", strlen("tcp://")) == 0) {
+        } else if (strncmp(con_string, "tcp://", strlen("tcp://")) == 0) {
 
-			*lock_required_out = 0;
-			con_string += strlen("tcp://");
-			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
-			*lock_key = hash(host) % NSEMS;
-			*ctx_out = modbus_new_tcp(host, port);
+            *lock_required_out = 0;
+            con_string += strlen("tcp://");
+            sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+            *lock_key = hash(host) % NSEMS;
+            *ctx_out = modbus_new_tcp(host, port);
 
-		}
-		else {//try Modbus TCP
+        }
+        else {//try Modbus TCP
 
-			*lock_required_out = 0;
-			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
-			*lock_key = hash(host) % NSEMS;
-			*ctx_out = modbus_new_tcp(host, port);
+            *lock_required_out = 0;
+            sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+            *lock_key = hash(host) % NSEMS;
+            *ctx_out = modbus_new_tcp(host, port);
 
-		}
+        }
     }
-    
+
     return;
 }
 
@@ -696,14 +695,14 @@ int initsem()  /* sem_key from ftok() */
     union semun arg;
     struct semid_ds buf;
     struct sembuf sb;
-    
-	if (-1 == (sem_key = ftok(MODBUS_SEM_KEY,'z'))) {
+
+    if (-1 == (sem_key = ftok(MODBUS_SEM_KEY,'z'))) {
         //zbx_error("cannot create IPC key for path '%s': %s",
-				//MODBUS_SEM_KEY, zbx_strerror(errno));
+                //MODBUS_SEM_KEY, zbx_strerror(errno));
         return ZBX_MUTEX_ERROR;
-	}
-  
-  
+    }
+
+
     semid = semget(sem_key, nsems, IPC_CREAT | IPC_EXCL | 0600);
 
     if (semid >= 0) { /* we got it first */
@@ -748,11 +747,11 @@ int initsem()  /* sem_key from ftok() */
 
 void sem_lock (int sem_num) {
     struct sembuf sb;
-    
+
     sb.sem_num = sem_num;
     sb.sem_op = -1;  /* set to allocate resource */
     sb.sem_flg = SEM_UNDO;
-    
+
     if (semop(MODBUS_SEM_ID, &sb, 1) == -1) {
         //zabbix_log(LOG_LEVEL_ERROR, "Failed to lock semaphore for semid: %d",MODBUS_SEM_ID);
     }
@@ -762,11 +761,11 @@ void sem_lock (int sem_num) {
 
 void sem_unlock (int sem_num) {
     struct sembuf sb;
-    
+
     sb.sem_num = sem_num;
     sb.sem_op = 1;  /* free resource */
     sb.sem_flg = SEM_UNDO;
-    
+
     if (semop(MODBUS_SEM_ID, &sb, 1) == -1) {
        //zabbix_log(LOG_LEVEL_ERROR, "Failed to unlock semaphore for semid: %d",MODBUS_SEM_ID);
     }
@@ -775,9 +774,9 @@ void sem_unlock (int sem_num) {
 
 
 void sem_uninit (int semid) {
-    
+
      if (semctl(semid, 0, IPC_RMID) == -1) {
        //zabbix_log(LOG_LEVEL_ERROR, "Failed to destroy semaphore set for semid: %d",MODBUS_SEM_ID);
-    	 printf("libzbxmodbus: failed to destroy semaphore set for semid: %d",MODBUS_SEM_ID);
+         printf("libzbxmodbus: failed to destroy semaphore set for semid: %d",MODBUS_SEM_ID);
     }
 }
