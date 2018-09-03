@@ -158,5 +158,6 @@ If using libzbxmodbus with Zabbix agent, you can also save time and test respons
  
  ## 6. Read more  
  Use case example in IoT project: https://www.zabbix.com/files/zabconf2017/fabrizio_fantoni-zabbix_in_iot_architecture.pdf
- More examples in Habrhabr article (RU): https://habrahabr.ru/company/zabbix/blog/268119/
+ More examples in Habrhabr article (RU): https://habrahabr.ru/company/zabbix/blog/268119/  
+ About Modbus: http://www.ni.com/white-paper/52134/en/  
  
