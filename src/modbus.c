@@ -35,14 +35,26 @@
 #define MODBUS_READ_H_REGISTERS_3 3
 #define MODBUS_READ_I_REGISTERS_4 4
 
+
 #define MODBUS_BIT      'b'
-#define MODBUS_INTEGER  'i'
+#define MODBUS_BIT_STR      "bit"
+#define MODBUS_UINT16  'i'
+#define MODBUS_UINT16_STR  "uint16"
 #define MODBUS_SIGNED_INT  's'
-#define MODBUS_LONG     'l'
-#define MODBUS_FLOAT    'f'
+#define MODBUS_SIGNED_INT_STR  "int16"
+#define MODBUS_UINT32     'l'
+#define MODBUS_UINT32_STR     "uint32"
 #define MODBUS_SIGNED_INT32    'S'
+#define MODBUS_SIGNED_INT32_STR    "int32"
+#define MODBUS_FLOAT    'f'
+#define MODBUS_FLOAT_STR    "float"
+//#define MODBUS_SIGNED_INT64    ''
+#define MODBUS_SIGNED_INT64_STR    "int64" //not implemented
 #define MODBUS_UINT64    'I'
+#define MODBUS_UINT64_STR    "uint64"
 #define MODBUS_FLOAT64    'd'
+#define MODBUS_FLOAT64_STR    "double"
+
 
 #define MODBUS_GET_BE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index)]) << 16) | tab_int16[(index) + 1]
 #define MODBUS_GET_MLE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index) + 1]) << 16) | tab_int16[(index)]
@@ -269,14 +281,43 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 	if (request->nparam > 4) { //optional params provided
    
         param5 = get_rparam(request, 4); //datatype
-        if(!validate_datatype_param(param5)) {
-            SET_MSG_RESULT(result, strdup("Check datatype provided."));
+    
+        if (!strcmp(MODBUS_BIT_STR,param5))
+			datatype = MODBUS_BIT;
+		else if (!strcmp(MODBUS_UINT16_STR, param5))
+			datatype = MODBUS_UINT16;
+        else if (!strcmp(MODBUS_SIGNED_INT_STR, param5))
+			datatype = MODBUS_SIGNED_INT;
+        else if (!strcmp(MODBUS_UINT32_STR, param5))
+            datatype = MODBUS_UINT32;
+        else if (!strcmp(MODBUS_SIGNED_INT32_STR, param5))
+            datatype = MODBUS_SIGNED_INT32;
+        else if (!strcmp(MODBUS_FLOAT_STR, param5))
+            datatype = MODBUS_FLOAT;
+        else if (!strcmp(MODBUS_SIGNED_INT64_STR, param5)){
+            SET_MSG_RESULT(result, strdup("datatype 'int64' is not supported."));
             modbus_free(ctx);
             return SYSINFO_RET_FAIL;
         }
+        else if (!strcmp(MODBUS_UINT64_STR, param5))
+            datatype = MODBUS_UINT64;
+        else if (!strcmp(MODBUS_FLOAT64_STR, param5))
+            datatype = MODBUS_FLOAT64;
+		else
+		{ 
+            if(!validate_datatype_param(param5)) {
+                SET_MSG_RESULT(result, strdup("Check datatype provided."));
+                modbus_free(ctx);
+                return SYSINFO_RET_FAIL;
+            }
+			
+            datatype = *param5; // set datatype
+		}
+
         
-        datatype = *param5; // set datatype
-		param6 = get_rparam(request, 5); //32-64bit endiannes
+        
+		
+        param6 = get_rparam(request, 5); //32-64bit endiannes
         if(param6) {
             //endianness to use
             errno = 0;
@@ -317,7 +358,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
             datatype = MODBUS_BIT;//default
         }
         if (function==MODBUS_READ_H_REGISTERS_3 || function == MODBUS_READ_I_REGISTERS_4) {
-            datatype = MODBUS_INTEGER ;//default
+            datatype = MODBUS_UINT16 ;//default
         }
     }
 
@@ -330,7 +371,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     uint8_t tab_reg_bits[64];
 
     int regs_to_read = 1;
-	if (datatype == MODBUS_FLOAT || datatype == MODBUS_LONG || datatype == MODBUS_SIGNED_INT32) { regs_to_read=2;}
+	if (datatype == MODBUS_FLOAT || datatype == MODBUS_UINT32 || datatype == MODBUS_SIGNED_INT32) { regs_to_read=2;}
     else if (datatype == MODBUS_UINT64 || datatype == MODBUS_FLOAT64) { regs_to_read=4;}
 
 
@@ -385,7 +426,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         SET_UI64_RESULT(result, tab_reg_bits[0]);
     break;
     
-    case MODBUS_INTEGER:
+    case MODBUS_UINT16:
         SET_UI64_RESULT(result, tab_reg[0]);
     break;
     
@@ -418,7 +459,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         SET_DBL_RESULT(result, f);
     break;
 
-    case MODBUS_LONG:
+    case MODBUS_UINT32:
 
         switch( end )
         {
