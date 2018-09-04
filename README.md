@@ -109,10 +109,10 @@ and some optional params can be provided as well:
   
 * **endianness(optional):**   
     Modbus endianness for 32bit/64bit datatypes:  
-      0 - for MODBUS_MLE_CDAB (Mid-Little Endian (CDAB))  
-      1 - for MODBUS_BE_ABCD (Big Endian (ABCD))  
-      2 - for MODBUS_MBE_BADC (Mid-Big Endian (BADC))  
-      3 - for MODBUS_LE_DCBA (Little Endian (DCBA))  
+      0 or `MLE` - for MODBUS_MLE_CDAB (Mid-Little Endian (CDAB))  
+      1 or `BE` - for MODBUS_BE_ABCD (Big Endian (ABCD))  
+      2 or `MBE` - for MODBUS_MBE_BADC (Mid-Big Endian (BADC))  
+      3 or `LE` - for MODBUS_LE_DCBA (Little Endian (DCBA))  
     Default is BE(1). Normally, you don't need to change this.  
     
 * **first_reg(optional):**  
