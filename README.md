@@ -26,8 +26,8 @@ Resource locking (via IPC semaphores) is used when using RTU or Encapsulated Mod
   
 ## 1.B Install from tar.gz
 Download from  https://share.zabbix.com/dir-libraries/zabbix-loadable-modules/modbus-loadable-module
-  - `tar zxvpf libzbxmodbus-0.7.tar.gz`
-  - `cd libzbxmodbus-0.7`
+  - `tar zxvpf libzbxmodbus-0.8.tar.gz`
+  - `cd libzbxmodbus-0.8`
   - `./configure --prefix=/etc/zabbix --enable-zabbix-[2|3|3.2]`
   - `make`
   - `make install`
