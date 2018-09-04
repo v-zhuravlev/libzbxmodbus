@@ -50,7 +50,7 @@ Download from  https://share.zabbix.com/dir-libraries/zabbix-loadable-modules/mo
 ## 3. Configure Modbus polling in Zabbix
   Configure the new item with the following key:
   
-`modbus_read[<connection>,<slave_id>, <reg_to_read>, <modbus_function>, [<datatype>],[<endiannes>],[<first_reg>]]`  
+`modbus_read[<connection>,<slave_id>,<reg_to_read>,<modbus_function>[,<datatype>][,<endiannes>][,<first_reg>]]`  
 
 where:  
 
