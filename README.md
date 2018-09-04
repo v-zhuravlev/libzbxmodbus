@@ -93,15 +93,15 @@ where:
 and some optional params can be provided as well:  
   
 * **datatype(optional):**  
-    provide datatype as single char:  
-      `b` - for MODBUS_BIT  
-      `i` - for MODBUS_INTEGER, 16bit (unsigned)  
-      `s` - for MODBUS_SIGNED_INT, 16bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
-      `l` - for MODBUS_LONG, 32bit (unsigned)  
-      `f` - for MODBUS_FLOAT, 32bit  
-      `S` - for MODBUS_SIGNED_INT32, 32bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
-      `I` - for MODBUS_UINT64, 64bit (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
-      `d` - for MODBUS_FLOAT64, 64bit  
+    provide datatype:  
+      `b` or `bit` - for MODBUS_BIT  
+      `i` or `uint16` - for MODBUS_UINT16, 16bit (unsigned)  
+      `s` or `int16` - for MODBUS_SIGNED_INT, 16bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
+      `l` or `uint32` - for MODBUS_UINT32, 32bit (unsigned)  
+      `S` or `int32` - for MODBUS_SIGNED_INT32, 32bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
+      `f` or `float` - for MODBUS_FLOAT, 32bit  
+      `I` or `uint64`- for MODBUS_UINT64, 64bit (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
+      `d` or `double`- for MODBUS_FLOAT64, 64bit  
     
     otherwise, defaults will be used:  
       MODBUS_BIT if modbus function 1 or 2.  
@@ -124,12 +124,12 @@ and some optional params can be provided as well:
 **Example keys:**  
 ```
     modbus_read[/dev/ttyS0,32,4,3]
-    modbus_read[{$MODBUS_PORT},{$MODBUS_SLAVE},59,3,f,1,0]
-    modbus_read[{HOST.CONN},{$MODBUS_SLAVE},59,3,f,1,0]
-    modbus_read[/dev/ttyS0 9600 N,32,4,3,f,1,0]
+    modbus_read[{$MODBUS_PORT},{$MODBUS_SLAVE},59,3,float,BE,0]
+    modbus_read[{HOST.CONN},{$MODBUS_SLAVE},59,3,float,BE,0]
+    modbus_read[/dev/ttyS0 9600 N,32,4,3,float,BE,0]
     modbus_read[192.168.1.1,1,6,1]
     modbus_read[192.168.1.1:514,1,5,1]
-    modbus_read[{$MODBUS_PORT},32,4,3,f,1,0]
+    modbus_read[{$MODBUS_PORT},32,4,3,uint32,BE,0]
     modbus_read[enc://192.168.1.1,1,6,1]
     modbus_read[tcp://192.168.1.1:5000,1,5,1]
 ```
