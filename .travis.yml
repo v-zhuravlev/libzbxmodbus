@@ -13,6 +13,7 @@ before_install:
   - curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
+  - python -m pip install --user pytest
 script:
   - ./autogen.sh 
   - ./configure --enable-zabbix-${ZBX_HEADERS_VERSION}
@@ -22,7 +23,4 @@ script:
   - docker logs docker_zabbix-agent-modbus_1
   - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k agent.ping"
   - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k modbus_read[172.16.238.2:5020,1,2,3,i,1,1]"
-  - python tests/test_modbus.py
-  - python tests/test_modbus_errors.py
-  - python tests/test_modbus_64bit.py
-  - python tests/test_modbus_connection_string.py
+  - pytest -v
