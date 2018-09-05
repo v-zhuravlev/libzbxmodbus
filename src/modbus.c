@@ -204,6 +204,7 @@ unsigned long hash(unsigned char *str)
  ******************************************************************************/
 int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 {
+<<<<<<< HEAD
 	char *param1, *param2, *param3, *param4, *param5, *param6, *param7;
 
 	if (request->nparam < 4)	// check if mandatory params are provided
@@ -645,6 +646,11 @@ int param_is_empty(char *param_to_check)
 
 int validate_datatype_param(char *datatype_param)
 {	// checks that datatype provided one char long
+	//Guard against direct 'B' input in param
+	if (datatype_param[0] == MODBUS_BULK_FORMULA)
+	{
+		return 0;
+	}
 	return (datatype_param[1] == '\0') ? 1 : 0;
 }
 
@@ -700,6 +706,41 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 
 	return;
 }
+
+int is_bulk_formula(char *datatype_param){
+    //check that datatype_param represents formula
+
+    return FALSE;
+}
+
+int validate_bulk_formula(char *datatype_param){
+/*
+check that there are no 'bit' is used in formula
+*/
+   //stub
+   return FALSE;
+
+}
+int count_request_length(char *datatype_param){
+    //parse formula in datatype_param and count the number of 16-bit words to read
+    return 2;
+}
+
+
+const char * bulk_response_to_json(uint16_t modbus_response, int reg_start, char *datatype_param){
+
+
+    /*
+    go throught response and parse it according to formula. Output as JSON formated string with keys with respect to reg_start
+    */
+
+    return "TODO";
+
+}
+
+
+
+
 
 int initsem() /* sem_key from ftok() */
 {
