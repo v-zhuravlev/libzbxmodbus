@@ -101,6 +101,12 @@ def run_server(modbus_type,port):
 
         7:0x0DC2,#PDU6 - LE
         8:0x8FC2,
+        #
+        9:0xC28F,#PDU8 - same as (PDU0 - BE)
+        10:0xC20D,
+
+        11:0xC28F,#PDU0 - same as (PDU0 - BE)
+        12:0xC20D,
 
         # test int32
         13:0xFFFF,#PDU12
