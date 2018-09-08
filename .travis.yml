@@ -14,8 +14,10 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
 script:
+  - clang-format -style=llvm -dump-config
   - ./autogen.sh 
   - ./configure --enable-zabbix-${ZBX_HEADERS_VERSION}
+  - clang-format --style=file src/*.c
   - make && sudo make install
   - pushd tests/docker && docker-compose up -d
   - popd
