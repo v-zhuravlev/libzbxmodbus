@@ -46,7 +46,6 @@ IncludeCategories:
     Priority:        -1
 IncludeIsMainRegex: '$'
 IndentCaseLabels: true
-IndentPPDirectives: AfterHash
 IndentWidth: 8
 IndentWrappedFunctionNames: false
 KeepEmptyLinesAtTheStartOfBlocks: false
