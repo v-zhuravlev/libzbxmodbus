@@ -21,7 +21,6 @@ BraceWrapping:
   AfterFunction: true
   AfterStruct: true
   AfterUnion: true
-  AfterExternBlock: true
   IndentBraces: false
   SplitEmptyFunction: true
   SplitEmptyRecord: true
