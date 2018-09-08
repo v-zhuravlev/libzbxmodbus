@@ -34,7 +34,6 @@ ContinuationIndentWidth: 8
 DerivePointerAlignment: false
 DisableFormat: false
 ExperimentalAutoDetectBinPacking: false
-IncludeBlocks: Regroup
 IncludeCategories: 
   - Regex:           '^<'
     Priority:        -4
