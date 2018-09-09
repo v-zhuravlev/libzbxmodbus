@@ -30,6 +30,8 @@
 
 #include <byteswap.h>
 
+#include "datatype.h"
+
 #define MODBUS_READ_COIL_1 1
 #define MODBUS_READ_DINPUTS_2 2
 #define MODBUS_READ_H_REGISTERS_3 3
@@ -161,65 +163,6 @@ unsigned long hash(unsigned char *str)
     return hash;
 }
 
-
-typedef enum
-{
-	MODBUS_BIT,
-	MODBUS_UINT16,
-	MODBUS_SIGNED_INT,
-	MODBUS_UINT32,
-	MODBUS_SIGNED_INT32,
-	MODBUS_FLOAT,
-	MODBUS_SIGNED_INT64,
-	MODBUS_UINT64,
-	MODBUS_FLOAT64,
-	MODBUS_SKIP
-}
-datatype_code_t;
-
-typedef struct
-{
-	const char		*name;
-	const char		*legacy_name;
-	const datatype_code_t	type_code;
-	const int		regs_to_read;
-}
-datatype_token_t;
-
-const datatype_token_t	bit_syntax[] =
-{
-	{"bit",		"b",	MODBUS_BIT,		1},
-	{"skip",	NULL,	MODBUS_SKIP,		1},
-	{NULL}
-};
-
-const datatype_token_t	register_syntax[] =
-{
-	{"uint16",	"i",	MODBUS_UINT16,		1},
-	{"int16",	"s",	MODBUS_SIGNED_INT,	1},
-	{"uint32",	"l",	MODBUS_UINT32,		2},
-	{"int32",	"S",	MODBUS_SIGNED_INT32,	2},
-	{"float",	"f",	MODBUS_FLOAT,		2},
-	{"int64",	NULL,	MODBUS_SIGNED_INT64,	4},
-	{"uint64",	"I",	MODBUS_UINT64,		4},
-	{"double",	"d",	MODBUS_FLOAT64,		4},
-	{"skip",	NULL,	MODBUS_SKIP,		1},
-	{NULL}
-};
-
-static int	parse_datatype(const datatype_token_t *syntax, const char *datatype, char **error)
-{
-	if (NULL == datatype)
-		return 1;
-
-	/* TODO */
-}
-
-static void	set_result_based_on_datatype(AGENT_RESULT *result, const char *datatype, int start, const uint8_t *bits, size_t bits_size, const uint16_t *registers, size_t registers_size, int endianness)
-{
-	/* TODO */
-}
-
 /******************************************************************************
  *                                                                            *
  * Function: zbx_modbus_read_registers                                          *
@@ -317,15 +260,18 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         return SYSINFO_RET_FAIL;
     }
 
+
+	datatype_syntax_t	datatype_syntax;
+
 	switch (function)
 	{
 		case MODBUS_READ_COIL_1:
 		case MODBUS_READ_DINPUTS_2:
-			datatype_syntax = bit_syntax;
+			datatype_syntax = BIT_SYNTAX;
 			break;
 		case MODBUS_READ_H_REGISTERS_3:
 		case MODBUS_READ_I_REGISTERS_4:
-			datatype_syntax = register_syntax;
+			datatype_syntax = REGISTER_SYNTAX;
 			break;
 		default:
 			SET_MSG_RESULT(result, strdup("Check function (1,2,3,4) used"));
@@ -336,7 +282,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 	char	*error = NULL;
 	int	regs_to_read;
 
-	if (-1 == (regs_to_read = parse_datatype(datatype_syntax, get_rparam(request, 4) /* datatype */, &error)
+	if (-1 == (regs_to_read = parse_datatype(datatype_syntax, param5 = get_rparam(request, 4) /* datatype */, &error)))
 	{
 		SET_MSG_RESULT(result, error);
 		modbus_free(ctx);
@@ -445,7 +391,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     //post-parsing
 
-	set_result_based_on_datatype(result, datatype, reg_start, tab_reg_bits, tab_reg, end);
+	set_result_based_on_datatype(result, param5, reg_start, tab_reg_bits, sizeof(tab_reg_bits), tab_reg, sizeof(tab_reg), end);
 /*
     uint16_t temp_arr[4];     //output based on datatype
     switch(datatype){
