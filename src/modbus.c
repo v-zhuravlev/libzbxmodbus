@@ -35,25 +35,6 @@
 #define MODBUS_READ_H_REGISTERS_3 3
 #define MODBUS_READ_I_REGISTERS_4 4
 
-#define MODBUS_BIT 'b'
-#define MODBUS_BIT_STR "bit"
-#define MODBUS_UINT16 'i'
-#define MODBUS_UINT16_STR "uint16"
-#define MODBUS_SIGNED_INT 's'
-#define MODBUS_SIGNED_INT_STR "int16"
-#define MODBUS_UINT32 'l'
-#define MODBUS_UINT32_STR "uint32"
-#define MODBUS_SIGNED_INT32 'S'
-#define MODBUS_SIGNED_INT32_STR "int32"
-#define MODBUS_FLOAT 'f'
-#define MODBUS_FLOAT_STR "float"
-//#define MODBUS_SIGNED_INT64    ''
-#define MODBUS_SIGNED_INT64_STR "int64"	// not implemented
-#define MODBUS_UINT64 'I'
-#define MODBUS_UINT64_STR "uint64"
-#define MODBUS_FLOAT64 'd'
-#define MODBUS_FLOAT64_STR "double"
-
 #define MODBUS_GET_BE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index)]) << 16) | tab_int16[(index) + 1]
 #define MODBUS_GET_MLE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index) + 1]) << 16) | tab_int16[(index)]
 #define MODBUS_GET_MBE_32BIT(tab_int16, index) \
@@ -111,12 +92,11 @@ static int item_timeout = 0;
 
 int  zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result);
 void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out, short *lock_key);
-int  param_is_empty(char *param_to_check);
-int  validate_datatype_param(char *datatype_param);
-int  initsem();
-void sem_lock();
+int param_is_empty(char *param_to_check);
+int initsem();
+void sem_lock ();
 void sem_unlock();
-void sem_uninit(int semid);
+void sem_uninit (int semid);
 
 static ZBX_METRIC keys[] =
 	/*      KEY                     FLAG        FUNCTION            TEST PARAMETERS */
@@ -178,6 +158,65 @@ unsigned long hash(unsigned char *str)
 	return hash;
 }
 
+
+typedef enum
+{
+	MODBUS_BIT,
+	MODBUS_UINT16,
+	MODBUS_SIGNED_INT,
+	MODBUS_UINT32,
+	MODBUS_SIGNED_INT32,
+	MODBUS_FLOAT,
+	MODBUS_SIGNED_INT64,
+	MODBUS_UINT64,
+	MODBUS_FLOAT64,
+	MODBUS_SKIP
+}
+datatype_code_t;
+
+typedef struct
+{
+	const char		*name;
+	const char		*legacy_name;
+	const datatype_code_t	type_code;
+	const int		regs_to_read;
+}
+datatype_token_t;
+
+const datatype_token_t	bit_syntax[] =
+{
+	{"bit",		"b",	MODBUS_BIT,		1},
+	{"skip",	NULL,	MODBUS_SKIP,		1},
+	{NULL}
+};
+
+const datatype_token_t	register_syntax[] =
+{
+	{"uint16",	"i",	MODBUS_UINT16,		1},
+	{"int16",	"s",	MODBUS_SIGNED_INT,	1},
+	{"uint32",	"l",	MODBUS_UINT32,		2},
+	{"int32",	"S",	MODBUS_SIGNED_INT32,	2},
+	{"float",	"f",	MODBUS_FLOAT,		2},
+	{"int64",	NULL,	MODBUS_SIGNED_INT64,	4},
+	{"uint64",	"I",	MODBUS_UINT64,		4},
+	{"double",	"d",	MODBUS_FLOAT64,		4},
+	{"skip",	NULL,	MODBUS_SKIP,		1},
+	{NULL}
+};
+
+static int	parse_datatype(const datatype_token_t *syntax, const char *datatype, char **error)
+{
+	if (NULL == datatype)
+		return 1;
+
+	/* TODO */
+}
+
+static void	set_result_based_on_datatype(AGENT_RESULT *result, const char *datatype, int start, const uint8_t *bits, size_t bits_size, const uint16_t *registers, size_t registers_size, int endianness)
+{
+	/* TODO */
+}
+
 /******************************************************************************
  *                                                                            *
  * Function: zbx_modbus_read_registers                                          *
@@ -204,393 +243,349 @@ unsigned long hash(unsigned char *str)
  ******************************************************************************/
 int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 {
-<<<<<<< HEAD
-	char *param1, *param2, *param3, *param4, *param5, *param6, *param7;
+    char    *param1, *param2,*param3,*param4,*param5,*param6,*param7;
 
-	if (request->nparam < 4)	// check if mandatory params are provided
-	{
-		SET_MSG_RESULT(result, strdup("Invalid number of parameters."));
-		return SYSINFO_RET_FAIL;
-	}
+    if (request->nparam <4) //check if mandatory params are provided
+    {
+        SET_MSG_RESULT(result, strdup("Invalid number of parameters."));
+        return SYSINFO_RET_FAIL;
+    }
 
-	param1 = get_rparam(request, 0);
-	if (param_is_empty(param1))
-	{
-		SET_MSG_RESULT(result, strdup("No connection address provided."));
-		return SYSINFO_RET_FAIL;
-	}
-	param2 = get_rparam(request, 1);
-	if (param_is_empty(param2))
-	{
-		SET_MSG_RESULT(result, strdup("No slave id provided."));
-		return SYSINFO_RET_FAIL;
-	}
-	param3 = get_rparam(request, 2);
-	if (param_is_empty(param3))
-	{
-		SET_MSG_RESULT(result, strdup("No register to read provided."));
-		return SYSINFO_RET_FAIL;
-	}
-	param4 = get_rparam(request, 3);
-	if (param_is_empty(param4))
-	{
-		SET_MSG_RESULT(result, strdup("No Modbus function provided! Please provide either 1,2,3,4."));
-		return SYSINFO_RET_FAIL;
-	}
+    param1 = get_rparam(request, 0);
+    if(param_is_empty(param1)) {
+        SET_MSG_RESULT(result, strdup("No connection address provided."));
+        return SYSINFO_RET_FAIL;
+    }
+    param2 = get_rparam(request, 1);
+    if(param_is_empty(param2)) {
+        SET_MSG_RESULT(result, strdup("No slave id provided."));
+        return SYSINFO_RET_FAIL;
+    }
+    param3 = get_rparam(request, 2);
+    if(param_is_empty(param3)) {
+        SET_MSG_RESULT(result, strdup("No register to read provided."));
+        return SYSINFO_RET_FAIL;
+    }
+    param4 = get_rparam(request, 3);
+    if(param_is_empty(param4)) {
+        SET_MSG_RESULT(result, strdup("No Modbus function provided! Please provide either 1,2,3,4."));
+        return SYSINFO_RET_FAIL;
+    }
 
-	modbus_t *ctx;
-	int       lock_required;
-	short     lock_key = 0;
 
-	create_modbus_context(param1, &ctx, &lock_required, &lock_key);
-	if (ctx == NULL)
-	{
-		SET_MSG_RESULT(result, strdup("Unable to create the libmodbus context"));
-		modbus_free(ctx);
-		return SYSINFO_RET_FAIL;
-	}
+    modbus_t *ctx;
+    int lock_required;
+    short lock_key = 0;
+    
 
-	//<slave_id> set slave id
-	char *endptr;
-	errno = 0;
-	int slave_id = strtol(param2, &endptr, 0);
-	if (errno != 0 || *endptr != '\0')
-	{
-		SET_MSG_RESULT(result, strdup("Check slaveid parameter"));
-		modbus_free(ctx);
-		return SYSINFO_RET_FAIL;
-	}
-	modbus_set_slave(ctx, slave_id);
+    create_modbus_context(param1,&ctx,&lock_required, &lock_key);
+    if (ctx == NULL) {
+            SET_MSG_RESULT(result, strdup("Unable to create the libmodbus context"));
+            modbus_free(ctx);
+            return SYSINFO_RET_FAIL;
+    }
+    
+    //<slave_id> set slave id 
+    char *endptr;
+    errno = 0;
+    int slave_id = strtol(param2,&endptr, 0);
+    if (errno!=0 || *endptr != '\0') {
+        SET_MSG_RESULT(result, strdup("Check slaveid parameter"));
+        modbus_free(ctx);
+        return SYSINFO_RET_FAIL;
+    }
+    modbus_set_slave(ctx, slave_id);
 
-	//<reg> set register to start from
-	errno = 0;
-	int reg_start = strtol(param3, &endptr, 0);
-	if (errno != 0 || *endptr != '\0')
-	{
-		SET_MSG_RESULT(result, strdup("Check register to read"));
-		modbus_free(ctx);
-		return SYSINFO_RET_FAIL;
-	}
+    //<reg> set register to start from
+    errno = 0;
+    int reg_start = strtol(param3,&endptr, 0);
+    if (errno!=0 || *endptr != '\0') {
+        SET_MSG_RESULT(result, strdup("Check register to read"));
+        modbus_free(ctx);
+        return SYSINFO_RET_FAIL;
+    }
 
-	// set function to use
-	errno = 0;
-	int function = strtol(param4, &endptr, 0);
-	if (errno != 0 || *endptr != '\0')
-	{
-		SET_MSG_RESULT(result, strdup("Check function (1,2,3,4) used"));
-		modbus_free(ctx);
-		return SYSINFO_RET_FAIL;
-	}
+    //set function to use
+    errno = 0;
+    int function = strtol(param4,&endptr, 0);
+    if (errno!=0 || *endptr != '\0') {
+        SET_MSG_RESULT(result, strdup("Check function (1,2,3,4) used"));
+        modbus_free(ctx);
+        return SYSINFO_RET_FAIL;
+    }
 
-	char datatype;
-	int  end = MODBUS_BE_ABCD;	//<endianness> endianness LE(0) BE(1) MBE(2) MLE(3) default BE
-	if (request->nparam > 4)
-	{	// optional params provided
-
-		param5 = get_rparam(request, 4);	// datatype
-
-		if (!strcmp(MODBUS_BIT_STR, param5))
-			datatype = MODBUS_BIT;
-		else if (!strcmp(MODBUS_UINT16_STR, param5))
-			datatype = MODBUS_UINT16;
-		else if (!strcmp(MODBUS_SIGNED_INT_STR, param5))
-			datatype = MODBUS_SIGNED_INT;
-		else if (!strcmp(MODBUS_UINT32_STR, param5))
-			datatype = MODBUS_UINT32;
-		else if (!strcmp(MODBUS_SIGNED_INT32_STR, param5))
-			datatype = MODBUS_SIGNED_INT32;
-		else if (!strcmp(MODBUS_FLOAT_STR, param5))
-			datatype = MODBUS_FLOAT;
-		else if (!strcmp(MODBUS_SIGNED_INT64_STR, param5))
-		{
-			SET_MSG_RESULT(result, strdup("datatype 'int64' is not supported."));
-			modbus_free(ctx);
-			return SYSINFO_RET_FAIL;
-		}
-		else if (!strcmp(MODBUS_UINT64_STR, param5))
-			datatype = MODBUS_UINT64;
-		else if (!strcmp(MODBUS_FLOAT64_STR, param5))
-			datatype = MODBUS_FLOAT64;
-		else
-		{
-			if (!validate_datatype_param(param5))
-			{
-				SET_MSG_RESULT(result, strdup("Check datatype provided."));
-				modbus_free(ctx);
-				return SYSINFO_RET_FAIL;
-			}
-
-			datatype = *param5;	// set datatype
-		}
-
-		param6 = get_rparam(request, 5);	// 32-64bit endiannes
-		if (param6)
-		{
-			// endianness to use
-			if (!strcmp(MODBUS_BE_ABCD_STR, param6))
-				end = MODBUS_BE_ABCD;
-			else if (!strcmp(MODBUS_MBE_BADC_STR, param6))
-				end = MODBUS_MBE_BADC;
-			else if (!strcmp(MODBUS_MLE_CDAB_STR, param6))
-				end = MODBUS_MLE_CDAB;
-			else if (!strcmp(MODBUS_LE_DCBA_STR, param6))
-				end = MODBUS_LE_DCBA;
-			else
-			{
-				errno = 0;
-				end = strtol(param6, &endptr, 0);
-				if ((end != MODBUS_LE_DCBA && end != MODBUS_BE_ABCD && end != MODBUS_MBE_BADC &&
-					    end != MODBUS_MLE_CDAB) ||
-					(errno != 0 || *endptr != '\0'))
-				{
-					SET_MSG_RESULT(result, strdup("Check endiannes used: BE,LE,MLE,MBE."));
-					modbus_free(ctx);
-					return SYSINFO_RET_FAIL;
-				}
-			}
-		}
-
-		param7 = get_rparam(request, 6);	// PDU
-		if (param7)
-		{	// PDU <first reg> check
-			// int first_reg=atoi(param7);
-
-			errno = 0;
-			int first_reg = strtol(param7, &endptr, 0);
-			if ((first_reg != MODBUS_PROTOCOL_ADDRESS_1 && first_reg != MODBUS_PDU_ADDRESS_0) ||
-				(errno != 0 || *endptr != '\0'))
-			{
-				SET_MSG_RESULT(result, strdup("Check addressing scheme(PDU,PROTOCOL) used"));
-				modbus_free(ctx);
-				return SYSINFO_RET_FAIL;
-			}
-
-			if (first_reg == MODBUS_PROTOCOL_ADDRESS_1)
-			{
-				reg_start = reg_start - 1;
-			}
-		}
-	}
-	else
-	{	// no datatype set, place defaults
-
-		if (function == MODBUS_READ_COIL_1 || function == MODBUS_READ_DINPUTS_2)
-		{
-			datatype = MODBUS_BIT;	// default
-		}
-		if (function == MODBUS_READ_H_REGISTERS_3 || function == MODBUS_READ_I_REGISTERS_4)
-		{
-			datatype = MODBUS_UINT16;	// default
-		}
-	}
-
-	modbus_set_response_timeout(ctx, item_timeout, 0);
-
-	// read part
-
-	uint16_t tab_reg[64];	// temp vars
-	uint8_t  tab_reg_bits[64];
-
-	int regs_to_read = 1;
-	if (datatype == MODBUS_FLOAT || datatype == MODBUS_UINT32 || datatype == MODBUS_SIGNED_INT32)
-	{
-		regs_to_read = 2;
-	}
-	else if (datatype == MODBUS_UINT64 || datatype == MODBUS_FLOAT64)
-	{
-		regs_to_read = 4;
-	}
-
-	if (lock_required == 1)
-		LOCK_PORT(lock_key);
-
-	if (modbus_connect(ctx) == -1)
-	{
-		SET_MSG_RESULT(result, strdup(modbus_strerror(errno)));
-		modbus_free(ctx);
-		if (lock_required == 1)
-			UNLOCK_PORT(lock_key);
-		return SYSINFO_RET_FAIL;
-	}
-
-	int rc;	// modbus return_code
 	switch (function)
 	{
 		case MODBUS_READ_COIL_1:
-			rc = modbus_read_bits(ctx, reg_start, regs_to_read, tab_reg_bits);
-			break;
 		case MODBUS_READ_DINPUTS_2:
-			rc = modbus_read_input_bits(ctx, reg_start, regs_to_read, tab_reg_bits);
+			datatype_syntax = bit_syntax;
 			break;
 		case MODBUS_READ_H_REGISTERS_3:
-			rc = modbus_read_registers(ctx, reg_start, regs_to_read, tab_reg);
-			break;
 		case MODBUS_READ_I_REGISTERS_4:
-			rc = modbus_read_input_registers(ctx, reg_start, regs_to_read, tab_reg);
+			datatype_syntax = register_syntax;
 			break;
 		default:
 			SET_MSG_RESULT(result, strdup("Check function (1,2,3,4) used"));
-			// close connection
-			modbus_close(ctx);
-			if (lock_required == 1)
-				UNLOCK_PORT(lock_key);
 			modbus_free(ctx);
 			return SYSINFO_RET_FAIL;
-			break;
 	}
-	// close connection
-	modbus_close(ctx);
-	if (lock_required == 1)
-		UNLOCK_PORT(lock_key);
-	modbus_free(ctx);
 
-	if (rc == -1)
+	char	*error = NULL;
+	int	regs_to_read;
+
+	if (-1 == (regs_to_read = parse_datatype(datatype_syntax, get_rparam(request, 4) /* datatype */, &error)
 	{
-		SET_MSG_RESULT(result, strdup(modbus_strerror(errno)));
+		SET_MSG_RESULT(result, error);
+		modbus_free(ctx);
 		return SYSINFO_RET_FAIL;
 	}
 
-	// post-parsing
-	uint16_t temp_arr[4];	// output based on datatype
-	switch (datatype)
-	{
-		case MODBUS_BIT:
-			SET_UI64_RESULT(result, tab_reg_bits[0]);
-			break;
+    int end = MODBUS_BE_ABCD; //<endianness> endianness LE(0) BE(1) MBE(2) MLE(3) default BE
+    if (request->nparam > 4) { //optional params provided
+        param6 = get_rparam(request, 5); //32-64bit endiannes
+        if(param6) {
+            //endianness to use
+            if (!strcmp(MODBUS_BE_ABCD_STR,param6))
+                end = MODBUS_BE_ABCD;
+            else if (!strcmp(MODBUS_MBE_BADC_STR, param6))
+                end = MODBUS_MBE_BADC;
+            else if (!strcmp(MODBUS_MLE_CDAB_STR, param6))
+                end = MODBUS_MLE_CDAB;
+            else if (!strcmp(MODBUS_LE_DCBA_STR, param6))
+                end = MODBUS_LE_DCBA;
+            else {
+                errno = 0;
+                end = strtol(param6,&endptr, 0);
+                if ( (end != MODBUS_LE_DCBA &&
+                    end != MODBUS_BE_ABCD && 
+                    end != MODBUS_MBE_BADC &&
+                    end != MODBUS_MLE_CDAB ) ||
+                    (errno!=0 || *endptr != '\0') )  {
+                    SET_MSG_RESULT(result, strdup("Check endiannes used: BE,LE,MLE,MBE."));
+                    modbus_free(ctx);
+                    return SYSINFO_RET_FAIL;
+                }
 
-		case MODBUS_UINT16:
-			SET_UI64_RESULT(result, tab_reg[0]);
-			break;
+            }
 
-		case MODBUS_SIGNED_INT:
-			// use float type in zabbix item
-			SET_DBL_RESULT(result, (int16_t)tab_reg[0]);
-			break;
-			float    f;
-			uint32_t i;
-		case MODBUS_FLOAT:
-			switch (end)
-			{
-				case MODBUS_LE_DCBA:
-					i = MODBUS_GET_LE_32BIT(tab_reg, 0);
-					break;
-				case MODBUS_BE_ABCD:
-					i = MODBUS_GET_BE_32BIT(tab_reg, 0);
-					break;
-				case MODBUS_MBE_BADC:
-					i = MODBUS_GET_MBE_32BIT(tab_reg, 0);
-					break;
-				case MODBUS_MLE_CDAB:
-					i = MODBUS_GET_MLE_32BIT(tab_reg, 0);
-					break;
-				default:
-					return SYSINFO_RET_FAIL;
-					break;
-			}
-			memcpy(&f, &i, sizeof(float));
-			SET_DBL_RESULT(result, f);
-			break;
+        }
 
-		case MODBUS_UINT32:
+        param7 = get_rparam(request, 6); //PDU
+        if(param7) {//PDU <first reg> check
+            //int first_reg=atoi(param7); 
 
-			switch (end)
-			{
-				case MODBUS_LE_DCBA:
-					SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_LE_32BIT(tab_reg, 0));
-					break;
-				case MODBUS_BE_ABCD:
-					SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_BE_32BIT(tab_reg, 0));
-					break;
-				case MODBUS_MBE_BADC:
-					SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_MBE_32BIT(tab_reg, 0));
-					break;
-				case MODBUS_MLE_CDAB:
-					SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_MLE_32BIT(tab_reg, 0));
-					break;
-				default:
-					return SYSINFO_RET_FAIL;
-					break;
-			}
-			break;
+            errno = 0;
+            int first_reg = strtol(param7,&endptr, 0);
+            if ( (first_reg != MODBUS_PROTOCOL_ADDRESS_1 && first_reg != MODBUS_PDU_ADDRESS_0) ||
+                        (errno!=0 || *endptr != '\0') )  {
+                SET_MSG_RESULT(result, strdup("Check addressing scheme(PDU,PROTOCOL) used"));
+                modbus_free(ctx);
+                return SYSINFO_RET_FAIL;
+            }
 
-		case MODBUS_SIGNED_INT32:
-			switch (end)
-			{
-				case MODBUS_BE_ABCD:
-					temp_arr[0] = tab_reg[0];
-					temp_arr[1] = tab_reg[1];
-					break;
-				case MODBUS_LE_DCBA:
-					temp_arr[0] = bswap_16(tab_reg[1]);
-					temp_arr[1] = bswap_16(tab_reg[0]);
-					break;
-				case MODBUS_MBE_BADC:
-					temp_arr[0] = bswap_16(tab_reg[0]);
-					temp_arr[1] = bswap_16(tab_reg[1]);
-					break;
-				case MODBUS_MLE_CDAB:
-					temp_arr[0] = tab_reg[1];
-					temp_arr[1] = tab_reg[0];
-					break;
-				default:
-					return SYSINFO_RET_FAIL;
-					break;
-			}
-			SET_DBL_RESULT(result, ((int32_t)MODBUS_GET_INT32_FROM_INT16(temp_arr, 0)));
-			break;
-		case MODBUS_UINT64:
-			switch (end)
-			{
-				case MODBUS_LE_DCBA:
-					SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_LE_64BIT(tab_reg, 0)));
-					break;
-				case MODBUS_BE_ABCD:
-					SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_BE_64BIT(tab_reg, 0)));
-					break;
-				case MODBUS_MBE_BADC:
-					SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_MBE_64BIT(tab_reg, 0)));
-					break;
-				case MODBUS_MLE_CDAB:
-					SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_MLE_64BIT(tab_reg, 0)));
-					break;
-				default:
-					return SYSINFO_RET_FAIL;
-					break;
-			}
-			break;
+            if (first_reg == MODBUS_PROTOCOL_ADDRESS_1){
+                    reg_start=reg_start-1;
+            }
+        }
 
-			double   d;
-			uint64_t i64;
-		case MODBUS_FLOAT64:
-			switch (end)
-			{
-				case MODBUS_LE_DCBA:
-					i64 = MODBUS_GET_LE_64BIT(tab_reg, 0);
-					break;
-				case MODBUS_BE_ABCD:
-					i64 = MODBUS_GET_BE_64BIT(tab_reg, 0);
-					break;
-				case MODBUS_MBE_BADC:
-					i64 = MODBUS_GET_MBE_64BIT(tab_reg, 0);
-					break;
-				case MODBUS_MLE_CDAB:
-					i64 = MODBUS_GET_MLE_64BIT(tab_reg, 0);
-					break;
-				default:
-					return SYSINFO_RET_FAIL;
-					break;
-			}
-			memcpy(&d, &i64, sizeof(double));
-			SET_DBL_RESULT(result, d);
-			break;
+    }
 
-		default:
-			SET_MSG_RESULT(result, strdup("Check datatype provided."));
-			return SYSINFO_RET_FAIL;
-			break;
-	}
 
-	return SYSINFO_RET_OK;
+    modbus_set_response_timeout(ctx, item_timeout, 0);
+
+    //read part
+
+    uint16_t tab_reg[64];//temp vars
+    uint8_t tab_reg_bits[64];
+
+    if (lock_required == 1 ) LOCK_PORT(lock_key);
+
+    if (modbus_connect(ctx) == -1) {
+        SET_MSG_RESULT(result, strdup(modbus_strerror(errno)));
+        modbus_free(ctx);
+        if (lock_required == 1 ) UNLOCK_PORT(lock_key);
+        return SYSINFO_RET_FAIL;
+    }
+
+    int rc;//modbus return_code
+    switch (function) {
+        case MODBUS_READ_COIL_1:
+            rc = modbus_read_bits(ctx, reg_start, regs_to_read, tab_reg_bits);  
+        break;
+        case MODBUS_READ_DINPUTS_2:
+            rc = modbus_read_input_bits(ctx, reg_start, regs_to_read, tab_reg_bits);
+        break;
+        case MODBUS_READ_H_REGISTERS_3:
+            rc = modbus_read_registers(ctx, reg_start, regs_to_read, tab_reg);
+        break;
+        case MODBUS_READ_I_REGISTERS_4:
+            rc = modbus_read_input_registers(ctx, reg_start, regs_to_read, tab_reg);
+        break;
+        default :
+            SET_MSG_RESULT(result, strdup("Check function (1,2,3,4) used"));
+            //close connection
+            modbus_close(ctx);
+            if (lock_required == 1 ) UNLOCK_PORT(lock_key);
+            modbus_free(ctx);
+            return SYSINFO_RET_FAIL;
+        break;
+    }
+    //close connection
+    modbus_close(ctx);
+    if (lock_required == 1 ) UNLOCK_PORT(lock_key);
+    modbus_free(ctx);
+
+    if (rc == -1) {
+        SET_MSG_RESULT(result, strdup(modbus_strerror(errno)));
+        return SYSINFO_RET_FAIL;
+    }
+
+    //post-parsing
+
+	set_result_based_on_datatype(result, datatype, reg_start, tab_reg_bits, tab_reg, end);
+/*
+    uint16_t temp_arr[4];     //output based on datatype
+    switch(datatype){
+
+    case MODBUS_BIT:
+        SET_UI64_RESULT(result, tab_reg_bits[0]);
+    break;
+
+    case MODBUS_UINT16:
+        SET_UI64_RESULT(result, tab_reg[0]);
+    break;
+
+    case MODBUS_SIGNED_INT:
+        //use float type in zabbix item
+        SET_DBL_RESULT(result, (int16_t) tab_reg[0]);
+    break;
+    float f;
+    uint32_t i;
+    case MODBUS_FLOAT:
+        switch( end )
+        {
+            case MODBUS_LE_DCBA:
+                i = MODBUS_GET_LE_32BIT(tab_reg, 0);
+                break;
+            case MODBUS_BE_ABCD:
+                i = MODBUS_GET_BE_32BIT(tab_reg, 0);
+                break;
+            case MODBUS_MBE_BADC:
+                i = MODBUS_GET_MBE_32BIT(tab_reg, 0);
+                break;
+            case MODBUS_MLE_CDAB:
+                i = MODBUS_GET_MLE_32BIT(tab_reg, 0);
+                break;
+            default:
+                return SYSINFO_RET_FAIL;
+                break;
+        }
+        memcpy(&f, &i, sizeof(float));
+        SET_DBL_RESULT(result, f);
+    break;
+
+    case MODBUS_UINT32:
+
+        switch( end )
+        {
+            case MODBUS_LE_DCBA:
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_LE_32BIT(tab_reg, 0));
+                break;
+            case MODBUS_BE_ABCD:
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_BE_32BIT(tab_reg, 0));
+                break;
+            case MODBUS_MBE_BADC:
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_MBE_32BIT(tab_reg, 0));
+                break;
+            case MODBUS_MLE_CDAB:
+                SET_UI64_RESULT(result, (uint32_t)MODBUS_GET_MLE_32BIT(tab_reg, 0));
+                break;
+            default:
+                return SYSINFO_RET_FAIL;
+                break;
+        }
+    break;
+
+    case MODBUS_SIGNED_INT32:
+        switch( end )
+        {
+            case MODBUS_BE_ABCD:
+                temp_arr[0] = tab_reg[0];
+                temp_arr[1] = tab_reg[1];
+                break;
+            case MODBUS_LE_DCBA:
+                temp_arr[0] = bswap_16(tab_reg[1]);
+                temp_arr[1] = bswap_16(tab_reg[0]);
+                break;
+            case MODBUS_MBE_BADC:
+                temp_arr[0] = bswap_16(tab_reg[0]);
+                temp_arr[1] = bswap_16(tab_reg[1]);
+                break;
+            case MODBUS_MLE_CDAB:
+                temp_arr[0] = tab_reg[1];
+                temp_arr[1] = tab_reg[0];
+                break;
+            default:
+                return SYSINFO_RET_FAIL;
+                break;
+        }
+        SET_DBL_RESULT(result, ((int32_t)MODBUS_GET_INT32_FROM_INT16(temp_arr,0)));
+    break;
+    case MODBUS_UINT64:
+        switch( end )
+        {
+            case MODBUS_LE_DCBA:
+                SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_LE_64BIT(tab_reg,0)));
+                break;
+            case MODBUS_BE_ABCD:
+                SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_BE_64BIT(tab_reg,0)));
+                break;
+            case MODBUS_MBE_BADC:
+                SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_MBE_64BIT(tab_reg,0)));
+                break;
+            case MODBUS_MLE_CDAB:
+                SET_UI64_RESULT(result, ((uint64_t)MODBUS_GET_MLE_64BIT(tab_reg,0)));
+                break;
+            default:
+                return SYSINFO_RET_FAIL;
+                break;
+        }
+    break;
+    double d;
+    uint64_t i64;
+    case MODBUS_FLOAT64:
+        switch( end )
+        {
+            case MODBUS_LE_DCBA:
+                i64 = MODBUS_GET_LE_64BIT(tab_reg, 0);
+                break;
+            case MODBUS_BE_ABCD:
+                i64 = MODBUS_GET_BE_64BIT(tab_reg, 0);
+                break;
+            case MODBUS_MBE_BADC:
+                i64 = MODBUS_GET_MBE_64BIT(tab_reg, 0);
+                break;
+            case MODBUS_MLE_CDAB:
+                i64 = MODBUS_GET_MLE_64BIT(tab_reg, 0);
+                break;
+            default:
+                return SYSINFO_RET_FAIL;
+                break;
+        }
+        memcpy(&d, &i64, sizeof(double));
+        SET_DBL_RESULT(result, d);
+    break;
+    case MODBUS_BULK_FORMULA:
+        SET_TEXT_RESULT(result, bulk_response_to_json(*tab_reg, reg_start, param5));
+    break;
+    default :
+        SET_MSG_RESULT(result, strdup("Check datatype provided."));
+        return SYSINFO_RET_FAIL;
+    break;
+    }
+*/
+
+    return SYSINFO_RET_OK;
 }
 
 /******************************************************************************
@@ -642,16 +637,6 @@ int zbx_module_uninit()
 int param_is_empty(char *param_to_check)
 {
 	return (param_to_check[0] == '\0') ? 1 : 0;
-}
-
-int validate_datatype_param(char *datatype_param)
-{	// checks that datatype provided one char long
-	//Guard against direct 'B' input in param
-	if (datatype_param[0] == MODBUS_BULK_FORMULA)
-	{
-		return 0;
-	}
-	return (datatype_param[1] == '\0') ? 1 : 0;
 }
 
 void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out, short *lock_key)
@@ -706,40 +691,6 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 
 	return;
 }
-
-int is_bulk_formula(char *datatype_param){
-    //check that datatype_param represents formula
-
-    return FALSE;
-}
-
-int validate_bulk_formula(char *datatype_param){
-/*
-check that there are no 'bit' is used in formula
-*/
-   //stub
-   return FALSE;
-
-}
-int count_request_length(char *datatype_param){
-    //parse formula in datatype_param and count the number of 16-bit words to read
-    return 2;
-}
-
-
-const char * bulk_response_to_json(uint16_t modbus_response, int reg_start, char *datatype_param){
-
-
-    /*
-    go throught response and parse it according to formula. Output as JSON formated string with keys with respect to reg_start
-    */
-
-    return "TODO";
-
-}
-
-
-
 
 
 int initsem() /* sem_key from ftok() */
