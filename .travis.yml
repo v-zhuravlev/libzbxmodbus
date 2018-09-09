@@ -16,7 +16,7 @@ before_install:
 script:
   - ./autogen.sh 
   - ./configure --enable-zabbix-${ZBX_HEADERS_VERSION}
-  - clang-format -i --style=file src/*.c
+  - ./clang-format.sh
   - git diff --exit-code
   - make && sudo make install
   - pushd tests/docker && docker-compose up -d

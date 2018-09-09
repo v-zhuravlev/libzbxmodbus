@@ -2,7 +2,7 @@
 This module has automatic travis check for code style provided by Travis CI.
 So it is recommended to check any source code changes locally using `clang-format`.
 Just run:
-`clang-format -i --style=file src/*.c`
+`./clang-format.sh`
 
 You might also integrate `clang-format` into your editor if you haven't already:
 - Emacs: http://clang.llvm.org/docs/ClangFormat.html
