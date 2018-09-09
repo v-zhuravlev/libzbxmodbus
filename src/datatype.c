@@ -23,14 +23,14 @@ const datatype_token_t	register_syntax[] =
 	{NULL}
 };
 
-static int	parse_type_name(const datatype_token_t *syntax, const char *string)
+static int	parse_type_name(const datatype_token_t *syntax, const char *string, int *jump)
 {
-	int			token_length;
+	int			token_length = -1;
 	const char		token_delimiters[] = " +*";	/* terminating '\0' counts as delimiter too! */
 	size_t			i = sizeof(token_delimiters);
 	const datatype_token_t	*allowed_token;
 
-	while (0 <= --i)
+	while (0 < i--)
 	{
 		const char	*token_delimiter;
 
@@ -44,13 +44,19 @@ static int	parse_type_name(const datatype_token_t *syntax, const char *string)
 	for (allowed_token = syntax; NULL != allowed_token->name; allowed_token++)
 	{
 		if (0 == strncmp(allowed_token->name, string, token_length))
+		{
+			*jump = token_length;
 			return allowed_token->regs_to_read;
+		}
 
 		if (NULL == allowed_token->legacy_name)
 			continue;
 
 		if (0 == strncmp(allowed_token->legacy_name, string, token_length))
+		{
+			*jump = token_length;
 			return allowed_token->regs_to_read;
+		}
 	}
 
 	return -1;
@@ -108,20 +114,22 @@ int	parse_datatype(const datatype_token_t *syntax, const char *datatype, char **
 				p++;
 				continue;
 			case TYPE_ON_THE_RIGHT:		/* type string after multiplier and "*" sign */
-				if (-1 == (type_registers = parse_type_name(syntax, p)))
+				if (-1 == (type_registers = parse_type_name(syntax, p, &jump)))
 				{
 					*error = strdup("Invalid type in datatype expression.");
 					return -1;
 				}
 				state = PLUS_OR_NOTHING;
+				p += jump;
 				break;
 			case TYPE_ON_THE_LEFT:		/* type string without multiplier before it */
-				if (-1 == (type_registers = parse_type_name(syntax, p)))
+				if (-1 == (type_registers = parse_type_name(syntax, p, &jump)))
 				{
 					*error = strdup("Invalid type in datatype expression.");
 					return -1;
 				}
 				state = CROSS_AFTER_TYPE;
+				p += jump;
 				continue;
 			case CROSS_AFTER_TYPE:		/* optional "*" with multiplier after type string */
 				if ('*' != *p)
@@ -156,7 +164,11 @@ int	parse_datatype(const datatype_token_t *syntax, const char *datatype, char **
 		reg_count += multiplier * type_registers;
 	}
 
-	if (PLUS_OR_NOTHING != state)
+	if (CROSS_AFTER_TYPE == state)
+	{
+		reg_count += type_registers;
+	}
+	else if (PLUS_OR_NOTHING != state)
 	{
 		*error = strdup("Unexpected end of expression.");
 		return -1;
