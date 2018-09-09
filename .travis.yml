@@ -9,15 +9,12 @@ env:
   - ZBX_VERSION=3.0.19 ZBX_HEADERS_VERSION=3
   #- ZBX_VERSION=2.2.19 ZBX_HEADERS_VERSION=2  
 before_install:
-  - chmod +x autogen.sh
   - curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` > docker-compose
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
 script:
   - ./autogen.sh 
   - ./configure --enable-zabbix-${ZBX_HEADERS_VERSION}
-  - ./format-clang.sh
-  - git diff --exit-code
   - make && sudo make install
   - pushd tests/docker && docker-compose up -d
   - popd
@@ -29,3 +26,14 @@ script:
   - python tests/test_modbus_64bit.py
   - python tests/test_modbus_connection_string.py
   - python tests/test_modbus_short_params.py
+
+jobs:
+  include:
+    - stage: format
+      script: 
+      - ./clang-format.sh
+      - git diff --exit-code
+
+stages:
+  - format
+  - test
