@@ -6,8 +6,8 @@ if [[ ${TRAVIS_JOB_TYPE} == "FORMAT" ]]; then
 else 
     # run tests
     echo "Going to build and then test with docker..."
-    ./configure --enable-zabbix-${ZBX_HEADERS_VERSION}
-    make && sudo make install
+    ./configure --enable-zabbix-${ZBX_HEADERS_VERSION} -q
+    make
     pushd tests/docker && docker-compose up -d
     popd
     docker logs docker_zabbix-agent-modbus_1
