@@ -21,6 +21,6 @@ matrix:
 
 before_install:
   - ./autogen.sh
-  - python -m pip install --user pytest
+  - python -m pip install -q --user pytest
 script:
   - ./run-tests.sh
