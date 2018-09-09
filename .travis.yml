@@ -22,5 +22,12 @@ matrix:
 before_install:
   - ./autogen.sh
   - python -m pip install -q --user pytest
+  - ./configure --enable-zabbix-${ZBX_HEADERS_VERSION} -q
+  - make
+  - pushd tests/docker && docker-compose up -d
+  - popd
+  - docker logs docker_zabbix-agent-modbus_1
+  - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k agent.ping"
+  - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k modbus_read[172.16.238.2:5020,1,2,3,uint16,1,1]"
 script:
   - ./run-tests.sh
