@@ -13,9 +13,5 @@ else
     docker logs docker_zabbix-agent-modbus_1
     docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k agent.ping"
     docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k modbus_read[172.16.238.2:5020,1,2,3,uint16,1,1]"
-    python tests/test_modbus.py
-    python tests/test_modbus_errors.py
-    python tests/test_modbus_64bit.py
-    python tests/test_modbus_connection_string.py
-    python tests/test_modbus_short_params.py
+    pytest -v
 fi

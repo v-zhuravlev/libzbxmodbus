@@ -24,5 +24,6 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
   - ./autogen.sh
+  - python -m pip install --user pytest
 script:
   - ./run-tests.sh
