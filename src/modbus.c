@@ -204,12 +204,146 @@ const datatype_token_t	register_syntax[] =
 	{NULL}
 };
 
+static int	parse_type_name(const datatype_token_t *syntax, const char *string)
+{
+	int			token_length;
+	const char		token_delimiters[] = " +*";	/* terminating '\0' counts as delimiter too! */
+	size_t			i = sizeof(token_delimiters);
+	const datatype_token_t	*allowed_token;
+
+	while (0 <= --i)
+	{
+		const char	*token_delimiter;
+
+		if (NULL == (token_delimiter = strchr(string, token_delimiters[i])))
+			continue;
+
+		if (-1 == token_length || token_delimiter - string < token_length)
+			token_length = token_delimiter - string;
+	}
+
+	for (allowed_token = syntax; NULL != allowed_token->name; allowed_token++)
+	{
+		if (0 == strncmp(allowed_token->name, string, token_length))
+			return allowed_token->regs_to_read;
+
+		if (NULL == alowed_token->legacy_name)
+			continue;
+
+		if (0 == strncmp(alowed_token->legacy_name, string, token_length))
+			return allowed_token->regs_to_read;
+	}
+
+	return -1;
+}
+
+typedef enum
+{
+	MULTIPLIER_ON_THE_LEFT,
+	MULTIPLIER_ON_THE_RIGHT,
+	CROSS_AFTER_MULTIPLIER,
+	CROSS_AFTER_TYPE,
+	TYPE_ON_THE_LEFT,
+	TYPE_ON_THE_RIGHT,
+	PLUS_OR_NOTHING
+}
+parser_state_t;
+
 static int	parse_datatype(const datatype_token_t *syntax, const char *datatype, char **error)
 {
-	if (NULL == datatype)
+	const char	*p = datatype;
+	parser_state_t	state = MULTIPLIER_BEFORE;
+	int		reg_count = 0, multiplier, type_registers;
+
+	if (NULL == datatype || '\0' == *datatype)
 		return 1;
 
-	/* TODO */
+	while ('\0' != *p)
+	{
+		int	jump;
+
+		if (' ' == *p)
+		{
+			p++;
+			continue;
+		}
+
+		switch (state)
+		{
+			case MULTIPLIER_ON_THE_LEFT:	/* optional multiplier on the left of type string */
+				if (1 == sscanf(p, "%d%n", &multiplier, &jump))
+				{
+					state = CROSS_AFTER_MULTIPLIER;
+					p += jump;
+				}
+				else
+					state = TYPE_ON_THE_LEFT;
+				continue;
+			case CROSS_AFTER_MULTIPLIER:	/* mandatory "*" after left hand side multiplier */
+				if ('*' != *p)
+				{
+					*error = strdup("There must be \"*\" sign after a multiplier and before a type.");
+					return -1;
+				}
+				state = TYPE_ON_THE_RIGHT;
+				p++;
+				continue;
+			case TYPE_ON_THE_RIGHT:		/* type string after multiplier and "*" sign */
+				if (-1 == (type_registers = parse_type_name(syntax, p)))
+				{
+					*error = strdup("Invalid type in datatype expression.")
+					return -1;
+				}
+				state = PLUS_OR_NOTHING;
+				break;
+			case TYPE_ON_THE_LEFT:		/* type string without multiplier before it */
+				if (-1 == (type_registers = parse_type_name(syntax, p)))
+				{
+					*error = strdup("Invalid type in datatype expression.")
+					return -1;
+				}
+				state = CROSS_AFTER_TYPE;
+				continue;
+			case CROSS_AFTER_TYPE:		/* optional "*" with multiplier after type string */
+				if ('*' != *p)
+				{
+					state = PLUS_OR_NOTHING;
+					multiplier = 1;
+					break;
+				}
+				state = MULTIPLIER_ON_THE_RIGHT;
+				p++;
+				continue;
+			case MULTIPLIER_ON_THE_RIGHT:	/* mandatory multiplier after type string and "*" */
+				if (1 == sscanf(p, "%d%n", &multiplier, jump))
+				{
+					state = PLUS_OR_NOTHING;
+					p += jump;
+					break;
+				}
+				*error = strdup("Multiplier expected after type and \"*\" sign.");
+				return -1;
+			case PLUS_OR_NOTHING:		/* next summand or the end of expression */
+				if ('+' != *p)
+				{
+					*error = strdup("Expected \"+\" or the end of expression.");
+					return -1;
+				}
+				state = MULTIPLIER_ON_THE_LEFT;
+				p++;
+				continue;
+		}
+
+		reg_count += multiplier * type_registers;
+	}
+
+	if (PLUS_OR_NOTHING != state)
+	{
+		*error = strdup("Unexpected end of expression.");
+		return -1;
+	}
+
+	return reg_count;
 }
 
 static void	set_result_based_on_datatype(AGENT_RESULT *result, const char *datatype, int start, const uint8_t *bits, size_t bits_size, const uint16_t *registers, size_t registers_size, int endianness)
