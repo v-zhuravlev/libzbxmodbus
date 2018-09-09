@@ -35,27 +35,6 @@
 #define MODBUS_READ_H_REGISTERS_3 3
 #define MODBUS_READ_I_REGISTERS_4 4
 
-
-#define MODBUS_BIT      'b'
-#define MODBUS_BIT_STR      "bit"
-#define MODBUS_UINT16  'i'
-#define MODBUS_UINT16_STR  "uint16"
-#define MODBUS_SIGNED_INT  's'
-#define MODBUS_SIGNED_INT_STR  "int16"
-#define MODBUS_UINT32     'l'
-#define MODBUS_UINT32_STR     "uint32"
-#define MODBUS_SIGNED_INT32    'S'
-#define MODBUS_SIGNED_INT32_STR    "int32"
-#define MODBUS_FLOAT    'f'
-#define MODBUS_FLOAT_STR    "float"
-//#define MODBUS_SIGNED_INT64    ''
-#define MODBUS_SIGNED_INT64_STR    "int64" //not implemented
-#define MODBUS_UINT64    'I'
-#define MODBUS_UINT64_STR    "uint64"
-#define MODBUS_FLOAT64    'd'
-#define MODBUS_FLOAT64_STR    "double"
-#define MODBUS_BULK_FORMULA    'B'
-
 #define MODBUS_GET_BE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index)]) << 16) | tab_int16[(index) + 1]
 #define MODBUS_GET_MLE_32BIT(tab_int16, index) (((uint32_t)tab_int16[(index) + 1]) << 16) | tab_int16[(index)]
 #define MODBUS_GET_MBE_32BIT(tab_int16, index) (((uint32_t)bswap_16(tab_int16[(index)])) << 16) | bswap_16(tab_int16[(index) + 1])
@@ -114,15 +93,10 @@ static int  item_timeout = 0;
 int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result);
 void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out, short *lock_key);
 int param_is_empty(char *param_to_check);
-int validate_datatype_param (char *datatype_param);
 int initsem();
 void sem_lock ();
 void sem_unlock();
 void sem_uninit (int semid);
-int is_bulk_formula(char *datatype_param);
-int validate_bulk_formula(char *datatype_param);
-int count_request_length(char *datatype_param);
-const char * bulk_response_to_json(uint16_t modbus_response, int reg_start, char *datatype_param);
 
 static ZBX_METRIC keys[] =
 /*      KEY                     FLAG        FUNCTION            TEST PARAMETERS */
@@ -187,6 +161,64 @@ unsigned long hash(unsigned char *str)
     return hash;
 }
 
+
+typedef enum
+{
+	MODBUS_BIT,
+	MODBUS_UINT16,
+	MODBUS_SIGNED_INT,
+	MODBUS_UINT32,
+	MODBUS_SIGNED_INT32,
+	MODBUS_FLOAT,
+	MODBUS_SIGNED_INT64,
+	MODBUS_UINT64,
+	MODBUS_FLOAT64,
+	MODBUS_SKIP
+}
+datatype_code_t;
+
+typedef struct
+{
+	const char		*name;
+	const char		*legacy_name;
+	const datatype_code_t	type_code;
+	const int		regs_to_read;
+}
+datatype_token_t;
+
+const datatype_token_t	bit_syntax[] =
+{
+	{"bit",		"b",	MODBUS_BIT,		1},
+	{"skip",	NULL,	MODBUS_SKIP,		1},
+	{NULL}
+};
+
+const datatype_token_t	register_syntax[] =
+{
+	{"uint16",	"i",	MODBUS_UINT16,		1},
+	{"int16",	"s",	MODBUS_SIGNED_INT,	1},
+	{"uint32",	"l",	MODBUS_UINT32,		2},
+	{"int32",	"S",	MODBUS_SIGNED_INT32,	2},
+	{"float",	"f",	MODBUS_FLOAT,		2},
+	{"int64",	NULL,	MODBUS_SIGNED_INT64,	4},
+	{"uint64",	"I",	MODBUS_UINT64,		4},
+	{"double",	"d",	MODBUS_FLOAT64,		4},
+	{"skip",	NULL,	MODBUS_SKIP,		1},
+	{NULL}
+};
+
+static int	parse_datatype(const datatype_token_t *syntax, const char *datatype, char **error)
+{
+	if (NULL == datatype)
+		return 1;
+
+	/* TODO */
+}
+
+static void	set_result_based_on_datatype(AGENT_RESULT *result, const char *datatype, int start, const uint8_t *bits, size_t bits_size, const uint16_t *registers, size_t registers_size, int endianness)
+{
+	/* TODO */
+}
 
 /******************************************************************************
  *                                                                            *
@@ -284,55 +316,35 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         modbus_free(ctx);
         return SYSINFO_RET_FAIL;
     }
-    
-    char datatype;  
+
+	switch (function)
+	{
+		case MODBUS_READ_COIL_1:
+		case MODBUS_READ_DINPUTS_2:
+			datatype_syntax = bit_syntax;
+			break;
+		case MODBUS_READ_H_REGISTERS_3:
+		case MODBUS_READ_I_REGISTERS_4:
+			datatype_syntax = register_syntax;
+			break;
+		default:
+			SET_MSG_RESULT(result, strdup("Check function (1,2,3,4) used"));
+			modbus_free(ctx);
+			return SYSINFO_RET_FAIL;
+	}
+
+	char	*error = NULL;
+	int	regs_to_read;
+
+	if (-1 == (regs_to_read = parse_datatype(datatype_syntax, get_rparam(request, 4) /* datatype */, &error)
+	{
+		SET_MSG_RESULT(result, error);
+		modbus_free(ctx);
+		return SYSINFO_RET_FAIL;
+	}
+
     int end = MODBUS_BE_ABCD; //<endianness> endianness LE(0) BE(1) MBE(2) MLE(3) default BE
     if (request->nparam > 4) { //optional params provided
-
-        param5 = get_rparam(request, 4); //datatype
-
-        if (!strcmp(MODBUS_BIT_STR,param5))
-            datatype = MODBUS_BIT;
-        else if (!strcmp(MODBUS_UINT16_STR, param5))
-            datatype = MODBUS_UINT16;
-        else if (!strcmp(MODBUS_SIGNED_INT_STR, param5))
-            datatype = MODBUS_SIGNED_INT;
-        else if (!strcmp(MODBUS_UINT32_STR, param5))
-            datatype = MODBUS_UINT32;
-        else if (!strcmp(MODBUS_SIGNED_INT32_STR, param5))
-            datatype = MODBUS_SIGNED_INT32;
-        else if (!strcmp(MODBUS_FLOAT_STR, param5))
-            datatype = MODBUS_FLOAT;
-        else if (!strcmp(MODBUS_SIGNED_INT64_STR, param5)){
-            SET_MSG_RESULT(result, strdup("datatype 'int64' is not supported."));
-            modbus_free(ctx);
-            return SYSINFO_RET_FAIL;
-        }
-        else if (!strcmp(MODBUS_UINT64_STR, param5))
-            datatype = MODBUS_UINT64;
-        else if (!strcmp(MODBUS_FLOAT64_STR, param5))
-            datatype = MODBUS_FLOAT64;
-        else if (is_bulk_formula(param5)){
-            if(!validate_bulk_formula(param5)){
-                SET_MSG_RESULT(result, strdup("Check bulk formula: usage of 'bit' datatype is not allowed."));
-                modbus_free(ctx);
-                return SYSINFO_RET_FAIL;
-            }
-            datatype = MODBUS_BULK_FORMULA;
-        }
-        else
-        { 
-            if(!validate_datatype_param(param5)) {
-                SET_MSG_RESULT(result, strdup("Check datatype provided."));
-                modbus_free(ctx);
-                return SYSINFO_RET_FAIL;
-            }
-            
-            datatype = *param5; // set datatype
-        }
-
-
-
         param6 = get_rparam(request, 5); //32-64bit endiannes
         if(param6) {
             //endianness to use
@@ -380,15 +392,6 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         }
 
     }
-    else {//no datatype set, place defaults
-    
-        if (function==MODBUS_READ_COIL_1 || function == MODBUS_READ_DINPUTS_2) {
-            datatype = MODBUS_BIT;//default
-        }
-        if (function==MODBUS_READ_H_REGISTERS_3 || function == MODBUS_READ_I_REGISTERS_4) {
-            datatype = MODBUS_UINT16 ;//default
-        }
-    }
 
 
     modbus_set_response_timeout(ctx, item_timeout, 0);
@@ -397,13 +400,6 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     uint16_t tab_reg[64];//temp vars
     uint8_t tab_reg_bits[64];
-
-    int regs_to_read = 1;
-    if (datatype == MODBUS_FLOAT || datatype == MODBUS_UINT32 || datatype == MODBUS_SIGNED_INT32) { regs_to_read=2;}
-    else if (datatype == MODBUS_UINT64 || datatype == MODBUS_FLOAT64) { regs_to_read=4;}
-    else if (datatype == MODBUS_BULK_FORMULA) {regs_to_read = count_request_length(param5);}
-
-
 
     if (lock_required == 1 ) LOCK_PORT(lock_key);
 
@@ -448,6 +444,9 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     }
 
     //post-parsing
+
+	set_result_based_on_datatype(result, datatype, reg_start, tab_reg_bits, tab_reg, end);
+/*
     uint16_t temp_arr[4];     //output based on datatype
     switch(datatype){
 
@@ -587,6 +586,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         return SYSINFO_RET_FAIL;
     break;
     }
+*/
 
     return SYSINFO_RET_OK;
 }
@@ -638,14 +638,6 @@ int zbx_module_uninit()
 
 int param_is_empty(char *param_to_check) {
     return (param_to_check[0] == '\0') ? 1: 0;
-}
-
-int validate_datatype_param (char *datatype_param) {//checks that datatype provided one char long
-    //Guard against direct 'B' input in param
-    if (datatype_param[0] == MODBUS_BULK_FORMULA) {
-        return 0;
-    }
-    return (datatype_param[1] == '\0') ? 1: 0;
 }
 
 void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out, short *lock_key) {
@@ -700,40 +692,6 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 
     return;
 }
-
-int is_bulk_formula(char *datatype_param){
-    //check that datatype_param represents formula
-
-    return FALSE;
-}
-
-int validate_bulk_formula(char *datatype_param){
-/*
-check that there are no 'bit' is used in formula
-*/
-   //stub
-   return FALSE;
-
-}
-int count_request_length(char *datatype_param){
-    //parse formula in datatype_param and count the number of 16-bit words to read
-    return 2;
-}
-
-
-const char * bulk_response_to_json(uint16_t modbus_response, int reg_start, char *datatype_param){
-
-
-    /*
-    go throught response and parse it according to formula. Output as JSON formated string with keys with respect to reg_start
-    */
-
-    return "TODO";
-
-}
-
-
-
 
 
 int initsem()  /* sem_key from ftok() */
