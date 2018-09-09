@@ -50,7 +50,7 @@ Download from  https://share.zabbix.com/dir-libraries/zabbix-loadable-modules/mo
 ## 3. Configure Modbus polling in Zabbix
   Configure the new item with the following key:
   
-`modbus_read[<connection>,<slave_id>, <reg_to_read>, <modbus_function>, [<datatype>],[<endiannes>],[<first_reg>]]`  
+`modbus_read[<connection>,<slave_id>,<reg_to_read>,<modbus_function>[,<datatype>][,<endiannes>][,<first_reg>]]`  
 
 where:  
 
@@ -93,15 +93,15 @@ where:
 and some optional params can be provided as well:  
   
 * **datatype(optional):**  
-    provide datatype as single char:  
-      `b` - for MODBUS_BIT  
-      `i` - for MODBUS_INTEGER, 16bit (unsigned)  
-      `s` - for MODBUS_SIGNED_INT, 16bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
-      `l` - for MODBUS_LONG, 32bit (unsigned)  
-      `f` - for MODBUS_FLOAT, 32bit  
-      `S` - for MODBUS_SIGNED_INT32, 32bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
-      `I` - for MODBUS_UINT64, 64bit (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
-      `d` - for MODBUS_FLOAT64, 64bit  
+    provide datatype:  
+      `b` or `bit` - for MODBUS_BIT  
+      `i` or `uint16` - for MODBUS_UINT16, 16bit (unsigned)  
+      `s` or `int16` - for MODBUS_SIGNED_INT, 16bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
+      `l` or `uint32` - for MODBUS_UINT32, 32bit (unsigned)  
+      `S` or `int32` - for MODBUS_SIGNED_INT32, 32bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
+      `f` or `float` - for MODBUS_FLOAT, 32bit  
+      `I` or `uint64`- for MODBUS_UINT64, 64bit (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
+      `d` or `double`- for MODBUS_FLOAT64, 64bit  
     
     otherwise, defaults will be used:  
       MODBUS_BIT if modbus function 1 or 2.  
@@ -109,10 +109,10 @@ and some optional params can be provided as well:
   
 * **endianness(optional):**   
     Modbus endianness for 32bit/64bit datatypes:  
-      0 - for MODBUS_MLE_CDAB (Mid-Little Endian (CDAB))  
-      1 - for MODBUS_BE_ABCD (Big Endian (ABCD))  
-      2 - for MODBUS_MBE_BADC (Mid-Big Endian (BADC))  
-      3 - for MODBUS_LE_DCBA (Little Endian (DCBA))  
+      0 or `MLE` - for MODBUS_MLE_CDAB (Mid-Little Endian (CDAB))  
+      1 or `BE` - for MODBUS_BE_ABCD (Big Endian (ABCD))  
+      2 or `MBE` - for MODBUS_MBE_BADC (Mid-Big Endian (BADC))  
+      3 or `LE` - for MODBUS_LE_DCBA (Little Endian (DCBA))  
     Default is BE(1). Normally, you don't need to change this.  
     
 * **first_reg(optional):**  
@@ -124,12 +124,12 @@ and some optional params can be provided as well:
 **Example keys:**  
 ```
     modbus_read[/dev/ttyS0,32,4,3]
-    modbus_read[{$MODBUS_PORT},{$MODBUS_SLAVE},59,3,f,1,0]
-    modbus_read[{HOST.CONN},{$MODBUS_SLAVE},59,3,f,1,0]
-    modbus_read[/dev/ttyS0 9600 N,32,4,3,f,1,0]
+    modbus_read[{$MODBUS_PORT},{$MODBUS_SLAVE},59,3,float,BE,0]
+    modbus_read[{HOST.CONN},{$MODBUS_SLAVE},59,3,float,BE,0]
+    modbus_read[/dev/ttyS0 9600 N,32,4,3,float,BE,0]
     modbus_read[192.168.1.1,1,6,1]
     modbus_read[192.168.1.1:514,1,5,1]
-    modbus_read[{$MODBUS_PORT},32,4,3,f,1,0]
+    modbus_read[{$MODBUS_PORT},32,4,3,uint32,BE,0]
     modbus_read[enc://192.168.1.1,1,6,1]
     modbus_read[tcp://192.168.1.1:5000,1,5,1]
 ```
