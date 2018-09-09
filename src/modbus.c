@@ -230,10 +230,10 @@ static int	parse_type_name(const datatype_token_t *syntax, const char *string)
 		if (0 == strncmp(allowed_token->name, string, token_length))
 			return allowed_token->regs_to_read;
 
-		if (NULL == alowed_token->legacy_name)
+		if (NULL == allowed_token->legacy_name)
 			continue;
 
-		if (0 == strncmp(alowed_token->legacy_name, string, token_length))
+		if (0 == strncmp(allowed_token->legacy_name, string, token_length))
 			return allowed_token->regs_to_read;
 	}
 
@@ -255,7 +255,7 @@ parser_state_t;
 static int	parse_datatype(const datatype_token_t *syntax, const char *datatype, char **error)
 {
 	const char	*p = datatype;
-	parser_state_t	state = MULTIPLIER_BEFORE;
+	parser_state_t	state = MULTIPLIER_ON_THE_LEFT;
 	int		reg_count = 0, multiplier, type_registers;
 
 	if (NULL == datatype || '\0' == *datatype)
@@ -294,7 +294,7 @@ static int	parse_datatype(const datatype_token_t *syntax, const char *datatype, 
 			case TYPE_ON_THE_RIGHT:		/* type string after multiplier and "*" sign */
 				if (-1 == (type_registers = parse_type_name(syntax, p)))
 				{
-					*error = strdup("Invalid type in datatype expression.")
+					*error = strdup("Invalid type in datatype expression.");
 					return -1;
 				}
 				state = PLUS_OR_NOTHING;
@@ -302,7 +302,7 @@ static int	parse_datatype(const datatype_token_t *syntax, const char *datatype, 
 			case TYPE_ON_THE_LEFT:		/* type string without multiplier before it */
 				if (-1 == (type_registers = parse_type_name(syntax, p)))
 				{
-					*error = strdup("Invalid type in datatype expression.")
+					*error = strdup("Invalid type in datatype expression.");
 					return -1;
 				}
 				state = CROSS_AFTER_TYPE;
@@ -318,7 +318,7 @@ static int	parse_datatype(const datatype_token_t *syntax, const char *datatype, 
 				p++;
 				continue;
 			case MULTIPLIER_ON_THE_RIGHT:	/* mandatory multiplier after type string and "*" */
-				if (1 == sscanf(p, "%d%n", &multiplier, jump))
+				if (1 == sscanf(p, "%d%n", &multiplier, &jump))
 				{
 					state = PLUS_OR_NOTHING;
 					p += jump;
@@ -451,6 +451,9 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
         return SYSINFO_RET_FAIL;
     }
 
+
+	const datatype_token_t	*datatype_syntax;
+
 	switch (function)
 	{
 		case MODBUS_READ_COIL_1:
@@ -470,7 +473,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 	char	*error = NULL;
 	int	regs_to_read;
 
-	if (-1 == (regs_to_read = parse_datatype(datatype_syntax, get_rparam(request, 4) /* datatype */, &error)
+	if (-1 == (regs_to_read = parse_datatype(datatype_syntax, param5 = get_rparam(request, 4) /* datatype */, &error)))
 	{
 		SET_MSG_RESULT(result, error);
 		modbus_free(ctx);
@@ -579,7 +582,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
     //post-parsing
 
-	set_result_based_on_datatype(result, datatype, reg_start, tab_reg_bits, tab_reg, end);
+	set_result_based_on_datatype(result, param5, reg_start, tab_reg_bits, sizeof(tab_reg_bits), tab_reg, sizeof(tab_reg), end);
 /*
     uint16_t temp_arr[4];     //output based on datatype
     switch(datatype){
