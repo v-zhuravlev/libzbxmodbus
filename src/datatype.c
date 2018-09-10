@@ -2,6 +2,30 @@
 
 #include "datatype.h"
 
+typedef enum
+{
+	MODBUS_BIT,
+	MODBUS_UINT16,
+	MODBUS_SIGNED_INT,
+	MODBUS_UINT32,
+	MODBUS_SIGNED_INT32,
+	MODBUS_FLOAT,
+	MODBUS_SIGNED_INT64,
+	MODBUS_UINT64,
+	MODBUS_FLOAT64,
+	MODBUS_SKIP
+}
+datatype_code_t;
+
+typedef struct
+{
+	const char		*name;
+	const char		*legacy_name;
+	const datatype_code_t	type_code;
+	const int		regs_to_read;
+}
+datatype_token_t;
+
 const datatype_token_t	bit_syntax[] =
 {
 	{"bit",		"b",	MODBUS_BIT,		1},
@@ -23,7 +47,7 @@ const datatype_token_t	register_syntax[] =
 	{NULL}
 };
 
-static int	parse_type_name(const datatype_token_t *syntax, const char *string, int *jump)
+static int	parse_type_name(const datatype_token_t *tokens, const char *string, int *jump)
 {
 	int			token_length = -1;
 	const char		token_delimiters[] = " +*";	/* terminating '\0' counts as delimiter too! */
@@ -41,7 +65,7 @@ static int	parse_type_name(const datatype_token_t *syntax, const char *string, i
 			token_length = token_delimiter - string;
 	}
 
-	for (allowed_token = syntax; NULL != allowed_token->name; allowed_token++)
+	for (allowed_token = tokens; NULL != allowed_token->name; allowed_token++)
 	{
 		if (token_length == strlen(allowed_token->name) &&
 				0 == strncmp(allowed_token->name, string, token_length))
@@ -76,14 +100,27 @@ typedef enum
 }
 parser_state_t;
 
-int	parse_datatype(const datatype_token_t *syntax, const char *datatype, char **error)
+int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 {
-	const char	*p = datatype;
-	parser_state_t	state = MULTIPLIER_ON_THE_LEFT;
-	int		reg_count = 0, multiplier, type_registers;
+	const char		*p = datatype;
+	const datatype_token_t	*tokens;
+	parser_state_t		state = MULTIPLIER_ON_THE_LEFT;
+	int			reg_count = 0, multiplier, type_registers;
 
 	if (NULL == datatype || '\0' == *datatype)
 		return 1;
+
+	switch (syntax)
+	{
+		case BIT_SYNTAX:
+			tokens = bit_syntax;
+			break;
+		case REGISTER_SYNTAX:
+			tokens = register_syntax;
+			break;
+		default:
+			return -1;
+	}
 
 	while ('\0' != *p)
 	{
@@ -116,7 +153,7 @@ int	parse_datatype(const datatype_token_t *syntax, const char *datatype, char **
 				p++;
 				continue;
 			case TYPE_ON_THE_RIGHT:		/* type string after multiplier and "*" sign */
-				if (-1 == (type_registers = parse_type_name(syntax, p, &jump)))
+				if (-1 == (type_registers = parse_type_name(tokens, p, &jump)))
 				{
 					*error = strdup("Invalid type in datatype expression.");
 					return -1;
@@ -125,7 +162,7 @@ int	parse_datatype(const datatype_token_t *syntax, const char *datatype, char **
 				p += jump;
 				break;
 			case TYPE_ON_THE_LEFT:		/* type string without multiplier before it */
-				if (-1 == (type_registers = parse_type_name(syntax, p, &jump)))
+				if (-1 == (type_registers = parse_type_name(tokens, p, &jump)))
 				{
 					*error = strdup("Invalid type in datatype expression.");
 					return -1;

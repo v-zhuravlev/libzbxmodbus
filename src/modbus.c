@@ -261,17 +261,17 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
     }
 
 
-	const datatype_token_t	*datatype_syntax;
+	datatype_syntax_t	datatype_syntax;
 
 	switch (function)
 	{
 		case MODBUS_READ_COIL_1:
 		case MODBUS_READ_DINPUTS_2:
-			datatype_syntax = bit_syntax;
+			datatype_syntax = BIT_SYNTAX;
 			break;
 		case MODBUS_READ_H_REGISTERS_3:
 		case MODBUS_READ_I_REGISTERS_4:
-			datatype_syntax = register_syntax;
+			datatype_syntax = REGISTER_SYNTAX;
 			break;
 		default:
 			SET_MSG_RESULT(result, strdup("Check function (1,2,3,4) used"));
