@@ -6,7 +6,7 @@ RUN apt-get install make autoconf automake libtool pkg-config -q=2
 COPY ./libmodbus .
 
 #only libmodbus(without libzbxmodbus) is installed
-RUN ./configure
+RUN ./configure -q
 
 RUN make && make install
 #force LLD cache refresh
