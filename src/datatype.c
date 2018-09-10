@@ -160,13 +160,20 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 		switch (state)
 		{
 			case MULTIPLIER_ON_THE_LEFT:	/* optional multiplier on the left of type string */
-				if (1 == sscanf(p, "%d%n", &multiplier, &jump))
+				if (1 != sscanf(p, "%d%n", &multiplier, &jump))
+				{
+					state = TYPE_ON_THE_LEFT;
+				}
+				else if (0 >= multiplier)
+				{
+					*error = strdup("Multiplier must be positive.");
+					return -1;
+				}
+				else
 				{
 					state = CROSS_AFTER_MULTIPLIER;
 					p += jump;
 				}
-				else
-					state = TYPE_ON_THE_LEFT;
 				continue;
 			case CROSS_AFTER_MULTIPLIER:	/* mandatory "*" after left hand side multiplier */
 				if ('*' != *p)
@@ -206,14 +213,22 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 				p++;
 				continue;
 			case MULTIPLIER_ON_THE_RIGHT:	/* mandatory multiplier after type string and "*" */
-				if (1 == sscanf(p, "%d%n", &multiplier, &jump))
+				if (1 != sscanf(p, "%d%n", &multiplier, &jump))
+				{
+					*error = strdup("Multiplier expected after type and \"*\" sign.");
+					return -1;
+				}
+				else if (0 >= multiplier)
+				{
+					*error = strdup("Multiplier must be positive.");
+					return -1;
+				}
+				else
 				{
 					state = PLUS_OR_NOTHING;
 					p += jump;
 					break;
 				}
-				*error = strdup("Multiplier expected after type and \"*\" sign.");
-				return -1;
 			case PLUS_OR_NOTHING:		/* next summand or the end of expression */
 				if ('+' != *p)
 				{
