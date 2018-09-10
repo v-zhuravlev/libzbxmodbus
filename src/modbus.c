@@ -289,6 +289,13 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 		return SYSINFO_RET_FAIL;
 	}
 
+	if (64 < regs_to_read)	/* FIXME ideally tab_reg[] and tab_reg_bits[] should be allocated dynamically */
+	{
+		SET_MSG_RESULT(result, strdup("Cannot read so much at once."));
+		modbus_free(ctx);
+		return SYSINFO_RET_FAIL;
+	}
+
     int end = MODBUS_BE_ABCD; //<endianness> endianness LE(0) BE(1) MBE(2) MLE(3) default BE
     if (request->nparam > 4) { //optional params provided
         param6 = get_rparam(request, 5); //32-64bit endiannes
