@@ -19,10 +19,10 @@
 
 #include <sys/ipc.h>
 #include <sys/sem.h>
-
+// clang-format off
 #include "sysinc.h"
 #include "module.h"
-
+// clang-format on
 #include <modbus.h>
 #include <stdio.h>
 #include <stdlib.h>

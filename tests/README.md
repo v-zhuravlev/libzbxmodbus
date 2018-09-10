@@ -10,7 +10,6 @@
 1. (optional) Add new Modbus values in tests/docker/modbus-server/app.py by using ModbusSparseDataBlock  
 2. Create new test_*.py in /tests  
 3. Define tests in similar fashion to already created  
-4. Add new command in .travis.yml to run new file on commit.  
 
 ## Run local
 You can run tests local:
