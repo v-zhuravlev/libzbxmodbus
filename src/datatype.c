@@ -43,7 +43,8 @@ static int	parse_type_name(const datatype_token_t *syntax, const char *string, i
 
 	for (allowed_token = syntax; NULL != allowed_token->name; allowed_token++)
 	{
-		if (0 == strncmp(allowed_token->name, string, token_length))
+		if (token_length == strlen(allowed_token->name) &&
+				0 == strncmp(allowed_token->name, string, token_length))
 		{
 			*jump = token_length;
 			return allowed_token->regs_to_read;
@@ -52,7 +53,8 @@ static int	parse_type_name(const datatype_token_t *syntax, const char *string, i
 		if (NULL == allowed_token->legacy_name)
 			continue;
 
-		if (0 == strncmp(allowed_token->legacy_name, string, token_length))
+		if (token_length == strlen(allowed_token->legacy_name) &&
+				0 == strncmp(allowed_token->legacy_name, string, token_length))
 		{
 			*jump = token_length;
 			return allowed_token->regs_to_read;
