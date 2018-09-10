@@ -4,53 +4,77 @@
 
 typedef enum
 {
-	MODBUS_BIT,
-	MODBUS_UINT16,
-	MODBUS_SIGNED_INT,
-	MODBUS_UINT32,
-	MODBUS_SIGNED_INT32,
-	MODBUS_FLOAT,
-	MODBUS_SIGNED_INT64,
-	MODBUS_UINT64,
-	MODBUS_FLOAT64,
-	MODBUS_SKIP
+	LIBZBXMODBUS_SKIP,	/* register to read, but discard */
+	LIBZBXMODBUS_BIT,
+	LIBZBXMODBUS_UINT16,
+	LIBZBXMODBUS_SIGNED_INT,
+	LIBZBXMODBUS_UINT32,
+	LIBZBXMODBUS_SIGNED_INT32,
+	LIBZBXMODBUS_FLOAT,
+	LIBZBXMODBUS_SIGNED_INT64,
+	LIBZBXMODBUS_UINT64,
+	LIBZBXMODBUS_FLOAT64,
+	LIBZBXMODBUS_NONE	/* special code for invalid type */
 }
 datatype_code_t;
 
+static int	type_registers(datatype_code_t type_code)
+{
+	switch (type_code)
+	{
+		case LIBZBXMODBUS_SKIP:
+		case LIBZBXMODBUS_BIT:
+		case LIBZBXMODBUS_UINT16:
+		case LIBZBXMODBUS_SIGNED_INT:
+			return 1;
+		case LIBZBXMODBUS_UINT32:
+		case LIBZBXMODBUS_SIGNED_INT32:
+		case LIBZBXMODBUS_FLOAT:
+			return 2;
+		case LIBZBXMODBUS_SIGNED_INT64:
+		case LIBZBXMODBUS_UINT64:
+		case LIBZBXMODBUS_FLOAT64:
+			return 4;
+		case LIBZBXMODBUS_NONE:
+		default:
+			return 0;
+	}
+}
+
 typedef struct
 {
+	const datatype_code_t	type_code;
 	const char		*name;
 	const char		*legacy_name;
-	const datatype_code_t	type_code;
-	const int		regs_to_read;
 }
 datatype_token_t;
 
 const datatype_token_t	bit_syntax[] =
 {
-	{"bit",		"b",	MODBUS_BIT,		1},
-	{"skip",	NULL,	MODBUS_SKIP,		1},
-	{NULL}
+	{LIBZBXMODBUS_BIT,		"bit",		"b"},
+	{LIBZBXMODBUS_SKIP,		"skip",		NULL},
+	{LIBZBXMODBUS_NONE,		NULL,		NULL}
 };
 
 const datatype_token_t	register_syntax[] =
 {
-	{"uint16",	"i",	MODBUS_UINT16,		1},
-	{"int16",	"s",	MODBUS_SIGNED_INT,	1},
-	{"uint32",	"l",	MODBUS_UINT32,		2},
-	{"int32",	"S",	MODBUS_SIGNED_INT32,	2},
-	{"float",	"f",	MODBUS_FLOAT,		2},
-	{"int64",	NULL,	MODBUS_SIGNED_INT64,	4},
-	{"uint64",	"I",	MODBUS_UINT64,		4},
-	{"double",	"d",	MODBUS_FLOAT64,		4},
-	{"skip",	NULL,	MODBUS_SKIP,		1},
-	{NULL}
+	{LIBZBXMODBUS_UINT16,		"uint16",	"i"},
+	{LIBZBXMODBUS_SIGNED_INT,	"int16",	"s"},
+	{LIBZBXMODBUS_UINT32,		"uint32",	"l"},
+	{LIBZBXMODBUS_SIGNED_INT32,	"int32",	"S"},
+	{LIBZBXMODBUS_FLOAT,		"float",	"f"},
+	{LIBZBXMODBUS_SIGNED_INT64,	"int64",	NULL},
+	{LIBZBXMODBUS_UINT64,		"uint64",	"I"},
+	{LIBZBXMODBUS_FLOAT64,		"double",	"d"},
+	{LIBZBXMODBUS_SKIP,		"skip",		NULL},
+	{LIBZBXMODBUS_NONE,		NULL,		NULL}
 };
 
-static int	parse_type_name(const datatype_token_t *tokens, const char *string, int *jump)
+const char	token_delimiters[] = " +*";	/* terminating '\0' counts as delimiter too! */
+
+static datatype_code_t	parse_type_name(const datatype_token_t *tokens, const char *string, int *jump)
 {
 	int			token_length = -1;
-	const char		token_delimiters[] = " +*";	/* terminating '\0' counts as delimiter too! */
 	size_t			i = sizeof(token_delimiters);
 	const datatype_token_t	*allowed_token;
 
@@ -65,13 +89,13 @@ static int	parse_type_name(const datatype_token_t *tokens, const char *string, i
 			token_length = token_delimiter - string;
 	}
 
-	for (allowed_token = tokens; NULL != allowed_token->name; allowed_token++)
+	for (allowed_token = tokens; LIBZBXMODBUS_NONE != allowed_token->type_code; allowed_token++)
 	{
 		if (token_length == strlen(allowed_token->name) &&
 				0 == strncmp(allowed_token->name, string, token_length))
 		{
 			*jump = token_length;
-			return allowed_token->regs_to_read;
+			return allowed_token->type_code;
 		}
 
 		if (NULL == allowed_token->legacy_name)
@@ -81,11 +105,11 @@ static int	parse_type_name(const datatype_token_t *tokens, const char *string, i
 				0 == strncmp(allowed_token->legacy_name, string, token_length))
 		{
 			*jump = token_length;
-			return allowed_token->regs_to_read;
+			return allowed_token->type_code;
 		}
 	}
 
-	return -1;
+	return LIBZBXMODBUS_NONE;
 }
 
 typedef enum
@@ -105,7 +129,8 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 	const char		*p = datatype;
 	const datatype_token_t	*tokens;
 	parser_state_t		state = MULTIPLIER_ON_THE_LEFT;
-	int			reg_count = 0, multiplier, type_registers;
+	datatype_code_t		type_code;
+	int			reg_count = 0, multiplier;
 
 	if (NULL == datatype || '\0' == *datatype)
 		return 1;
@@ -153,7 +178,7 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 				p++;
 				continue;
 			case TYPE_ON_THE_RIGHT:		/* type string after multiplier and "*" sign */
-				if (-1 == (type_registers = parse_type_name(tokens, p, &jump)))
+				if (LIBZBXMODBUS_NONE == (type_code = parse_type_name(tokens, p, &jump)))
 				{
 					*error = strdup("Invalid type in datatype expression.");
 					return -1;
@@ -162,7 +187,7 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 				p += jump;
 				break;
 			case TYPE_ON_THE_LEFT:		/* type string without multiplier before it */
-				if (-1 == (type_registers = parse_type_name(tokens, p, &jump)))
+				if (LIBZBXMODBUS_NONE == (type_code = parse_type_name(tokens, p, &jump)))
 				{
 					*error = strdup("Invalid type in datatype expression.");
 					return -1;
@@ -200,12 +225,12 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 				continue;
 		}
 
-		reg_count += multiplier * type_registers;
+		reg_count += multiplier * type_registers(type_code);
 	}
 
 	if (CROSS_AFTER_TYPE == state)
 	{
-		reg_count += type_registers;
+		reg_count += type_registers(type_code);
 	}
 	else if (PLUS_OR_NOTHING != state)
 	{
