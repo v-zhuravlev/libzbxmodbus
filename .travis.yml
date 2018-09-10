@@ -2,28 +2,32 @@ language: c
 sudo: required
 services:
   - docker
-env:
-  #ZBX_VERSION must be one of the tags for ubuntu here: https://hub.docker.com/r/zabbix/zabbix-agent/tags/
-  - ZBX_VERSION=3.4.12 ZBX_HEADERS_VERSION=3.2
-  - ZBX_VERSION=3.2.11 ZBX_HEADERS_VERSION=3.2  
-  - ZBX_VERSION=3.0.19 ZBX_HEADERS_VERSION=3
-  #- ZBX_VERSION=2.2.19 ZBX_HEADERS_VERSION=2  
+
+#ZBX_VERSION must be one of the tags for ubuntu here: https://hub.docker.com/r/zabbix/zabbix-agent/tags/
+matrix:
+  include:
+  - name: Format
+    before_install: true
+    env: TRAVIS_JOB_TYPE=FORMAT
+  - name: Zabbix 3.4
+    env: ZBX_VERSION=3.4.12 ZBX_HEADERS_VERSION=3.2 TRAVIS_JOB_TYPE=TEST
+  - name: Zabbix 3.2
+    env: ZBX_VERSION=3.2.11 ZBX_HEADERS_VERSION=3.2 TRAVIS_JOB_TYPE=TEST
+  - name: Zabbix 3.0
+    env: ZBX_VERSION=3.0.19 ZBX_HEADERS_VERSION=3   TRAVIS_JOB_TYPE=TEST
+  #- name: Zabbix 2.2
+  #  env: ZBX_VERSION=2.2.19 ZBX_HEADERS_VERSION=2  
+
+
 before_install:
-  - chmod +x autogen.sh
-  - curl -L https://github.com/docker/compose/releases/download/1.7.0/docker-compose-`uname -s`-`uname -m` > docker-compose
-  - chmod +x docker-compose
-  - sudo mv docker-compose /usr/local/bin
-script:
-  - ./autogen.sh 
-  - ./configure --enable-zabbix-${ZBX_HEADERS_VERSION}
-  - make && sudo make install
+  - ./autogen.sh
+  - python -m pip install -q --user pytest
+  - ./configure --enable-zabbix-${ZBX_HEADERS_VERSION} -q
+  - make
   - pushd tests/docker && docker-compose up -d
   - popd
   - docker logs docker_zabbix-agent-modbus_1
   - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k agent.ping"
   - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k modbus_read[172.16.238.2:5020,1,2,3,uint16,1,1]"
-  - python tests/test_modbus.py
-  - python tests/test_modbus_errors.py
-  - python tests/test_modbus_64bit.py
-  - python tests/test_modbus_connection_string.py
-  - python tests/test_modbus_short_params.py
+script:
+  - ./run-tests.sh
