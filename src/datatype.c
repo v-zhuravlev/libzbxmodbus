@@ -2,8 +2,7 @@
 
 #include "datatype.h"
 
-typedef enum
-{
+typedef enum {
 	LIBZBXMODBUS_SKIP, /* register to read, but discard */
 	LIBZBXMODBUS_BIT,
 	LIBZBXMODBUS_UINT16,
@@ -112,8 +111,7 @@ static datatype_code_t parse_type_name(const datatype_token_t *tokens, const cha
 	return LIBZBXMODBUS_NONE;
 }
 
-typedef enum
-{
+typedef enum {
 	MULTIPLIER_ON_THE_LEFT,
 	MULTIPLIER_ON_THE_RIGHT,
 	CROSS_AFTER_MULTIPLIER,

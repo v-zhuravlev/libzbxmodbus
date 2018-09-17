@@ -1,3 +1,2 @@
 #!/bin/bash
-clang-format --version
-clang-format -i --style=file src/*.c
+clang-format-5.0 -i --style=file src/*.c
