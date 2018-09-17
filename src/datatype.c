@@ -4,7 +4,7 @@
 
 typedef enum
 {
-	LIBZBXMODBUS_SKIP,	/* register to read, but discard */
+	LIBZBXMODBUS_SKIP, /* register to read, but discard */
 	LIBZBXMODBUS_BIT,
 	LIBZBXMODBUS_UINT16,
 	LIBZBXMODBUS_SIGNED_INT,
@@ -14,11 +14,10 @@ typedef enum
 	LIBZBXMODBUS_SIGNED_INT64,
 	LIBZBXMODBUS_UINT64,
 	LIBZBXMODBUS_FLOAT64,
-	LIBZBXMODBUS_NONE	/* special code for invalid type */
-}
-datatype_code_t;
+	LIBZBXMODBUS_NONE /* special code for invalid type */
+} datatype_code_t;
 
-static int	type_registers(datatype_code_t type_code)
+static int type_registers(datatype_code_t type_code)
 {
 	switch (type_code)
 	{
@@ -43,20 +42,20 @@ static int	type_registers(datatype_code_t type_code)
 
 typedef struct
 {
-	const datatype_code_t	type_code;
-	const char		*name;
-	const char		*legacy_name;
-}
-datatype_token_t;
+	const datatype_code_t type_code;
+	const char *	  name;
+	const char *	  legacy_name;
+} datatype_token_t;
 
-const datatype_token_t	bit_syntax[] =
+/* clang-format off */
+const datatype_token_t bit_syntax[] =
 {
 	{LIBZBXMODBUS_BIT,		"bit",		"b"},
 	{LIBZBXMODBUS_SKIP,		"skip",		NULL},
 	{LIBZBXMODBUS_NONE,		NULL,		NULL}
 };
 
-const datatype_token_t	register_syntax[] =
+const datatype_token_t register_syntax[] =
 {
 	{LIBZBXMODBUS_UINT16,		"uint16",	"i"},
 	{LIBZBXMODBUS_SIGNED_INT,	"int16",	"s"},
@@ -69,18 +68,19 @@ const datatype_token_t	register_syntax[] =
 	{LIBZBXMODBUS_SKIP,		"skip",		NULL},
 	{LIBZBXMODBUS_NONE,		NULL,		NULL}
 };
+/* clang-format on */
 
-const char	token_delimiters[] = " +*";	/* terminating '\0' counts as delimiter too! */
+const char token_delimiters[] = " +*"; /* terminating '\0' counts as delimiter too! */
 
-static datatype_code_t	parse_type_name(const datatype_token_t *tokens, const char *string, int *jump)
+static datatype_code_t parse_type_name(const datatype_token_t *tokens, const char *string, int *jump)
 {
 	int			token_length = -1;
 	size_t			i = sizeof(token_delimiters);
-	const datatype_token_t	*allowed_token;
+	const datatype_token_t *allowed_token;
 
 	while (0 < i--)
 	{
-		const char	*token_delimiter;
+		const char *token_delimiter;
 
 		if (NULL == (token_delimiter = strchr(string, token_delimiters[i])))
 			continue;
@@ -92,7 +92,7 @@ static datatype_code_t	parse_type_name(const datatype_token_t *tokens, const cha
 	for (allowed_token = tokens; LIBZBXMODBUS_NONE != allowed_token->type_code; allowed_token++)
 	{
 		if (token_length == strlen(allowed_token->name) &&
-				0 == strncmp(allowed_token->name, string, token_length))
+			0 == strncmp(allowed_token->name, string, token_length))
 		{
 			*jump = token_length;
 			return allowed_token->type_code;
@@ -102,7 +102,7 @@ static datatype_code_t	parse_type_name(const datatype_token_t *tokens, const cha
 			continue;
 
 		if (token_length == strlen(allowed_token->legacy_name) &&
-				0 == strncmp(allowed_token->legacy_name, string, token_length))
+			0 == strncmp(allowed_token->legacy_name, string, token_length))
 		{
 			*jump = token_length;
 			return allowed_token->type_code;
@@ -121,13 +121,12 @@ typedef enum
 	TYPE_ON_THE_LEFT,
 	TYPE_ON_THE_RIGHT,
 	PLUS_OR_NOTHING
-}
-parser_state_t;
+} parser_state_t;
 
-int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
+int parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 {
-	const char		*p = datatype;
-	const datatype_token_t	*tokens;
+	const char *		p = datatype;
+	const datatype_token_t *tokens;
 	parser_state_t		state = MULTIPLIER_ON_THE_LEFT;
 	datatype_code_t		type_code;
 	int			reg_count = 0, multiplier;
@@ -149,7 +148,7 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 
 	while ('\0' != *p)
 	{
-		int	jump;
+		int jump;
 
 		if (' ' == *p)
 		{
@@ -159,7 +158,7 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 
 		switch (state)
 		{
-			case MULTIPLIER_ON_THE_LEFT:	/* optional multiplier on the left of type string */
+			case MULTIPLIER_ON_THE_LEFT: /* optional multiplier on the left of type string */
 				if (1 != sscanf(p, "%d%n", &multiplier, &jump))
 				{
 					state = TYPE_ON_THE_LEFT;
@@ -175,16 +174,17 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 					p += jump;
 				}
 				continue;
-			case CROSS_AFTER_MULTIPLIER:	/* mandatory "*" after left hand side multiplier */
+			case CROSS_AFTER_MULTIPLIER: /* mandatory "*" after left hand side multiplier */
 				if ('*' != *p)
 				{
-					*error = strdup("There must be \"*\" sign after a multiplier and before a type.");
+					*error = strdup("There must be \"*\" sign after a multiplier and before a "
+							"type.");
 					return -1;
 				}
 				state = TYPE_ON_THE_RIGHT;
 				p++;
 				continue;
-			case TYPE_ON_THE_RIGHT:		/* type string after multiplier and "*" sign */
+			case TYPE_ON_THE_RIGHT: /* type string after multiplier and "*" sign */
 				if (LIBZBXMODBUS_NONE == (type_code = parse_type_name(tokens, p, &jump)))
 				{
 					*error = strdup("Invalid type in datatype expression.");
@@ -193,7 +193,7 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 				state = PLUS_OR_NOTHING;
 				p += jump;
 				break;
-			case TYPE_ON_THE_LEFT:		/* type string without multiplier before it */
+			case TYPE_ON_THE_LEFT: /* type string without multiplier before it */
 				if (LIBZBXMODBUS_NONE == (type_code = parse_type_name(tokens, p, &jump)))
 				{
 					*error = strdup("Invalid type in datatype expression.");
@@ -202,7 +202,7 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 				state = CROSS_AFTER_TYPE;
 				p += jump;
 				continue;
-			case CROSS_AFTER_TYPE:		/* optional "*" with multiplier after type string */
+			case CROSS_AFTER_TYPE: /* optional "*" with multiplier after type string */
 				if ('*' != *p)
 				{
 					state = PLUS_OR_NOTHING;
@@ -212,7 +212,7 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 				state = MULTIPLIER_ON_THE_RIGHT;
 				p++;
 				continue;
-			case MULTIPLIER_ON_THE_RIGHT:	/* mandatory multiplier after type string and "*" */
+			case MULTIPLIER_ON_THE_RIGHT: /* mandatory multiplier after type string and "*" */
 				if (1 != sscanf(p, "%d%n", &multiplier, &jump))
 				{
 					*error = strdup("Multiplier expected after type and \"*\" sign.");
@@ -229,7 +229,7 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 					p += jump;
 					break;
 				}
-			case PLUS_OR_NOTHING:		/* next summand or the end of expression */
+			case PLUS_OR_NOTHING: /* next summand or the end of expression */
 				if ('+' != *p)
 				{
 					*error = strdup("Expected \"+\" or the end of expression.");
@@ -256,8 +256,8 @@ int	parse_datatype(datatype_syntax_t syntax, const char *datatype, char **error)
 	return reg_count;
 }
 
-void	set_result_based_on_datatype(AGENT_RESULT *result, const char *datatype, int start, const uint8_t *bits,
-		size_t bits_size, const uint16_t *registers, size_t registers_size, int endianness)
+void set_result_based_on_datatype(AGENT_RESULT *result, const char *datatype, int start, const uint8_t *bits,
+	size_t bits_size, const uint16_t *registers, size_t registers_size, int endianness)
 {
 	/* TODO */
 }
