@@ -7,9 +7,8 @@ services:
 matrix:
   include:
   - name: Format
-    packages:
-    - clang-format-5.0
-    before_install: true
+    before_install:
+    - sudo apt install clang-format-5.0
     env: TRAVIS_JOB_TYPE=FORMAT
   - name: Zabbix 3.4
     env: ZBX_VERSION=3.4.12 ZBX_HEADERS_VERSION=3.2 TRAVIS_JOB_TYPE=TEST
