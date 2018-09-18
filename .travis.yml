@@ -7,8 +7,6 @@ services:
 matrix:
   include:
   - name: Format
-    packages:
-    - clang-format-5.0
     before_install: true
     env: TRAVIS_JOB_TYPE=FORMAT
   - name: Zabbix 3.4
