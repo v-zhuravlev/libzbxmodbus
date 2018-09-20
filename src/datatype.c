@@ -187,7 +187,7 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 				}
 				else if (0 >= multiplier)
 				{
-					*error = strdup("Multiplier must be positive.");
+					*error = strdup("Multiplier must be positive in the datatype exression.");
 					free(*layout);
 					return -1;
 				}
@@ -201,7 +201,7 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 				if ('*' != *p)
 				{
 					*error = strdup("There must be \"*\" sign after a multiplier and before a "
-							"type.");
+							"type in the datatype expression.");
 					free(*layout);
 					return -1;
 				}
@@ -211,7 +211,7 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 			case TYPE_ON_THE_RIGHT: /* type string after multiplier and "*" sign */
 				if (LIBZBXMODBUS_NONE == (type_code = parse_type_name(tokens, p, &jump)))
 				{
-					*error = strdup("Invalid type in datatype expression.");
+					*error = strdup("Invalid type in the datatype expression.");
 					free(*layout);
 					return -1;
 				}
@@ -221,7 +221,7 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 			case TYPE_ON_THE_LEFT: /* type string without multiplier before it */
 				if (LIBZBXMODBUS_NONE == (type_code = parse_type_name(tokens, p, &jump)))
 				{
-					*error = strdup("Invalid type in datatype expression.");
+					*error = strdup("Invalid type in the datatype expression.");
 					free(*layout);
 					return -1;
 				}
@@ -241,13 +241,14 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 			case MULTIPLIER_ON_THE_RIGHT: /* mandatory multiplier after type string and "*" */
 				if (1 != sscanf(p, "%d%n", &multiplier, &jump))
 				{
-					*error = strdup("Multiplier expected after type and \"*\" sign.");
+					*error = strdup("Multiplier expected after type and \"*\" sign in the datatype "
+							"expression.");
 					free(*layout);
 					return -1;
 				}
 				else if (0 >= multiplier)
 				{
-					*error = strdup("Multiplier must be positive.");
+					*error = strdup("Multiplier must be positive in the datatype expression.");
 					free(*layout);
 					return -1;
 				}
@@ -257,10 +258,10 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 					p += jump;
 					break;
 				}
-			case PLUS_OR_NOTHING: /* next summand or the end of expression */
+			case PLUS_OR_NOTHING: /* next summand or the end of datatype expression */
 				if ('+' != *p)
 				{
-					*error = strdup("Expected \"+\" or the end of expression.");
+					*error = strdup("Expected \"+\" or the end of the datatype expression.");
 					free(*layout);
 					return -1;
 				}
@@ -280,7 +281,7 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 	}
 	else if (PLUS_OR_NOTHING != state)
 	{
-		*error = strdup("Unexpected end of expression.");
+		*error = strdup("Unexpected end of the datatype expression.");
 		free(*layout);
 		return -1;
 	}
