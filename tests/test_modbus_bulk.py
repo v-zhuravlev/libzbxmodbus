@@ -108,7 +108,7 @@ class ModbusBulkTestCase(unittest.TestCase):
     def test_modbus_bulk_LE_with_skip(self):
         formula = "1*float+10*skip+1*double"
         first_reg = "6"
-        key = "modbus_read["+self.host+",1,"+first_reg+",3,"+formula+",BE]"
+        key = "modbus_read["+self.host+",1,"+first_reg+",3,"+formula+",LE]"
         expected_json = json.loads("""
             {
                 "6":-71.879005,
@@ -123,7 +123,7 @@ class ModbusBulkTestCase(unittest.TestCase):
     def test_modbus_bulk_MLE_with_skip(self):
         formula = "1*float+16*skip+1*double"
         first_reg = "4"
-        key = "modbus_read["+self.host+",1,"+first_reg+",3,"+formula+",BE]"
+        key = "modbus_read["+self.host+",1,"+first_reg+",3,"+formula+",MLE]"
         expected_json = json.loads("""
             {
                 "4":-71.879005,
@@ -138,7 +138,7 @@ class ModbusBulkTestCase(unittest.TestCase):
     def test_modbus_bulk_MBE_with_skip(self):
         formula = "1*float+22*skip+1*double"
         first_reg = "2"
-        key = "modbus_read["+self.host+",1,"+first_reg+",3,"+formula+",BE]"
+        key = "modbus_read["+self.host+",1,"+first_reg+",3,"+formula+",MBE]"
         expected_json = json.loads("""
             {
                 "2":-71.879005,
