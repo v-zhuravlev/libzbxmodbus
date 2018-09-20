@@ -132,9 +132,6 @@ struct datatype_parse_s
 static void append(datatype_parse_t **layout, size_t *layout_alloc, size_t *layout_offset, int multiplier,
 	datatype_code_t type_code)
 {
-	if (LIBZBXMODBUS_SKIP == type_code)
-		return;
-
 	if (*layout_alloc <= *layout_offset)
 		*layout =
 			realloc(*layout, (*layout_alloc += 16) * sizeof(datatype_parse_t)); /* FIXME realloc() may
@@ -289,12 +286,6 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 
 	append(layout, &layout_alloc, &layout_offset, 0, LIBZBXMODBUS_NONE);
 
-	if (0 == layout_offset)
-	{
-		*error = strdup("No meaningful data to read.");
-		return -1;
-	}
-
 	return reg_count;
 }
 
@@ -402,6 +393,9 @@ void set_result_based_on_datatype(AGENT_RESULT *result, const datatype_parse_t *
 			float    f;
 			uint64_t ui64;
 			double   d;
+
+			if (LIBZBXMODBUS_SKIP == layout->type_code)
+				continue;
 
 			strappf(&json, &json_alloc, &json_offset, "%s\"%d\":", delimiter, start);
 
