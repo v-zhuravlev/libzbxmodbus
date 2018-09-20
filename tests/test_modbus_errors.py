@@ -33,7 +33,7 @@ class ModbusErrorsTestCase(unittest.TestCase):
 
     def test_bad_datatype(self):
         key = "modbus_read_registers["+self.host+",3,14,3,bad]"
-        self.assertEqual(zabbix_get(key),'ZBX_NOTSUPPORTED: Check datatype provided.')
+        self.assertEqual(zabbix_get(key),'ZBX_NOTSUPPORTED: Invalid type in datatype expression.')
 
     def test_int64_datatype(self):
         key = "modbus_read_registers["+self.host+",3,14,3,int64]"
