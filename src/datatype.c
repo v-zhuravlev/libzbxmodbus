@@ -284,6 +284,7 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 		return -1;
 	}
 
+	append(layout, &layout_alloc, &layout_offset, 0, LIBZBXMODBUS_NONE);
 	return reg_count;
 }
 
