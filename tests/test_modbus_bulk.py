@@ -53,7 +53,7 @@ class ModbusBulkTestCase(unittest.TestCase):
             """)
         str_from_zabbix = zabbix_get(key)
         self.assertNotIn("ZBX_NOTSUPPORTED",str_from_zabbix)
-        self.assertDictEqual(json.loads(str_from_zabbix), expected_json)        
+        self.assertDictEqual(json.loads(str_from_zabbix), expected_json)
     
     
     def test_modbus_bulk_BE_with_skip(self):
