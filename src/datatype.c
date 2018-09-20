@@ -65,7 +65,8 @@ const datatype_token_t register_syntax[] =
 	{LIBZBXMODBUS_SIGNED_INT32,	"int32",	"S"},
 	{LIBZBXMODBUS_FLOAT,		"float",	"f"},
 	{LIBZBXMODBUS_UINT64,		"uint64",	"I"},
-	{LIBZBXMODBUS_SIGNED_INT64,	"int64",	NULL},
+/* no suitable data type in Zabbix, we either loose sign or accuracy+range */	
+/*	{LIBZBXMODBUS_SIGNED_INT64,	"int64",	NULL},*/
 	{LIBZBXMODBUS_FLOAT64,		"double",	"d"},
 	{LIBZBXMODBUS_SKIP,		"skip",		NULL},
 	{LIBZBXMODBUS_NONE,		NULL,		NULL}
