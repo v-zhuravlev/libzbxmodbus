@@ -4,7 +4,7 @@ import json
 from zabbix_get import zabbix_get
 
 
-class ModbusDatatypeErorrsTestCase(unittest.TestCase):
+class ModbusDatatypeErrorsTestCase(unittest.TestCase):
 
     host = "172.16.238.2:5020"
 
