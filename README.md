@@ -105,7 +105,7 @@ and some optional params can be provided as well:
     
     otherwise, defaults will be used:  
       MODBUS_BIT if modbus function 1 or 2.  
-      MODBUS_INTEGER if modbus_function 3 or 4.  
+      MODBUS_UINT16 if modbus_function 3 or 4.  
   
 * **endianness(optional):**   
     Modbus endianness for 32bit/64bit datatypes:  

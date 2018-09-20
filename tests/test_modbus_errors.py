@@ -31,15 +31,6 @@ class ModbusErrorsTestCase(unittest.TestCase):
         key = "modbus_read_registers["+self.host+",3,14,,uint32,BE,0]"
         self.assertEqual(zabbix_get(key),'ZBX_NOTSUPPORTED: No Modbus function provided! Please provide either 1,2,3,4.')
 
-    def test_bad_datatype(self):
-        key = "modbus_read_registers["+self.host+",3,14,3,bad]"
-        self.assertEqual(zabbix_get(key),'ZBX_NOTSUPPORTED: Invalid type in datatype expression.')
-
-    def test_int64_datatype(self):
-        key = "modbus_read_registers["+self.host+",3,14,3,int64]"
-        self.assertEqual(zabbix_get(key),'ZBX_NOTSUPPORTED: datatype \'int64\' is not supported.')
-
-
     def test_bad_PDU_flag_integer(self):
         key = "modbus_read_registers["+self.host+",3,14,3,uint32,BE,3]"
         self.assertEqual(zabbix_get(key),'ZBX_NOTSUPPORTED: Check addressing scheme(PDU,PROTOCOL) used')
