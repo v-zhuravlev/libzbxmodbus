@@ -8,7 +8,6 @@ class ModbusBulkTestCase(unittest.TestCase):
     host = "172.16.238.2:5020"
 
     # 16bit, all tests are PDU (start from 0 address)
-    @unittest.skip("Not implemented")
     def test_modbus_bulk_BE(self):
         formula = "2*float+1*int32+1*uint64"
         first_reg = "8"
@@ -25,7 +24,7 @@ class ModbusBulkTestCase(unittest.TestCase):
         self.assertNotIn("ZBX_NOTSUPPORTED",str_from_zabbix)
         self.assertDictEqual(json.loads(str_from_zabbix), expected_json)
 
-    @unittest.skip("Not implemented")
+    
     def test_modbus_bulk_int16_with_skip(self):
         formula = "2*skip+2*int16+1*skip+1*int16"
         first_reg = "2"
@@ -41,7 +40,7 @@ class ModbusBulkTestCase(unittest.TestCase):
         self.assertNotIn("ZBX_NOTSUPPORTED",str_from_zabbix)
         self.assertDictEqual(json.loads(str_from_zabbix), expected_json)
     
-    @unittest.skip("Not implemented")
+    
     def test_modbus_bulk_BE_with_skip(self):
         formula = "6*skip+2*float+1*int32+1*uint64"
         first_reg = "2"
@@ -59,7 +58,7 @@ class ModbusBulkTestCase(unittest.TestCase):
         self.assertDictEqual(json.loads(str_from_zabbix), expected_json)
     
         
-    @unittest.skip("Not implemented")
+    
     def test_modbus_bulk_BE_with_whitespace(self):
         formula = "\' 1*int32 + 1*uint64 \'"
         first_reg = "12"
@@ -74,7 +73,7 @@ class ModbusBulkTestCase(unittest.TestCase):
         self.assertNotIn("ZBX_NOTSUPPORTED",str_from_zabbix)
         self.assertDictEqual(json.loads(str_from_zabbix), expected_json)
     
-    @unittest.skip("Not implemented")
+    
     def test_modbus_bulk_BE_no_multiplier(self):
         formula = "int32+uint64"
         first_reg = "12"
@@ -90,7 +89,7 @@ class ModbusBulkTestCase(unittest.TestCase):
         self.assertDictEqual(json.loads(str_from_zabbix), expected_json)
 
     #must work with other endianess too:
-    @unittest.skip("Not implemented")
+    
     def test_modbus_bulk_LE_with_skip(self):
         formula = "1*float+10*skip+1*double"
         first_reg = "6"
@@ -105,7 +104,7 @@ class ModbusBulkTestCase(unittest.TestCase):
         self.assertNotIn("ZBX_NOTSUPPORTED",str_from_zabbix)
         self.assertDictEqual(json.loads(str_from_zabbix), expected_json)
 
-    @unittest.skip("Not implemented")
+    
     def test_modbus_bulk_MLE_with_skip(self):
         formula = "1*float+16*skip+1*double"
         first_reg = "4"
@@ -120,7 +119,7 @@ class ModbusBulkTestCase(unittest.TestCase):
         self.assertNotIn("ZBX_NOTSUPPORTED",str_from_zabbix)
         self.assertDictEqual(json.loads(str_from_zabbix), expected_json)
 
-    @unittest.skip("Not implemented")
+    
     def test_modbus_bulk_MBE_with_skip(self):
         formula = "1*float+22*skip+1*double"
         first_reg = "2"
@@ -138,7 +137,7 @@ class ModbusBulkTestCase(unittest.TestCase):
     
 
     # test that 'bit' is not supported:
-    @unittest.skip("Not implemented")
+    
     def test_modbus_bulk_bit_not_allowed(self):
         formula = "1*bit+10*skip+1*double"
         first_reg = "12"
