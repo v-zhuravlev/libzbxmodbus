@@ -49,6 +49,8 @@ typedef struct
 	const char *	  legacy_name;
 } datatype_token_t;
 
+/* first element of *_syntax array will be used as default */
+
 /* clang-format off */
 const datatype_token_t bit_syntax[] =
 {
@@ -134,10 +136,11 @@ static void append(datatype_parse_t **layout, size_t *layout_alloc, size_t *layo
 	datatype_code_t type_code)
 {
 	if (*layout_alloc <= *layout_offset)
-		*layout =
-			realloc(*layout, (*layout_alloc += 16) * sizeof(datatype_parse_t)); /* FIXME realloc() may
-											       return NULL, handle it
-											       somehow */
+	{
+		*layout = realloc(*layout, (*layout_alloc += 16) * sizeof(datatype_parse_t)); /* FIXME realloc() may
+												 return NULL, handle it
+												 somehow */
+	}
 
 	(*layout)[(*layout_offset)++] = (datatype_parse_t){.type_code = type_code, .multiplier = multiplier};
 }
@@ -150,9 +153,6 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 	datatype_code_t		type_code;
 	size_t			layout_alloc = 0, layout_offset = 0;
 	int			reg_count = 0, multiplier;
-
-	if (NULL == datatype || '\0' == *datatype)
-		return 1;
 
 	switch (syntax)
 	{
@@ -167,6 +167,12 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 	}
 
 	*layout = NULL;
+
+	if (NULL == datatype || '\0' == *datatype)
+	{
+		append(layout, &layout_alloc, &layout_offset, 1, tokens[0].type_code);
+		return type_registers(tokens[0].type_code);
+	}
 
 	while ('\0' != *p)
 	{
