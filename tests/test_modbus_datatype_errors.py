@@ -43,10 +43,11 @@ class ModbusDatatypeErrorsTestCase(unittest.TestCase):
         key = "modbus_read_registers["+self.host+",1,2,3,"+formula+"]"
         self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Datatype expression can neither begin nor end with skipping.')
 
+    @unittest.skip("Requires shell escaping")
     def test_modbus_datatype_whitespace_0(self):
-        formula = "'     '"
+        formula = "\'\"    \"\'"
         key = "modbus_read_registers["+self.host+",1,2,3,"+formula+"]"
-        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Invalid type in the datatype expression.')
+        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Unexpected end of the datatype expression.')
     
     def test_modbus_no_datatype_for_read_registers_0(self):
         """This test checks that if no datatype is provided(with ',') then 'uint16' must be used for functions 3 and 4"""
