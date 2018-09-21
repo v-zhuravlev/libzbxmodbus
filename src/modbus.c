@@ -266,7 +266,6 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 	{
 		SET_MSG_RESULT(result, error);
 		modbus_free(ctx);
-		free(result_layout);
 		return SYSINFO_RET_FAIL;
 	}
 
