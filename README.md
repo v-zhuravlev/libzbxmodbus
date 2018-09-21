@@ -83,8 +83,7 @@ where:
     `3` - for READ HOLDING REGISTERS  
     `4` - for READ INPUT REGISTERS  
     
-* **datatype(optional):**  
-    Note: Datatypes can be combined in the datatype expression here to request more than one register at once. See below how to do this.  
+* **datatype_expression(optional):**  
     
     Provide datatype:  
       `b` or `bit` - for MODBUS_BIT  
@@ -99,6 +98,8 @@ where:
     otherwise, defaults will be used:  
       MODBUS_BIT if modbus_function is `1` or `2`.  
       MODBUS_UINT16 if modbus_function is `3` or `4`.  
+
+    Note: Datatypes can be combined in the datatype expression here to request more than one register at once. See section (5) below for how to do this.        
     
     
   
