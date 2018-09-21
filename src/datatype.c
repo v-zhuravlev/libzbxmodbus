@@ -292,6 +292,13 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 		return -1;
 	}
 
+	if (LIBZBXMODBUS_SKIP == (*layout)[0].type_code || LIBZBXMODBUS_SKIP == (*layout)[layout_offset - 1].type_code)
+	{
+		*error = strdup("Datatype expression can neither begin nor end with skipping.");
+		free(*layout);
+		return -1;
+	}
+
 	append(layout, &layout_alloc, &layout_offset, 0, LIBZBXMODBUS_NONE);
 
 	return reg_count;
@@ -380,6 +387,9 @@ void set_result_based_on_datatype(AGENT_RESULT *result, const datatype_parse_t *
 			case LIBZBXMODBUS_SKIP:
 			case LIBZBXMODBUS_NONE:
 			default:
+				/* validation in parse_datatype() should prevent this from happening */
+				/* cannot use SET_MSG_RESULT() here since SYSINFO_RET_OK is returned */
+				SET_TEXT_RESULT(result, strdup("Internal error: unexpected layout."));
 				return;
 		}
 	}
