@@ -31,25 +31,23 @@ class ModbusDatatypeErrorsTestCase(unittest.TestCase):
     def test_modbus_datatype_skip_0(self):
         formula = "skip"
         key = "modbus_read_registers["+self.host+",1,2,3,"+formula+"]"
-        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Invalid type in the datatype expression.')
+        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Datatype expression can neither begin nor end with skipping.')
 
     def test_modbus_datatype_skip_1(self):
         formula = "2*skip"
         key = "modbus_read_registers["+self.host+",1,2,3,"+formula+"]"
-        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Invalid type in the datatype expression.')
+        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Datatype expression can neither begin nor end with skipping.')
 
     def test_modbus_datatype_skip_2(self):
         formula = "'  skip   '"
         key = "modbus_read_registers["+self.host+",1,2,3,"+formula+"]"
-        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Invalid type in the datatype expression.')
+        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Datatype expression can neither begin nor end with skipping.')
 
-    @unittest.skip("This test currently breaks the module")
     def test_modbus_datatype_whitespace_0(self):
         formula = "'     '"
         key = "modbus_read_registers["+self.host+",1,2,3,"+formula+"]"
         self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Invalid type in the datatype expression.')
     
-    @unittest.skip("This test currently breaks the module")
     def test_modbus_no_datatype_for_read_registers(self):
         """This test checks that if no datatype is provided then 'uint16' must be used for functions 3 and 4"""
         formula = ""
