@@ -5,7 +5,7 @@ This is the [Loadable module](https://www.zabbix.com/documentation/4.0/manual/co
 This module features:
 - [libmodbus](https://github.com/stephane/libmodbus) as a core library
 - Support of Modbus functions: `READ COILS`, `READ DISCRETE INPUT STATUS`, `READ HOLDING REGISTERS` and `READ INPUT REGISTERS`
-- Support of 16bit,32bit,64bit datatypes like unsigned integers, signed integers, floats, and doubles.  
+- Support of 16bit, 32bit, 64bit datatypes like unsigned integers, signed integers, floats, and doubles.  
 - Support of four endianess types for 32bit, 64bit datatypes: `Big Endian`, `Little Endian`, `Mid-Big Endian`, `Mid-Little Endian`
 - **Bulk data collection support**. You can now get as many Modbus registers as needed with just a single command and return it as JSON object to Zabbix. Huge thanks to [@i-ky](https://github.com/i-ky) for implementing it.
 - Resource locking (via IPC semaphores). It is used when using RTU or Encapsulated Modbus. So two or more Zabbix pollers don't poll the same serial port at the same time. No locking is used for Modbus TCP.  
