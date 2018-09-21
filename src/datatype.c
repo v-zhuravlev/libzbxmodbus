@@ -113,6 +113,7 @@ static datatype_code_t parse_type_name(const datatype_token_t *tokens, const cha
 		}
 	}
 
+	*jump = token_length; /* to highlight token we tried to parse in error message */
 	return LIBZBXMODBUS_NONE;
 }
 
@@ -143,6 +144,30 @@ static void append(datatype_parse_t **layout, size_t *layout_alloc, size_t *layo
 	}
 
 	(*layout)[(*layout_offset)++] = (datatype_parse_t){.type_code = type_code, .multiplier = multiplier};
+}
+
+static void strappf(char **old, size_t *old_size, size_t *old_offset, const char *format, ...);
+
+static char *compose(const char *description, const char *datatype, const char *position, int length)
+{
+	char * message = NULL;
+	size_t size = 0, offset = 0;
+
+	strappf(&message, &size, &offset, "%s: ", description);
+
+	if (datatype < position)
+		strappf(&message, &size, &offset, "%.*s", (int)(position - datatype), datatype);
+
+	while (0 < length--)
+	{
+		/* assume ASCII, no Unicode */
+		/* use "combining double low line" character to highlight */
+		strappf(&message, &size, &offset, "\xcc\xb3%c", *position++);
+	}
+
+	strappf(&message, &size, &offset, "%s", position);
+
+	return message;
 }
 
 int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_parse_t **layout, char **error)
@@ -194,7 +219,8 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 				}
 				else if (0 >= multiplier)
 				{
-					*error = strdup("Multiplier must be positive in the datatype exression.");
+					*error = compose("Multiplier must be positive in the datatype exression",
+						datatype, p, jump);
 					free(*layout);
 					return -1;
 				}
@@ -207,8 +233,9 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 			case CROSS_AFTER_MULTIPLIER: /* mandatory "*" after left hand side multiplier */
 				if ('*' != *p)
 				{
-					*error = strdup("There must be \"*\" sign after a multiplier and before a "
-							"type in the datatype expression.");
+					*error = compose("There must be \"*\" sign after a multiplier and before a "
+							 "type in the datatype expression",
+						datatype, p, 1);
 					free(*layout);
 					return -1;
 				}
@@ -218,7 +245,7 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 			case TYPE_ON_THE_RIGHT: /* type string after multiplier and "*" sign */
 				if (LIBZBXMODBUS_NONE == (type_code = parse_type_name(tokens, p, &jump)))
 				{
-					*error = strdup("Invalid type in the datatype expression.");
+					*error = compose("Invalid type in the datatype expression", datatype, p, jump);
 					free(*layout);
 					return -1;
 				}
@@ -228,7 +255,7 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 			case TYPE_ON_THE_LEFT: /* type string without multiplier before it */
 				if (LIBZBXMODBUS_NONE == (type_code = parse_type_name(tokens, p, &jump)))
 				{
-					*error = strdup("Invalid type in the datatype expression.");
+					*error = compose("Invalid type in the datatype expression", datatype, p, jump);
 					free(*layout);
 					return -1;
 				}
@@ -248,14 +275,17 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 			case MULTIPLIER_ON_THE_RIGHT: /* mandatory multiplier after type string and "*" */
 				if (1 != sscanf(p, "%d%n", &multiplier, &jump))
 				{
-					*error = strdup("Multiplier expected after type and \"*\" sign in the datatype "
-							"expression.");
+					*error =
+						compose("Multiplier expected after type and \"*\" sign in the datatype "
+							"expression",
+							datatype, p, 1);
 					free(*layout);
 					return -1;
 				}
 				else if (0 >= multiplier)
 				{
-					*error = strdup("Multiplier must be positive in the datatype expression.");
+					*error = compose("Multiplier must be positive in the datatype expression",
+						datatype, p, jump);
 					free(*layout);
 					return -1;
 				}
@@ -268,7 +298,8 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 			case PLUS_OR_NOTHING: /* next summand or the end of datatype expression */
 				if ('+' != *p)
 				{
-					*error = strdup("Expected \"+\" or the end of the datatype expression.");
+					*error = compose(
+						"Expected \"+\" or the end of the datatype expression", datatype, p, 1);
 					free(*layout);
 					return -1;
 				}
