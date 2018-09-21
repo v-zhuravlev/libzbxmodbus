@@ -171,6 +171,7 @@ int parse_datatype(datatype_syntax_t syntax, const char *datatype, datatype_pars
 	if (NULL == datatype || '\0' == *datatype)
 	{
 		append(layout, &layout_alloc, &layout_offset, 1, tokens[0].type_code);
+		append(layout, &layout_alloc, &layout_offset, 0, LIBZBXMODBUS_NONE);
 		return type_registers(tokens[0].type_code);
 	}
 
