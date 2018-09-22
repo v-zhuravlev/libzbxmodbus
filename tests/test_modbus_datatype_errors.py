@@ -11,17 +11,17 @@ class ModbusDatatypeErrorsTestCase(unittest.TestCase):
     def test_modbus_datatype_no_multiplier_sign(self):
         formula = "2int16"
         key = "modbus_read_registers["+self.host+",1,2,3,"+formula+"]"
-        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: There must be "*" sign after a multiplier and before a type in the datatype expression.')
+        self.assertIn('ZBX_NOTSUPPORTED: There must be "*" sign after a multiplier and before a type in the datatype expression:', zabbix_get(key))
 
     def test_modbus_datatype_negative_multiplier(self):
         formula = "-2*int16"
         key = "modbus_read_registers["+self.host+",1,2,3,"+formula+"]"
-        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Multiplier must be positive in the datatype exression.')
+        self.assertIn('ZBX_NOTSUPPORTED: Multiplier must be positive in the datatype exression:', zabbix_get(key))
 
     def test_modbus_datatype_unknown(self):
         formula = "2*bad"
         key = "modbus_read_registers["+self.host+",1,2,3,"+formula+"]"
-        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Invalid type in the datatype expression.')
+        self.assertIn('ZBX_NOTSUPPORTED: Invalid type in the datatype expression:', zabbix_get(key))
 
     def test_modbus_datatype_unexpected_end_0(self):
         formula = "2*int16+"
@@ -84,15 +84,15 @@ class ModbusDatatypeErrorsTestCase(unittest.TestCase):
         formula = "1*bit+10*skip+1*double"
         first_reg = "12"
         key = "modbus_read["+self.host+",1,"+first_reg+",3,"+formula+",BE]"
-        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Usage of \'bit\' is not allowed in the datatype expression.')
+        self.assertIn('ZBX_NOTSUPPORTED: Invalid type in the datatype expression:', zabbix_get(key))
 
     def test_bad_datatype(self):
         key = "modbus_read_registers["+self.host+",3,14,3,bad]"
-        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Invalid type in the datatype expression.')
+        self.assertIn('ZBX_NOTSUPPORTED: Invalid type in the datatype expression:', zabbix_get(key))
 
     def test_int64_datatype(self):
         key = "modbus_read_registers["+self.host+",3,14,3,int64]"
-        self.assertEqual(zabbix_get(key), 'ZBX_NOTSUPPORTED: Invalid type in the datatype expression.')
+        self.assertIn('ZBX_NOTSUPPORTED: Invalid type in the datatype expression:', zabbix_get(key))
 
 
 if __name__ == '__main__':
