@@ -65,19 +65,17 @@ class ModbusDatatypeErrorsTestCase(unittest.TestCase):
         key = "modbus_read_registers["+self.host+",1,2,3,,1,0]"
         self.assertEqual(zabbix_get(key), '36802')
     
-    @unittest.skip("Implement this first")
     def test_modbus_no_datatype_for_read_coils_0(self):
         """This test checks that if no datatype is provided(with ',') then 'bit' must be used for functions 1 and 2"""
         formula = ""
-        key = "modbus_read_registers["+self.host+",1,2,1,"+formula+"]"
-        self.assertEqual(zabbix_get(key), 'some coil value')
+        key = "modbus_read_registers["+self.host+",1,0,1,"+formula+"]"
+        self.assertEqual(zabbix_get(key), '0')
 
-    @unittest.skip("Implement this first")
     def test_modbus_no_datatype_for_read_coils_1(self):
         """This test checks that if no datatype is provided then 'bit' must be used for functions 1 and 2"""
         formula = ""
-        key = "modbus_read_registers["+self.host+",1,2,1]"
-        self.assertEqual(zabbix_get(key), 'some coil value')
+        key = "modbus_read_registers["+self.host+",1,0,1]"
+        self.assertEqual(zabbix_get(key), '0')
 
     # test that 'bit' is not supported:
     def test_modbus_datatype_expression_bit_not_allowed(self):

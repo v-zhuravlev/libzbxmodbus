@@ -88,10 +88,12 @@ def run_server(modbus_type,port):
     # ----------------------------------------------------------------------- # 
     
     #block = ModbusSequentialDataBlock(0x00, [16]*0xff)
-    block = ModbusSparseDataBlock({
-        #this block is to test 32bits
-        1:0xC28F,#PDU0 - BE
-        2:0xC20D,
+    coils_block = ModbusSparseDataBlock({
+        1: 0,
+        2: 1,
+        3: 0,
+        4: 1
+    })
 
         3:0x8FC2,#PDU2 - MBE
         4:0x0DC2,
@@ -137,7 +139,8 @@ def run_server(modbus_type,port):
         29:0xB050,
         30:0x7CF2
     })
-    store = ModbusSlaveContext(di=block, co=block, hr=block, ir=block)
+    store = ModbusSlaveContext(
+        di=coils_block, co=coils_block, hr=registers_block, ir=registers_block)
 
     context = ModbusServerContext(slaves=store, single=True)
     
