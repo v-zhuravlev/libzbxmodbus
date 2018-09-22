@@ -1,13 +1,13 @@
 # libzbxmodbus
 [![Build Status](https://travis-ci.org/v-zhuravlev/libzbxmodbus.svg?branch=master)](https://travis-ci.org/v-zhuravlev/libzbxmodbus)  
-This is the [Loadable module](https://www.zabbix.com/documentation/4.0/manual/config/items/loadablemodules) that adds support for Modbus (TCP, RTU and "RTU over TCP"(encapsulated) ) in Zabbix.
+This is the [Loadable module](https://www.zabbix.com/documentation/4.0/manual/config/items/loadablemodules) that adds support for Modbus (TCP, RTU and "RTU over TCP" (encapsulated)) in Zabbix.
 
 This module features:
 - [libmodbus](https://github.com/stephane/libmodbus) as a core library
 - Support of Modbus functions: `READ COILS`, `READ DISCRETE INPUT STATUS`, `READ HOLDING REGISTERS` and `READ INPUT REGISTERS`
 - Support of 16bit, 32bit, 64bit datatypes like unsigned integers, signed integers, floats, and doubles.  
 - Support of four endianess types for 32bit, 64bit datatypes: `Big Endian`, `Little Endian`, `Mid-Big Endian`, `Mid-Little Endian`
-- **Bulk data collection support**. You can now get as many Modbus registers as needed with just a single command and return it as JSON object to Zabbix. Huge thanks to [@i-ky](https://github.com/i-ky) for implementing it.
+- **Bulk data collection support**. You can now get as many Modbus registers as needed with just a single command and return it as JSON object to Zabbix. Huge thanks to @i-ky for implementing it.
 - Resource locking (via IPC semaphores). It is used when using RTU or Encapsulated Modbus. So two or more Zabbix pollers don't poll the same serial port at the same time. No locking is used for Modbus TCP.  
 
 ## 1. Install
@@ -40,7 +40,7 @@ Note: If you want to install from Github sources, see hints [here](https://githu
   Configure the new item with the following type:  
   
 * *Simple check* if the module is on zabbix_server or zabbix_proxy  
-* *Zabbix Agent* or *Zabbix Agent(active)* if the module is on zabbix_agent  
+* *Zabbix Agent* or *Zabbix Agent (active)* if the module is on zabbix_agentd
   
   and then input the key:  
   
@@ -83,23 +83,23 @@ where:
     `3` - for READ HOLDING REGISTERS  
     `4` - for READ INPUT REGISTERS  
     
-* **datatype_expression(optional):**  
+* **datatype_expression (optional):**  
     
     Provide datatype:  
       `b` or `bit` - for MODBUS_BIT  
       `i` or `uint16` - for MODBUS_UINT16, 16bit (unsigned)  
-      `s` or `int16` - for MODBUS_SIGNED_INT, 16bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
+      `s` or `int16` - for MODBUS_SIGNED_INT, 16bit (NOTE: in Zabbix use 'Type of information' Numeric (float))  
       `l` or `uint32` - for MODBUS_UINT32, 32bit (unsigned)  
-      `S` or `int32` - for MODBUS_SIGNED_INT32, 32bit (NOTE: in Zabbix use 'Type of information' Numeric(float) )  
+      `S` or `int32` - for MODBUS_SIGNED_INT32, 32bit (NOTE: in Zabbix use 'Type of information' Numeric (float))  
       `f` or `float` - for MODBUS_FLOAT, 32bit  
-      `I` or `uint64`- for MODBUS_UINT64, 64bit (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric(unsigned) )  
+      `I` or `uint64`- for MODBUS_UINT64, 64bit (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric (unsigned))  
       `d` or `double`- for MODBUS_FLOAT64, 64bit  
     
     otherwise, defaults will be used:  
       MODBUS_BIT if modbus_function is `1` or `2`.  
       MODBUS_UINT16 if modbus_function is `3` or `4`.  
 
-    Note: Datatypes can be combined in the datatype expression here to request more than one register at once. See section (5) below for how to do this.        
+    Note: Datatypes can be combined in the datatype expression here to request more than one register at once. See [section (5)](#5-bulk-data-collection) below for how to do this.
     
     
   
@@ -144,7 +144,7 @@ In order to get data in bulk, you first need to define which registers you want 
 The simplest datatype expression would be 
 `2*uint16` that you write in the key: `modbus_read[{$MODBUS_PORT},{$MODBUS_SLAVE},10,3,2*uint16]`  
 This expression is quite simple - it just retrieves two unsigned integers starting from register 10. Here is what you would get:
-```
+```json
 {
   "10":123,
   "11":321
@@ -160,12 +160,12 @@ To process it by Zabbix, first create master item:
 
 
 
-Then, create two [dependent items](https://www.zabbix.com/documentation/3.4/manual/config/items/itemtypes/dependent_items):  
+Then, create two [dependent items](https://www.zabbix.com/documentation/4.0/manual/config/items/itemtypes/dependent_items):
 The first item:  
 - Key: register10    
 - Type: Dependent item
 - Master item: Modbus bulk request
-- Type of information: Numeric(Unsigned)  
+- Type of information: Numeric (unsigned)
 - In Preprocessing tab: add JSONPath step with parameter: `$.10`
 ![image](https://user-images.githubusercontent.com/14870891/45901353-507af600-bdeb-11e8-9350-c7a0c5ab8e7f.png)
 ![image](https://user-images.githubusercontent.com/14870891/45901388-67b9e380-bdeb-11e8-850c-e95c3bb4aa7e.png)
@@ -176,7 +176,7 @@ And the second item:
 - Key: register11    
 - Type: Dependent item
 - Master item: Modbus bulk request
-- Type of information: Numeric(Unsigned)  
+- Type of information: Numeric (unsigned)
 - In Preprocessing tab: add JSONPath step with parameter: `$.11`
 
 Congratulations! You've just collected two metrics with the single Modbus command.  
@@ -186,7 +186,7 @@ Note: You can find examples how mass data collection works in Zabbix [here](http
 But datatype expressions can be more advanced. First, you can combine together different datatypes -   
 `uint16+double+float`, and you can define how many times each datatype should be repeated - 
 `2*uint16+double+float*3`. So in a key `modbus_read[{$MODBUS_PORT},{$MODBUS_SLAVE},10,3,2*uint16+double+float*3]` you would get a JSON:
-```
+```json
 {
   "10":123,
   "11":321,
@@ -201,7 +201,7 @@ Note two things here. First, since `double` is 4 words long (64bit/16bit = 4), n
 ### 5.3. Example with skip
 Modbus protocol supports only sequential read of registers. But what if you don't need all of them? For that, there is a special keyword `skip` you can use in order to retrieve multiple registers that are not located together. Example: Let's retrieve two `int16` from registers with addresses of `10` and `20`. Zabbix key 
 `modbus_read[{$MODBUS_PORT},{$MODBUS_SLAVE},10,3,int16+10*skip+int16]` would give you:
-```
+```json
 {
   "10":123,
   "20":-123
