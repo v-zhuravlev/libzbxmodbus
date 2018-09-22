@@ -8,9 +8,9 @@ party libraries (unless you need to use the serial protocols which require
 pyserial). This is helpful in constrained or old environments where using
 twisted just is not feasable. What follows is an examle of its use:
 """
-# --------------------------------------------------------------------------- # 
+# --------------------------------------------------------------------------- #
 # import the various server implementations
-# --------------------------------------------------------------------------- # 
+# --------------------------------------------------------------------------- #
 from pymodbus.server.sync import StartTcpServer
 from pymodbus.server.sync import StartUdpServer
 from pymodbus.server.sync import StartSerialServer
@@ -20,9 +20,9 @@ from pymodbus.datastore import ModbusSequentialDataBlock, ModbusSparseDataBlock
 from pymodbus.datastore import ModbusSlaveContext, ModbusServerContext
 
 from pymodbus.transaction import ModbusRtuFramer, ModbusBinaryFramer
-# --------------------------------------------------------------------------- # 
+# --------------------------------------------------------------------------- #
 # configure the service logging
-# --------------------------------------------------------------------------- # 
+# --------------------------------------------------------------------------- #
 import logging
 FORMAT = ('%(asctime)-15s %(threadName)-15s'
           ' %(levelname)-8s %(module)-15s:%(lineno)-8s %(message)s')
@@ -31,10 +31,10 @@ log = logging.getLogger()
 log.setLevel(logging.DEBUG)
 
 
-def run_server(modbus_type,port):
-    # ----------------------------------------------------------------------- # 
+def run_server(modbus_type, port):
+    # ----------------------------------------------------------------------- #
     # initialize your data store
-    # ----------------------------------------------------------------------- # 
+    # ----------------------------------------------------------------------- #
     # The datastores only respond to the addresses that they are initialized to
     # Therefore, if you initialize a DataBlock to addresses of 0x00 to 0xFF, a
     # request to 0x100 will respond with an invalid address exception. This is
@@ -85,8 +85,8 @@ def run_server(modbus_type,port):
     # will map to (1-8)::
     #
     #     store = ModbusSlaveContext(..., zero_mode=True)
-    # ----------------------------------------------------------------------- # 
-    
+    # ----------------------------------------------------------------------- #
+
     #block = ModbusSequentialDataBlock(0x00, [16]*0xff)
     coils_block = ModbusSparseDataBlock({
         1: 0,
@@ -95,60 +95,65 @@ def run_server(modbus_type,port):
         4: 1
     })
 
-        3:0x8FC2,#PDU2 - MBE
-        4:0x0DC2,
+    registers_block = ModbusSparseDataBlock({
+        # this block is to test 32bits
+        1: 0xC28F,  # PDU0 - BE
+        2: 0xC20D,
 
-        5:0xC20D,#PDU4 - MLE
-        6:0xC28F,
+        3: 0x8FC2,  # PDU2 - MBE
+        4: 0x0DC2,
 
-        7:0x0DC2,#PDU6 - LE
-        8:0x8FC2,
+        5: 0xC20D,  # PDU4 - MLE
+        6: 0xC28F,
+
+        7: 0x0DC2,  # PDU6 - LE
+        8: 0x8FC2,
         #
-        9:0xC28F,#PDU8 - same as (PDU0 - BE)
-        10:0xC20D,
+        9: 0xC28F,  # PDU8 - same as (PDU0 - BE)
+        10: 0xC20D,
 
-        11:0xC28F,#PDU0 - same as (PDU0 - BE)
-        12:0xC20D,
+        11: 0xC28F,  # PDU0 - same as (PDU0 - BE)
+        12: 0xC20D,
 
         # test int32
-        13:0xFFFF,#PDU12
-        14:0xFDCE,
-        
+        13: 0xFFFF,  # PDU12
+        14: 0xFDCE,
+
         # this block is to test 64bits
-        #BE
-        15:0xBFBF,#PDU14
-        16:0x9A6B,
-        17:0x50B0,
-        18:0xF27C,
+        # BE
+        15: 0xBFBF,  # PDU14
+        16: 0x9A6B,
+        17: 0x50B0,
+        18: 0xF27C,
 
-        #LE
-        19:0x7CF2,#PDU18
-        20:0xB050,
-        21:0x6B9A,
-        22:0xBFBF,
+        # LE
+        19: 0x7CF2,  # PDU18
+        20: 0xB050,
+        21: 0x6B9A,
+        22: 0xBFBF,
 
-        #MLE
-        23:0xF27C,#PDU22
-        24:0x50B0,
-        25:0x9A6B,
-        26:0xBFBF,
+        # MLE
+        23: 0xF27C,  # PDU22
+        24: 0x50B0,
+        25: 0x9A6B,
+        26: 0xBFBF,
 
-        #MBE
-        27:0xBFBF,#PDU26
-        28:0x6B9A,
-        29:0xB050,
-        30:0x7CF2
+        # MBE
+        27: 0xBFBF,  # PDU26
+        28: 0x6B9A,
+        29: 0xB050,
+        30: 0x7CF2
     })
     store = ModbusSlaveContext(
         di=coils_block, co=coils_block, hr=registers_block, ir=registers_block)
 
     context = ModbusServerContext(slaves=store, single=True)
-    
-    # ----------------------------------------------------------------------- # 
+
+    # ----------------------------------------------------------------------- #
     # initialize the server information
-    # ----------------------------------------------------------------------- # 
+    # ----------------------------------------------------------------------- #
     # If you don't set this or any fields, they are defaulted to empty strings.
-    # ----------------------------------------------------------------------- # 
+    # ----------------------------------------------------------------------- #
     identity = ModbusDeviceIdentification()
     identity.VendorName = 'Pymodbus'
     identity.ProductCode = 'PM'
@@ -159,42 +164,37 @@ def run_server(modbus_type,port):
 
     # ----------------------------------------------------------------------- #
     # run the server you want
-    # ----------------------------------------------------------------------- # 
+    # ----------------------------------------------------------------------- #
     # Tcp:
     if (modbus_type == 'TCP'):
         StartTcpServer(context, identity=identity, address=("0.0.0.0", port))
-    elif (modbus_type =='TCP_RTU'):
+    elif (modbus_type == 'TCP_RTU'):
         # TCP with different framer
         StartTcpServer(context, identity=identity,
-                    framer=ModbusRtuFramer, address=("0.0.0.0", port))
-
-
-    
+                       framer=ModbusRtuFramer, address=("0.0.0.0", port))
 
     # Udp:
     # StartUdpServer(context, identity=identity, address=("0.0.0.0", 5020))
-    
+
     # Ascii:
     # StartSerialServer(context, identity=identity,
     #                    port='/dev/ttyp0', timeout=1)
-    
+
     # RTU:
     # StartSerialServer(context, framer=ModbusRtuFramer, identity=identity,
     #                   port='/dev/ttyp0', timeout=.005, baudrate=9600)
-
     # Binary
     # StartSerialServer(context,
     #                   identity=identity,
     #                   framer=ModbusBinaryFramer,
     #                   port='/dev/ttyp0',
     #                   timeout=1)
-
 from multiprocessing import Process
 
 if __name__ == "__main__":
 
-    p = Process(target=run_server,args=('TCP',5020))
+    p = Process(target=run_server, args=('TCP', 5020))
     p.start()
-    #add RTU over TCP mode for tests
-    p2 = Process(target=run_server,args=('TCP_RTU',5021))
+    # add RTU over TCP mode for tests
+    p2 = Process(target=run_server, args=('TCP_RTU', 5021))
     p2.start()
