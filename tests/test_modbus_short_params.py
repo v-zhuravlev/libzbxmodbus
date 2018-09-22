@@ -5,6 +5,10 @@ from zabbix_get import zabbix_get
 class ModbusTestCase(unittest.TestCase):
 
     host = "172.16.238.2:5020"
+    # test coils(bits)
+    def test_modbus_datatype_short_bit_0(self):
+        key = "modbus_read["+self.host+",1,1,1,b]"
+        self.assertEqual(zabbix_get(key),'1')
 
     # 16bit, all tests are PDU (start from 0 address)
     # INT16,Big Endian

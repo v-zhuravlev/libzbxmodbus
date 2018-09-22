@@ -7,6 +7,53 @@ from zabbix_get import zabbix_get
 class ModbusBulkTestCase(unittest.TestCase):
 
     host = "172.16.238.2:5020"
+    # bits (coils, discrete inputs)
+    def test_modbus_bulk_bits_coils(self):
+        formula = "4*bit"
+        first_reg = "0"
+        key = "modbus_read["+self.host+",1,"+first_reg+",1,"+formula+"]"
+        expected_json = json.loads("""
+            {
+                "0":0,
+                "1":1,
+                "2":0,
+                "3":1
+            }
+            """)
+        str_from_zabbix = zabbix_get(key)
+        self.assertNotIn("ZBX_NOTSUPPORTED", str_from_zabbix)
+        self.assertDictEqual(json.loads(str_from_zabbix), expected_json)
+
+    def test_modbus_bulk_bits_discrete_inputs(self):
+        formula = "4*bit"
+        first_reg = "0"
+        key = "modbus_read["+self.host+",1,"+first_reg+",2,"+formula+"]"
+        expected_json = json.loads("""
+            {
+                "0":0,
+                "1":1,
+                "2":0,
+                "3":1
+            }
+            """)
+        str_from_zabbix = zabbix_get(key)
+        self.assertNotIn("ZBX_NOTSUPPORTED", str_from_zabbix)
+        self.assertDictEqual(json.loads(str_from_zabbix), expected_json)        
+
+    def test_modbus_bulk_bits_with_skip(self):
+        formula = "1*bit+2*skip+1*bit"
+        first_reg = "0"
+        key = "modbus_read["+self.host+",1,"+first_reg+",1,"+formula+"]"
+        expected_json = json.loads("""
+            {
+                "0":0,
+                "3":1
+            }
+            """)
+        str_from_zabbix = zabbix_get(key)
+        self.assertNotIn("ZBX_NOTSUPPORTED", str_from_zabbix)
+        self.assertDictEqual(json.loads(str_from_zabbix), expected_json)
+
 
     # 16bit, all tests are PDU (start from 0 address)
     def test_modbus_bulk_BE(self):
