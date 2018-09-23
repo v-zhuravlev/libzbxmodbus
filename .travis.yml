@@ -33,9 +33,8 @@ before_install:
   - make
   - pushd tests/docker && docker-compose up -d
   - popd
-  - docker logs --since 1h docker_zabbix-agent-modbus_1
-  - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k agent.ping"
-  - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k modbus_read[172.16.238.2:5020,1,2,3,uint16,1,1]"
+  - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k agent.ping" || (docker logs --since 1h docker_zabbix-agent-modbus_1 ; false)
+  - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k modbus_read[172.16.238.2:5020,1,2,3,uint16,1,1]" || (docker logs --since 1h docker_zabbix-agent-modbus_1 ; false)
 script:
   - ./run-tests.sh
 after_failure:
