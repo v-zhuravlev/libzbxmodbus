@@ -8,6 +8,7 @@ class TestModbusBulkCase(object):
 
     host = "172.16.238.2:5020"
     # bits (coils, discrete inputs)
+
     def test_modbus_bulk_bits_coils(self):
         formula = "4*bit"
         first_reg = "0"
@@ -21,8 +22,8 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     def test_modbus_bulk_bits_discrete_inputs(self):
         formula = "4*bit"
@@ -37,8 +38,8 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json        
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     def test_modbus_bulk_bits_with_skip(self):
         formula = "1*bit+2*skip+1*bit"
@@ -51,11 +52,11 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json
-
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     # 16bit, all tests are PDU (start from 0 address)
+
     def test_modbus_bulk_BE(self):
         formula = "2*float+1*int32+1*uint64"
         first_reg = "8"
@@ -69,8 +70,8 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     def test_modbus_bulk_int16_with_skip(self):
         formula = "2*int16+1*skip+1*int16"
@@ -84,8 +85,8 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     def test_modbus_bulk_uint16_with_skip(self):
         formula = "2*uint16+1*skip+1*uint16"
@@ -99,8 +100,8 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     def test_modbus_bulk_BE_with_skip(self):
         formula = "2*float+1*int32+1*uint64"
@@ -115,8 +116,8 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     def test_modbus_bulk_BE_with_whitespace(self):
         formula = "\' 1*int32 + 1*uint64 \'"
@@ -129,8 +130,8 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     # 16bit, all tests are PDU (start from 0 address)
     def test_modbus_bulk_multiplier_after_BE(self):
@@ -146,8 +147,8 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json        
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     def test_modbus_bulk_BE_no_multiplier(self):
         formula = "int32+uint64"
@@ -160,8 +161,8 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     # must work with other endianess too:
 
@@ -176,8 +177,8 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     def test_modbus_bulk_MLE_with_skip(self):
         formula = "1*float+16*skip+1*double"
@@ -190,8 +191,8 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
 
     def test_modbus_bulk_MBE_with_skip(self):
         formula = "1*float+22*skip+1*double"
@@ -204,5 +205,5 @@ class TestModbusBulkCase(object):
             }
             """)
         str_from_zabbix = zabbix_get(key)
-        assert "ZBX_NOTSUPPORTED" not in  str_from_zabbix
-        assert json.loads(str_from_zabbix) ==  expected_json
+        assert "ZBX_NOTSUPPORTED" not in str_from_zabbix
+        assert json.loads(str_from_zabbix) == expected_json
