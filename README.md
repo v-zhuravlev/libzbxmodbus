@@ -85,8 +85,9 @@ where:
     
 * **datatype_expression (optional):**  
     
-    Provide datatype:  
-      `b` or `bit` - for MODBUS_BIT  
+    Datatypes for READ COILS and READ DISCRETE INPUT STATUS:  
+      `b` or `bit` - for MODBUS_BIT.  
+    Datatypes for READ HOLDING REGISTERS and READ INPUT REGISTERS:  
       `i` or `uint16` - for MODBUS_UINT16, 16bit (unsigned)  
       `s` or `int16` - for MODBUS_SIGNED_INT, 16bit (NOTE: in Zabbix use 'Type of information' Numeric (float))  
       `l` or `uint32` - for MODBUS_UINT32, 32bit (unsigned)  
@@ -95,7 +96,7 @@ where:
       `I` or `uint64`- for MODBUS_UINT64, 64bit (unsigned) (NOTE: in Zabbix use 'Type of information' Numeric (unsigned))  
       `d` or `double`- for MODBUS_FLOAT64, 64bit  
     
-    otherwise, defaults will be used:  
+    If datatype is not provided, defaults will be used:  
       MODBUS_BIT if modbus_function is `1` or `2`.  
       MODBUS_UINT16 if modbus_function is `3` or `4`.  
 
@@ -218,7 +219,7 @@ You may try to grab some Modbus registers with it before you try to do it with Z
 
 
 If you use libzbxmodbus with Zabbix agent, then you can also save time and test responses first with `zabbix_get`, for example:
-`zabbix_get -s localhost -kmodbus_read["/dev/ttyS1 9600 N",9,0x1518,3,l,1,0]`
+`zabbix_get -s localhost -k'modbus_read[/dev/ttyS1 9600 N,9,0x1518,3,l,1,0]'`
   
 ## 7. Known Issues and Limitations  
  - Any libmodbus error returned including CRC errors would lead to Unsupported Item in Zabbix, so minimizing 'Refresh unsupported items' parameter in Zabbix is recommended because CRC could be common in RS-485 env.  
