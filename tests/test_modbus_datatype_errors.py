@@ -4,7 +4,7 @@ import json
 from zabbix_get import zabbix_get
 
 
-class TestModbusDatatypeErrorsCase(object):
+class TestModbusDatatypeErrors(object):
 
     
 

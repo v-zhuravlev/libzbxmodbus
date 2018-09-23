@@ -2,7 +2,7 @@ import pytest
 from zabbix_get import zabbix_get
 
 
-class TestModbusShortCase(object):
+class TestModbusShort(object):
 
     # test coils(bits)
 

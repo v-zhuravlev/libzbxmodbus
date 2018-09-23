@@ -1,7 +1,7 @@
 import pytest
 from zabbix_get import zabbix_get
 
-class TestModbusErrorsCase(object):
+class TestModbusErrors(object):
 
 
     # test errors

@@ -6,7 +6,7 @@ from zabbix_get import zabbix_get
     1,
     2
 ], ids=["read coils", "read discrete inputs"])
-class TestModbusCaseBit(object):
+class TestModbusBit(object):
     """This tests coils(bits)"""
 
     def test_modbus_datatype_bit_0(self, host, modbus_func):
@@ -22,7 +22,7 @@ class TestModbusCaseBit(object):
     3,
     4
 ], ids=["read holding registers", "read input registers"])
-class TestModbusCase(object):
+class TestModbus(object):
     # 16bit, all tests are PDU (start from 0 address)
     # INT16,Big Endian
 

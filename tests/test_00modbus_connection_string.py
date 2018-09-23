@@ -2,7 +2,7 @@ import pytest
 from zabbix_get import zabbix_get
 
 
-class TestModbusConnectionStringCase(object):
+class TestModbusConnectionString(object):
 
     host = "172.16.238.2:5020"
     host_rtutcp = "172.16.238.2:5021"

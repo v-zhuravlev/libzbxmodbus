@@ -6,7 +6,7 @@ from zabbix_get import zabbix_get
     3,
     4
 ], ids=["read holding registers", "read input registers"])
-class TestModbus64BitCase(object):
+class TestModbus64Bit(object):
 
     # INT64(Signed) NOT IMLEMENTED
     @pytest.mark.skip("Implement first")
