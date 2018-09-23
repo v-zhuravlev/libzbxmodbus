@@ -69,11 +69,7 @@ int  param_is_empty(char *param_to_check);
 int  initsem();
 void sem_lock();
 void sem_unlock();
-void sem_uninit (int semid);
-int is_bulk_formula(char *datatype_param);
-int validate_bulk_formula(char *datatype_param);
-int count_request_length(char *datatype_param);
-const char * bulk_response_to_json(uint16_t modbus_response, int reg_start, char *datatype_param);
+void sem_uninit(int semid);
 
 static ZBX_METRIC keys[] =
 	/*      KEY                     FLAG        FUNCTION            TEST PARAMETERS */
@@ -482,39 +478,6 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 
 	return;
 }
-
-int is_bulk_formula(char *datatype_param){
-    //check that datatype_param represents formula
-
-    return FALSE;
-}
-
-int validate_bulk_formula(char *datatype_param){
-/*
-check that there are no 'bit' is used in formula
-*/
-   //stub
-   return FALSE;
-
-}
-int count_request_length(char *datatype_param){
-    //parse formula in datatype_param and count the number of 16-bit words to read
-    return 2;
-}
-
-
-const char * bulk_response_to_json(uint16_t modbus_response, int reg_start, char *datatype_param){
-
-
-    /*
-    go throught response and parse it according to formula. Output as JSON formated string with keys with respect to reg_start
-    */
-
-    return "TODO";
-
-}
-
-
 
 int initsem() /* sem_key from ftok() */
 {
