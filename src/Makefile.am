@@ -1,6 +1,8 @@
 lib_LTLIBRARIES = libzbxmodbus.la
 
 libzbxmodbus_la_SOURCES = \
+	datatype.c \
+	endianness.c \
 	modbus.c
 libzbxmodbus_la_CFLAGS = -I$(top_srcdir)/libmodbus/src
 

@@ -52,11 +52,14 @@ m4/ltsugar.m4
 m4/ltversion.m4
 m4/lt~obsolete.m4
 missing
-src/.deps/libzbxmodbus_la-modbus.Plo
+src/.deps/*
 src/Makefile
 src/Makefile.in
 stamp-h1
 src/.libs/
-*.pyc
 ar-lib
 compile
+
+# python tests
+**/.pytest_cache
+*.pyc
