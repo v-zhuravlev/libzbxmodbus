@@ -2,11 +2,13 @@ lib_LTLIBRARIES = libzbxmodbus.la
 libzbxmodbus_ladir = src
 libzbxmodbus_la_HEADERS = \
     datatype.h \
-    endianness.h
+    endianness.h \
+    semaphores.h
 libzbxmodbus_la_SOURCES = \
 	datatype.c \
 	endianness.c \
-	modbus.c
+	modbus.c \
+	semaphores.c
 libzbxmodbus_la_CFLAGS = -I$(top_srcdir)/libmodbus/src
 
 if ZABBIX_2

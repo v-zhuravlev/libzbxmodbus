@@ -17,8 +17,6 @@
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 **/
 
-#include <sys/ipc.h>
-#include <sys/sem.h>
 // clang-format off
 #include "sysinc.h"
 #include "module.h"
@@ -31,6 +29,7 @@
 
 #include "datatype.h"
 #include "endianness.h"
+#include "semaphores.h"
 
 #define MODBUS_READ_COIL_1 1
 #define MODBUS_READ_DINPUTS_2 2
@@ -40,25 +39,8 @@
 #define MODBUS_PDU_ADDRESS_0 0
 #define MODBUS_PROTOCOL_ADDRESS_1 1
 
-#define NSEMS 128
-
-#define LOCK_PORT(x) sem_lock(x)
-#define UNLOCK_PORT(x) sem_unlock(x)
-
-// semaphore constants
-#define MODBUS_SEM_KEY "."
-int MODBUS_SEM_ID = -1;
-
-#define ZBX_MUTEX_ERROR -1
-
-#define MAX_RETRIES 10
-
-union semun
-{
-	int		 val;
-	struct semid_ds *buf;
-	unsigned short * array;
-};
+#define LOCK_PORT(x) semaphore_lock(x)
+#define UNLOCK_PORT(x) semaphore_unlock(x)
 
 /* the variable keeps timeout setting for item processing */
 static int item_timeout = 0;
@@ -66,10 +48,6 @@ static int item_timeout = 0;
 int  zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result);
 void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_required_out, short *lock_key);
 int  param_is_empty(char *param_to_check);
-int  initsem();
-void sem_lock();
-void sem_unlock();
-void sem_uninit(int semid);
 
 static ZBX_METRIC keys[] =
 	/*      KEY                     FLAG        FUNCTION            TEST PARAMETERS */
@@ -117,18 +95,6 @@ void zbx_module_item_timeout(int timeout)
 ZBX_METRIC *zbx_module_item_list()
 {
 	return keys;
-}
-
-// generate hash for nsem pseudo unique number.
-unsigned long hash(unsigned char *str)
-{
-	unsigned long hash = 5381;
-	int	   c;
-
-	while (c = *str++)
-		hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
-	return hash;
 }
 
 /******************************************************************************
@@ -390,13 +356,8 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
  ******************************************************************************/
 int zbx_module_init()
 {
-	if (ZBX_MUTEX_ERROR == (MODBUS_SEM_ID = initsem()))
-	{
-		printf("libzbxmodbus: unable to create semaphores. Please check maximum allowed nsem, it must be no "
-		       "less than %d. See limits in /proc/sys/kernel/sem\n",
-			NSEMS);
+	if (-1 == semaphore_init())
 		return ZBX_MODULE_FAIL;
-	}
 
 	printf("libzbxmodbus: loaded version: %s\n", VERSION);
 	/*This function should perform the necessary initialization for the module (if any).
@@ -417,7 +378,7 @@ int zbx_module_init()
  ******************************************************************************/
 int zbx_module_uninit()
 {
-	sem_uninit(MODBUS_SEM_ID);
+	semaphore_uninit();
 	return ZBX_MODULE_OK;
 }
 
@@ -441,7 +402,7 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 		int  rtu_stop_bit = 1;
 
 		sscanf(con_string, "%s %d %c %d %d", rtu_port, &rtu_speed, &rtu_parity, &rtu_bits, &rtu_stop_bit);
-		*lock_key = hash(rtu_port) % NSEMS;
+		*lock_key = get_resourceid(rtu_port);
 		*ctx_out = modbus_new_rtu(rtu_port, rtu_speed, rtu_parity, rtu_bits, rtu_stop_bit);
 	}
 	else
@@ -455,7 +416,7 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 			*lock_required_out = 1;
 			con_string += strlen("enc://");
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
-			*lock_key = hash(host) % NSEMS;
+			*lock_key = get_resourceid(host);
 			*ctx_out = modbus_new_rtutcp(host, port);
 		}
 		else if (strncmp(con_string, "tcp://", strlen("tcp://")) == 0)
@@ -463,7 +424,7 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 			*lock_required_out = 0;
 			con_string += strlen("tcp://");
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
-			*lock_key = hash(host) % NSEMS;
+			*lock_key = get_resourceid(host);
 			*ctx_out = modbus_new_tcp(host, port);
 		}
 		else
@@ -471,119 +432,10 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 
 			*lock_required_out = 0;
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
-			*lock_key = hash(host) % NSEMS;
+			*lock_key = get_resourceid(host);
 			*ctx_out = modbus_new_tcp(host, port);
 		}
 	}
 
 	return;
-}
-
-int initsem() /* sem_key from ftok() */
-{
-	int		nsems = NSEMS;
-	key_t		sem_key;
-	int		semid;
-	int		i;
-	union semun     arg;
-	struct semid_ds buf;
-	struct sembuf   sb;
-
-	if (-1 == (sem_key = ftok(MODBUS_SEM_KEY, 'z')))
-	{
-		// zbx_error("cannot create IPC key for path '%s': %s",
-		// MODBUS_SEM_KEY, zbx_strerror(errno));
-		return ZBX_MUTEX_ERROR;
-	}
-
-	semid = semget(sem_key, nsems, IPC_CREAT | IPC_EXCL | 0600);
-
-	if (semid >= 0)
-	{ /* we got it first */
-		sb.sem_op = 1;
-		sb.sem_flg = 0;
-		arg.val = 1;
-
-		for (sb.sem_num = 0; sb.sem_num < nsems; sb.sem_num++)
-		{
-			/* do a semop() to "free" the semaphores. */
-			/* this sets the sem_otime field, as needed below. */
-			if (semop(semid, &sb, 1) == -1)
-			{
-				int e = errno;
-				semctl(semid, 0, IPC_RMID); /* clean up */
-				errno = e;
-				return ZBX_MUTEX_ERROR; /* error, check errno */
-			}
-		}
-	}
-	else if (errno == EEXIST)
-	{ /* someone else got it first */
-		int ready = 0;
-		semid = semget(sem_key, nsems, 0); /* get the id */
-		if (semid < 0)
-			return semid; /* error, check errno */
-
-		/* wait for other process to initialize the semaphore: */
-		arg.buf = &buf;
-		for (i = 0; i < MAX_RETRIES && !ready; i++)
-		{
-			semctl(semid, nsems - 1, IPC_STAT, arg);
-			if (arg.buf->sem_otime != 0)
-			{
-				ready = 1;
-			}
-			else
-			{
-				sleep(1);
-			}
-		}
-		if (!ready)
-		{
-			errno = ETIME;
-			return ZBX_MUTEX_ERROR;
-		}
-	}
-	else
-	{
-		return semid; /* error, check errno */
-	}
-	return semid;
-}
-
-void sem_lock(int sem_num)
-{
-	struct sembuf sb;
-
-	sb.sem_num = sem_num;
-	sb.sem_op = -1; /* set to allocate resource */
-	sb.sem_flg = SEM_UNDO;
-
-	if (semop(MODBUS_SEM_ID, &sb, 1) == -1)
-	{
-		// zabbix_log(LOG_LEVEL_ERROR, "Failed to lock semaphore for semid: %d",MODBUS_SEM_ID);
-	}
-}
-
-void sem_unlock(int sem_num)
-{
-	struct sembuf sb;
-
-	sb.sem_num = sem_num;
-	sb.sem_op = 1; /* free resource */
-	sb.sem_flg = SEM_UNDO;
-
-	if (semop(MODBUS_SEM_ID, &sb, 1) == -1)
-	{
-		// zabbix_log(LOG_LEVEL_ERROR, "Failed to unlock semaphore for semid: %d",MODBUS_SEM_ID);
-	}
-}
-
-void sem_uninit(int semid)
-{
-	if (semctl(semid, 0, IPC_RMID) == -1)
-	{
-		// zabbix_log(LOG_LEVEL_ERROR, "Failed to destroy semaphore set for semid: %d",MODBUS_SEM_ID);
-		printf("libzbxmodbus: failed to destroy semaphore set for semid: %d", MODBUS_SEM_ID);
-	}
 }
