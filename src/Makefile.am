@@ -1,5 +1,8 @@
 lib_LTLIBRARIES = libzbxmodbus.la
-
+libzbxmodbus_ladir = src
+libzbxmodbus_la_HEADERS = \
+    datatype.h \
+    endianness.h
 libzbxmodbus_la_SOURCES = \
 	datatype.c \
 	endianness.c \
