@@ -24,6 +24,12 @@ jobs:
     after_failure: true
     env: TRAVIS_JOB_TYPE=FORMAT
     #ZBX_VERSION must be one of the tags for ubuntu here: https://hub.docker.com/r/zabbix/zabbix-agent/tags/
+  - name: Zabbix 4.0 Modbus TCP
+    env: < 
+      ZBX_VERSION=trunk
+      ZBX_HEADERS_VERSION=3.2
+      TRAVIS_JOB_TYPE=TEST
+      MODBUS_HOST=172.16.238.2:5020
   - name: Zabbix 3.4 Modbus TCP
     env: < 
       ZBX_VERSION=3.4.12
@@ -42,6 +48,12 @@ jobs:
       ZBX_HEADERS_VERSION=3
       TRAVIS_JOB_TYPE=TEST
       MODBUS_HOST=172.16.238.2:5020
+  - name: Zabbix 4.0 Modbus RTU over TCP
+    env: <
+      ZBX_VERSION=trunk
+      ZBX_HEADERS_VERSION=3.2
+      TRAVIS_JOB_TYPE=TEST
+      MODBUS_HOST=enc://172.16.238.2:5021      
   - name: Zabbix 3.4 Modbus RTU over TCP
     env: <
       ZBX_VERSION=3.4.12
