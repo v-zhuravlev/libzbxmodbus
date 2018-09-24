@@ -212,7 +212,12 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 		modbus_free(ctx);
 		return SYSINFO_RET_FAIL;
 	}
-	modbus_set_slave(ctx, slave_id);
+	if (modbus_set_slave(ctx, slave_id) == -1)
+	{
+		SET_MSG_RESULT(result, strdup("Check slaveid parameter"));
+		modbus_free(ctx);
+		return SYSINFO_RET_FAIL;
+	}
 
 	//<reg> set register to start from
 	errno = 0;
