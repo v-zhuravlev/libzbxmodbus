@@ -69,6 +69,7 @@ jobs:
     after_failure: true
     before_deploy:
       - ./autogen.sh
+      - ./configure --enable-zabbix-3.2 -q
       - make dist
     deploy:
       provider: releases
