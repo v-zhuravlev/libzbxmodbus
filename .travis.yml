@@ -3,29 +3,6 @@ sudo: required
 services:
   - docker
 
-#ZBX_VERSION must be one of the tags for ubuntu here: https://hub.docker.com/r/zabbix/zabbix-agent/tags/
-matrix:
-  include:
-  - name: Format
-    before_install: true
-    after_failure: true
-    env: TRAVIS_JOB_TYPE=FORMAT
-  - name: Zabbix 3.4 Modbus TCP
-    env: ZBX_VERSION=3.4.12 ZBX_HEADERS_VERSION=3.2 TRAVIS_JOB_TYPE=TEST MODBUS_HOST=172.16.238.2:5020
-  - name: Zabbix 3.2 Modbus TCP
-    env: ZBX_VERSION=3.2.11 ZBX_HEADERS_VERSION=3.2 TRAVIS_JOB_TYPE=TEST MODBUS_HOST=172.16.238.2:5020
-  - name: Zabbix 3.0 Modbus TCP
-    env: ZBX_VERSION=3.0.19 ZBX_HEADERS_VERSION=3   TRAVIS_JOB_TYPE=TEST MODBUS_HOST=172.16.238.2:5020
-  - name: Zabbix 3.4 Modbus RTU over TCP
-    env: ZBX_VERSION=3.4.12 ZBX_HEADERS_VERSION=3.2 TRAVIS_JOB_TYPE=TEST MODBUS_HOST=enc://172.16.238.2:5021
-  - name: Zabbix 3.2 Modbus RTU over TCP
-    env: ZBX_VERSION=3.2.11 ZBX_HEADERS_VERSION=3.2 TRAVIS_JOB_TYPE=TEST MODBUS_HOST=enc://172.16.238.2:5021
-  - name: Zabbix 3.0 Modbus RTU over TCP
-    env: ZBX_VERSION=3.0.19 ZBX_HEADERS_VERSION=3   TRAVIS_JOB_TYPE=TEST MODBUS_HOST=enc://172.16.238.2:5021
-  #- name: Zabbix 2.2
-  #  env: ZBX_VERSION=2.2.19 ZBX_HEADERS_VERSION=2  
-
-
 before_install:
   - ./autogen.sh
   - python -m pip install -q --user pytest
@@ -38,4 +15,48 @@ before_install:
 script:
   - ./run-tests.sh
 after_failure:
-  - docker logs --since 1h docker_zabbix-agent-modbus_1
+  - docker logs --since 1h docker_zabbix-agent-modbus_1    
+
+jobs:
+  include:
+  - name: Format
+    before_install: true
+    after_failure: true
+    env: TRAVIS_JOB_TYPE=FORMAT
+    #ZBX_VERSION must be one of the tags for ubuntu here: https://hub.docker.com/r/zabbix/zabbix-agent/tags/
+  - name: Zabbix 3.4 Modbus TCP
+    env: ZBX_VERSION=3.4.12 ZBX_HEADERS_VERSION=3.2 TRAVIS_JOB_TYPE=TEST MODBUS_HOST=172.16.238.2:5020
+  - name: Zabbix 3.2 Modbus TCP
+    env: ZBX_VERSION=3.2.11 ZBX_HEADERS_VERSION=3.2 TRAVIS_JOB_TYPE=TEST MODBUS_HOST=172.16.238.2:5020
+  - name: Zabbix 3.0 Modbus TCP
+    env: ZBX_VERSION=3.0.19 ZBX_HEADERS_VERSION=3   TRAVIS_JOB_TYPE=TEST MODBUS_HOST=172.16.238.2:5020
+  - name: Zabbix 3.4 Modbus RTU over TCP
+    env: ZBX_VERSION=3.4.12 ZBX_HEADERS_VERSION=3.2 TRAVIS_JOB_TYPE=TEST MODBUS_HOST=enc://172.16.238.2:5021
+  - name: Zabbix 3.2 Modbus RTU over TCP
+    env: ZBX_VERSION=3.2.11 ZBX_HEADERS_VERSION=3.2 TRAVIS_JOB_TYPE=TEST MODBUS_HOST=enc://172.16.238.2:5021
+  - name: Zabbix 3.0 Modbus RTU over TCP
+    env: ZBX_VERSION=3.0.19 ZBX_HEADERS_VERSION=3   TRAVIS_JOB_TYPE=TEST MODBUS_HOST=enc://172.16.238.2:5021
+  #-name: Zabbix 2.2
+  # env: ZBX_VERSION=2.2.19 ZBX_HEADERS_VERSION=2  
+  - stage: deploy
+    name: Deploy to GitHub
+    before_install: true
+    script: true
+    after_failure: true
+    before_deploy:
+      - ./autogen.sh
+      - make dist
+    deploy:
+      provider: releases
+      api_key:
+        secure: AUlyQK/z79Ty/84fsjxNb6/g2V3DqbMOhcCSs46YvyMNAVSJBeL2MHlO9rOkviLo/YIPKowy7xTAxCnRmDda8yZBYqdBqqCgdphFtPVABTuWEVomQ/RlM5j9BLZWpqqY7NcikP5xbF5L7N35DnRaATgHMLXyDmJKA0Zg460GX6clZR29JlkE7tBmAsrNvdc8uY+fRfO+s3Oa1/J48ndJIMqkOw4+Brr9m8YJAK3EmF0B6dhqJ6pMIb7iFBDRhnS0vyerjKDjJlDb5P65jTx2TUsghUlDv8W1zv5wFmWS7+S3yJg9MTmZ+SSjjIufNMqT1R3jE/jpfxHJAHd5pFrtft7GdmZ22j41nJHUb2PW6KHGhj5IgSMbnylqEd5bTXMMOsxlErRxtC7/ykVGO7dKK47BdbIbwhWTa0QQ21Z/Y1BJgFpp3PQoWx01x4YjCspQaSmKRmdqpBj0BG2+SO6/fWf9ZuUCh+0yKr9meIN6LlckPMiRoPCdoJ5Z0Rf5ppyWRXDKBet69XUnK2LT0TmtIEAMuE308NBjrYodC/yqC4A9C4PfBCLvIW3Lm5kCOqTC9hw+7jwMWGxRv8J3DgxJ/TZeAcOZlVKeXDtZdKyYB/KfHNPSQcYhlY4KutpZe2C1AnRJmviE2oWlLGTujwXPwvLxG7kCS7PrYS0LWPEdGD8=
+      file_glob: true
+      file: libzbxmodbus-*.tar.gz
+      skip_cleanup: true
+      on:
+        repo: v-zhuravlev/libzbxmodbus
+        branch: deploy
+        tags: true
+stages:
+  - test
+  - deploy
