@@ -14,7 +14,7 @@ This module features:
 Download sources from [here](https://share.zabbix.com/dir-libraries/zabbix-loadable-modules/modbus-loadable-module), then  do:
   - `tar zxvpf libzbxmodbus-0.9.tar.gz`
   - `cd libzbxmodbus-0.9`
-  - `./configure --prefix=/etc/zabbix --enable-zabbix-[2|3|3.2]`
+  - `./configure --prefix=/etc/zabbix --enable-zabbix-[2|3|3.2|4.0]`
   - `make`
   - `make install`  
 

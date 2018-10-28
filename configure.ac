@@ -7,7 +7,7 @@ m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 
 
 
-#Zabbix 2.4 / Zabbix 3.0 / 3.2 chooser
+#Zabbix 2.4 / Zabbix 3.0 / 3.2 / 4.0 chooser
 AC_ARG_ENABLE([zabbix-2],
 [  --enable-zabbix-2    Build with Zabbix 2.4 headers],
 [case "${enableval}" in
@@ -35,11 +35,20 @@ AC_ARG_ENABLE([zabbix-3.2],
 esac],[zabbix_3_2=false])
 AM_CONDITIONAL([ZABBIX_3_2], [test x$zabbix_3_2 = xtrue])
 
-if [test "x${zabbix_2}" = xfalse && test "x${zabbix_3}" = xfalse && test "x${zabbix_3_2}" = xfalse] ; then
+AC_ARG_ENABLE([zabbix-4.0],
+[  --enable-zabbix-4.0    Build with Zabbix 4.0 headers],
+[case "${enableval}" in
+  yes) zabbix_4_0=true ;;
+  no)  zabbix_4_0=false ;;
+  *) AC_MSG_ERROR([bad value ${enableval} for --enable-zabbix-4.0]) ;;
+esac],[zabbix_4_0=false])
+AM_CONDITIONAL([ZABBIX_4_0], [test x$zabbix_4_0 = xtrue])
+
+if [test "x${zabbix_2}" = xfalse && test "x${zabbix_3}" = xfalse && test "x${zabbix_3_2}" = xfalse && test "x${zabbix_4_0}" = xfalse] ; then
 AC_MSG_ERROR([
 ------------------------------------------
 Please specify the version of Zabbix module will be used with: by providing either
---enable-zabbix-2 or --enable-zabbix-3 or --enable-zabbix-3.2 key but no more than one.
+--enable-zabbix-2 or --enable-zabbix-3 or --enable-zabbix-3.2 or --enable-zabbix-4.0 key but no more than one.
 ------------------------------------------])
 fi
 
