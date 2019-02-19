@@ -351,16 +351,23 @@ static void strappf(char **old, size_t *old_size, size_t *old_offset, const char
 
 	if (new_offset >= new_size)
 	{
+		char *renew;
+
 		new_size = new_offset + 1;
 
-		if (NULL != (new = realloc(new, new_size)))
+		if (NULL != (renew = realloc(new, new_size)))
 		{
+			new = renew;
 			va_start(args, format);
 			vsnprintf(new + *old_offset, new_size - *old_offset, format, args);
 			va_end(args);
 		}
 		else
+		{
+			free(new);
+			new = NULL;
 			new_size = new_offset = 0;
+		}
 	}
 
 	*old = new;
