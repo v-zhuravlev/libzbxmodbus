@@ -18,7 +18,8 @@ Download sources from [here](https://share.zabbix.com/dir-libraries/zabbix-loada
   - `make`
   - `make install`  
 
-Note: If you want to install from Github sources, see hints [here](https://github.com/v-zhuravlev/libzbxmodbus/wiki/Install-from-Github-repo).
+Note: If you want to install from Github sources, see hints [here](https://github.com/v-zhuravlev/libzbxmodbus/wiki/Install-from-Github-repo).  
+One more note: use `--zabbix-3.2` in `configure` for all newer Zabbix versions such as 3.4, 4.0 and so on.  
 
 ## 2. Load into Zabbix  
   - Module libzbxmodule.so can be loaded into zabbix_server, zabbix_proxy or zabbix_agent(use passive mode).  
