@@ -21,7 +21,7 @@ class TestModbusErrors(object):
     def test_bad_IP(self, host):
         """Test bad IP"""
         key = "modbus_read_registers[badIP,3,14,3,uint32,BE,0]"
-        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Network is unreachable'
+        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Connection refused'
 
     def test_no_slaveID(self, host):
         key = "modbus_read_registers[{HOST.CONN},,14,3,uint32,BE,0]"
@@ -63,7 +63,7 @@ class TestModbusErrors(object):
 
     def test_bad_slaveid_integer(self, host):
         key = "modbus_read_registers["+host+",5000,99,3,uint32,BE,0]"
-        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Illegal data address'
+        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Check slaveid parameter'
     def test_bad_slaveid_string(self, host):
         key = "modbus_read_registers["+host+",bad,1,3,uint32,BE,0]"
-        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Check slaveid parameter'        
+        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Check slaveid parameter'

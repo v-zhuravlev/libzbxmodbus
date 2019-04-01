@@ -212,7 +212,12 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 		modbus_free(ctx);
 		return SYSINFO_RET_FAIL;
 	}
-	modbus_set_slave(ctx, slave_id);
+	if (modbus_set_slave(ctx, slave_id) == -1)
+	{
+		SET_MSG_RESULT(result, strdup("Check slaveid parameter"));
+		modbus_free(ctx);
+		return SYSINFO_RET_FAIL;
+	}
 
 	//<reg> set register to start from
 	errno = 0;
@@ -449,30 +454,34 @@ void create_modbus_context(char *con_string, modbus_t **ctx_out, int *lock_requi
 
 		char host[100];
 		int  port = MODBUS_TCP_DEFAULT_PORT;
+		char port_str[10];
 
 		if (strncmp(con_string, "enc://", strlen("enc://")) == 0)
 		{
 			*lock_required_out = 1;
 			con_string += strlen("enc://");
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+			sprintf(port_str, "%d", port);
 			*lock_key = hash(host) % NSEMS;
-			*ctx_out = modbus_new_rtutcp(host, port);
+			*ctx_out = modbus_new_rtutcp_pi(host, port_str);
 		}
 		else if (strncmp(con_string, "tcp://", strlen("tcp://")) == 0)
 		{
 			*lock_required_out = 0;
 			con_string += strlen("tcp://");
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+			sprintf(port_str, "%d", port);
 			*lock_key = hash(host) % NSEMS;
-			*ctx_out = modbus_new_tcp(host, port);
+			*ctx_out = modbus_new_tcp_pi(host, port_str);
 		}
 		else
 		{	// try Modbus TCP
 
 			*lock_required_out = 0;
 			sscanf(con_string, "%99[^:]:%99d[^\n]", host, &port);
+			sprintf(port_str, "%d", port);
 			*lock_key = hash(host) % NSEMS;
-			*ctx_out = modbus_new_tcp(host, port);
+			*ctx_out = modbus_new_tcp_pi(host, port_str);
 		}
 	}
 

@@ -1,4 +1,4 @@
 [submodule "libmodbus"]
 	path = libmodbus
 url=https://github.com/v-zhuravlev/libmodbus
-    branch = v3.1.4
+    branch = myssta-patch

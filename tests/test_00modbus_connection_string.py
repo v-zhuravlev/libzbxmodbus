@@ -6,6 +6,8 @@ class TestModbusConnectionString(object):
 
     host = "172.16.238.2:5020"
     host_rtutcp = "172.16.238.2:5021"
+    host_dns = "modbus-server:5020"
+    host_rtutcp_dns = "modbus-server:5021"
 
     # test enc:// (rtu over tcp)
 
@@ -16,6 +18,16 @@ class TestModbusConnectionString(object):
 
     def test_modbus_tcp(self):
         key = "modbus_read[tcp://"+self.host+",1,1,3,uint16]"
+        assert zabbix_get(key) == '49677'
+
+    # test enc:// (rtu over tcp) using hostname
+    def test_modbus_test_rtutcp_dns(self):
+        key = "modbus_read[enc://"+self.host_rtutcp_dns+",1,0,3,uint16]"
+        assert zabbix_get(key) == '49807'
+
+    # test tcp:// (plain tcp) using hostname
+    def test_modbus_tcp_dns(self):
+        key = "modbus_read[tcp://"+self.host_dns+",1,1,3,uint16]"
         assert zabbix_get(key) == '49677'
 
     # test serial /dev/ttyS0

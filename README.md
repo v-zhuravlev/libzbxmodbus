@@ -57,9 +57,7 @@ where:
     
     for Modbus Encapsulated (RTU over TCP): 
     IPv4 of Modbus gate, for example: `enc://192.168.1.1`  
-    TCP port may also be redefined (from Modbus default 502) if needed: `enc://192.168.1.1:5000`
-    
-    Note: DNS names are not supported for TCP and RTU over TCP
+    TCP port may also be redefined (from Modbus default 502) if needed: `enc://192.168.1.1:5000`  
     
     for Modbus RTU over serial:
     Serial connection parameters in a form of:  
