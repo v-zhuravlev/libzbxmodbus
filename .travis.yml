@@ -4,6 +4,11 @@ services:
   - docker
 
 before_install:
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/1.23.2/docker-compose-`uname -s`-`uname -m` > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+  - docker-compose --version
   - ./autogen.sh
   - python -m pip install -q --user pytest
   - ./configure --enable-zabbix-${ZBX_HEADERS_VERSION} -q
