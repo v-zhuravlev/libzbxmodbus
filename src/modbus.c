@@ -201,16 +201,19 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 	}
 
 	datatype_syntax_t datatype_syntax;
+	size_t		  reg_size;
 
 	switch (function)
 	{
 		case MODBUS_READ_COIL_1:
 		case MODBUS_READ_DINPUTS_2:
 			datatype_syntax = BIT_SYNTAX;
+			reg_size = sizeof(uint8_t);
 			break;
 		case MODBUS_READ_H_REGISTERS_3:
 		case MODBUS_READ_I_REGISTERS_4:
 			datatype_syntax = REGISTER_SYNTAX;
+			reg_size = sizeof(uint16_t);
 			break;
 		default:
 			SET_MSG_RESULT(result, strdup("Check function (1,2,3,4) used"));
@@ -228,14 +231,6 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 	{
 		SET_MSG_RESULT(result, error);
 		modbus_free(ctx);
-		return SYSINFO_RET_FAIL;
-	}
-
-	if (64 < regs_to_read) /* FIXME ideally tab_reg[] and tab_reg_bits[] should be allocated dynamically */
-	{
-		SET_MSG_RESULT(result, strdup("Cannot read so much at once."));
-		modbus_free(ctx);
-		free(result_layout);
 		return SYSINFO_RET_FAIL;
 	}
 
@@ -278,8 +273,17 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 
 	// read part
 
-	uint16_t tab_reg[64];	// temp vars
-	uint8_t  tab_reg_bits[64];
+	void *tab_reg;	// temp vars
+
+	tab_reg = malloc(regs_to_read * reg_size);
+
+	if (tab_reg == NULL)
+	{
+		SET_MSG_RESULT(result, strdup("Cannot allocate buffer to read registers"));
+		modbus_free(ctx);
+		free(result_layout);
+		return SYSINFO_RET_FAIL;
+	}
 
 	if (lock_required == 1)
 		LOCK_PORT(lock_key);
@@ -289,6 +293,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 		SET_MSG_RESULT(result, strdup(modbus_strerror(errno)));
 		modbus_free(ctx);
 		free(result_layout);
+		free(tab_reg);
 		if (lock_required == 1)
 			UNLOCK_PORT(lock_key);
 		return SYSINFO_RET_FAIL;
@@ -298,16 +303,16 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 	switch (function)
 	{
 		case MODBUS_READ_COIL_1:
-			rc = modbus_read_bits(ctx, reg_start, regs_to_read, tab_reg_bits);
+			rc = modbus_read_bits(ctx, reg_start, regs_to_read, (uint8_t *)tab_reg);
 			break;
 		case MODBUS_READ_DINPUTS_2:
-			rc = modbus_read_input_bits(ctx, reg_start, regs_to_read, tab_reg_bits);
+			rc = modbus_read_input_bits(ctx, reg_start, regs_to_read, (uint8_t *)tab_reg);
 			break;
 		case MODBUS_READ_H_REGISTERS_3:
-			rc = modbus_read_registers(ctx, reg_start, regs_to_read, tab_reg);
+			rc = modbus_read_registers(ctx, reg_start, regs_to_read, (uint16_t *)tab_reg);
 			break;
 		case MODBUS_READ_I_REGISTERS_4:
-			rc = modbus_read_input_registers(ctx, reg_start, regs_to_read, tab_reg);
+			rc = modbus_read_input_registers(ctx, reg_start, regs_to_read, (uint16_t *)tab_reg);
 			break;
 		default:
 			SET_MSG_RESULT(result, strdup("Check function (1,2,3,4) used"));
@@ -317,6 +322,7 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 				UNLOCK_PORT(lock_key);
 			modbus_free(ctx);
 			free(result_layout);
+			free(tab_reg);
 			return SYSINFO_RET_FAIL;
 			break;
 	}
@@ -330,13 +336,17 @@ int zbx_modbus_read_registers(AGENT_REQUEST *request, AGENT_RESULT *result)
 	{
 		SET_MSG_RESULT(result, strdup(modbus_strerror(errno)));
 		free(result_layout);
+		free(tab_reg);
 		return SYSINFO_RET_FAIL;
 	}
 
 	// post-parsing
 
-	set_result_based_on_datatype(result, result_layout, reg_start, tab_reg_bits, tab_reg, endianness);
+	set_result_based_on_datatype(result, result_layout, reg_start,
+		(datatype_syntax == BIT_SYNTAX ? (const uint8_t *)tab_reg : NULL),
+		(datatype_syntax == REGISTER_SYNTAX ? (const uint16_t *)tab_reg : NULL), endianness);
 	free(result_layout);
+	free(tab_reg);
 
 	return SYSINFO_RET_OK;
 }
