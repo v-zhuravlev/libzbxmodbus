@@ -63,3 +63,6 @@ compile
 # python tests
 **/.pytest_cache
 *.pyc
+
+# Compilation database
+compile_commands.json
