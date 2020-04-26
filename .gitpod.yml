@@ -1,6 +1,6 @@
 tasks:
 - init: >-
-    autogen.sh &&
+    ./autogen.sh &&
     ./configure --prefix=/etc/zabbix --enable-zabbix-3.2 &&
     bear make
 image:
