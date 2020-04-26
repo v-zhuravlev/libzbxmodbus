@@ -1,5 +1,7 @@
 # libzbxmodbus
 [![Build Status](https://travis-ci.org/v-zhuravlev/libzbxmodbus.svg?branch=master)](https://travis-ci.org/v-zhuravlev/libzbxmodbus)  
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/v-zhuravlev/libzbxmodbus)
+
 This is the [Loadable module](https://www.zabbix.com/documentation/4.0/manual/config/items/loadablemodules) that adds support for Modbus (TCP, RTU and "RTU over TCP" (encapsulated)) in Zabbix.
 
 This module features:
