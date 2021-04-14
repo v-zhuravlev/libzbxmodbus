@@ -4,23 +4,20 @@ services:
   - docker
 
 before_install:
-  - sudo rm /usr/local/bin/docker-compose
-  - curl -L https://github.com/docker/compose/releases/download/1.23.2/docker-compose-`uname -s`-`uname -m` > docker-compose
-  - chmod +x docker-compose
-  - sudo mv docker-compose /usr/local/bin
   - docker-compose --version
   - ./autogen.sh
   - python -m pip install -q --user pytest
   - ./configure --enable-zabbix-${ZBX_HEADERS_VERSION} -q
   - make
-  - pushd tests/docker && docker-compose up -d
+  - pushd tests/docker
+  - docker-compose up -d
+  - docker-compose exec zabbix-agent-modbus sh -c "zabbix_get -s localhost -k agent.ping" || (docker-compose logs zabbix-agent-modbus ; false)
+  - docker-compose exec zabbix-agent-modbus sh -c "zabbix_get -s localhost -k modbus_read[172.16.238.2:5020,1,2,3,uint16,1,1]" || (docker-compose logs zabbix-agent-modbus ; false)
   - popd
-  - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k agent.ping" || (docker logs --since 1h docker_zabbix-agent-modbus_1 ; false)
-  - docker exec docker_zabbix-agent-modbus_1 sh -c "zabbix_get -s localhost -k modbus_read[172.16.238.2:5020,1,2,3,uint16,1,1]" || (docker logs --since 1h docker_zabbix-agent-modbus_1 ; false)
 script:
   - ./run-tests.sh
 after_failure:
-  - docker logs --since 1h docker_zabbix-agent-modbus_1    
+  - docker-compose logs zabbix-agent-modbus
 
 jobs:
   include:
