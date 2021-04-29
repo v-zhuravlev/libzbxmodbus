@@ -39,6 +39,7 @@ aclocal.m4
 config.guess
 config.h
 config.h.in
+config.log
 config.status
 config.sub
 configure
@@ -59,6 +60,7 @@ stamp-h1
 src/.libs/
 ar-lib
 compile
+autom4te.cache
 
 # python tests
 **/.pytest_cache
