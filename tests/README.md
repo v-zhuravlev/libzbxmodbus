@@ -14,5 +14,6 @@
 ## Run local
 You can run tests local:
 1. Build libzbxmodbus `./configure --enable-zabbix-3.2 && make`
+1. Make sure Docker is running. In Gitpod run `sudo docker-up` and open a new terminal.
 2. Build and run the rest with docker-compose `export ZBX_VERSION=3.4.12 ; pushd tests/docker && docker-compose build && docker-compose up -d --force-recreate`
 3. Run sample test from shell `docker-compose exec zabbix-agent-modbus sh -c "zabbix_get -s localhost -k modbus_read[172.16.238.2:5020,1,2,3,i,1,1]"`
