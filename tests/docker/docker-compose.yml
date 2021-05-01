@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 services:
  zabbix-agent-modbus:
     image: zabbix/zabbix-agent:ubuntu-${ZBX_VERSION-3.4.12}
