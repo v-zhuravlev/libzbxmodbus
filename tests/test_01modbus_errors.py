@@ -28,31 +28,31 @@ class TestModbusErrors(object):
         assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: No slave id provided.'
     def test_no_function(self, host):
         key = "modbus_read_registers["+host+",3,14,,uint32,BE,0]"
-        assert zabbix_get(key),'ZBX_NOTSUPPORTED: No Modbus function provided! Please provide either 1,2,3 == 4.'
+        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: No Modbus function provided! Please provide either 1,2,3,4.'
 
     def test_bad_PDU_flag_integer(self, host):
         key = "modbus_read_registers["+host+",3,14,3,uint32,BE,3]"
-        assert zabbix_get(key),'ZBX_NOTSUPPORTED: Check addressing scheme(PDU == PROTOCOL) used'
+        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Check addressing scheme(PDU,PROTOCOL) used'
     def test_bad_PDU_flag_string(self, host):
         key = "modbus_read_registers["+host+",3,14,3,uint32,BE,bad]"
-        assert zabbix_get(key),'ZBX_NOTSUPPORTED: Check addressing scheme(PDU == PROTOCOL) used'
+        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Check addressing scheme(PDU,PROTOCOL) used'
 
 
     def test_bad_LE_flag_integer(self, host):
         key = "modbus_read_registers["+host+",3,14,3,uint32,5,0]"
-        assert zabbix_get(key),'ZBX_NOTSUPPORTED: Check endiannes used: BE,LE,MLE == MBE.'
+        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Check endiannes used: BE,LE,MLE,MBE.'
 
     def test_bad_LE_flag_string(self, host):
         key = "modbus_read_registers["+host+",3,14,3,uint32,bad,0]"
-        assert zabbix_get(key),'ZBX_NOTSUPPORTED: Check endiannes used: BE,LE,MLE == MBE.'
+        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Check endiannes used: BE,LE,MLE,MBE.'
 
 
     def test_bad_function_integer(self, host):
         key = "modbus_read_registers["+host+",3,14,5,uint32,BE,0]"
-        assert zabbix_get(key),'ZBX_NOTSUPPORTED: Check function (1,2,3 == 4) used'
+        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Check function (1,2,3,4) used'
     def test_bad_function_string(self, host):
         key = "modbus_read_registers["+host+",3,14,bad,uint32,BE,0]"
-        assert zabbix_get(key),'ZBX_NOTSUPPORTED: Check function (1,2,3 == 4) used'
+        assert zabbix_get(key) == 'ZBX_NOTSUPPORTED: Check function (1,2,3,4) used'
 
     def test_bad_register_out_of_bounds_integer(self, host):
         key = "modbus_read_registers["+host+",3,1000,3,uint32,BE,0]"
