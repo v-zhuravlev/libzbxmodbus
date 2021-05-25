@@ -39,13 +39,12 @@ class TestModbusDatatypeErrors(object):
         assert zabbix_get(key) ==  'ZBX_NOTSUPPORTED: Datatype expression can neither begin nor end with skipping.'
 
     def test_modbus_datatype_skip_2(self, host):
-        formula = "'  skip   '"
+        formula = "  skip   "
         key = "modbus_read_registers["+host+",1,2,3,"+formula+"]"
         assert zabbix_get(key) ==  'ZBX_NOTSUPPORTED: Datatype expression can neither begin nor end with skipping.'
 
-    @pytest.mark.skip("Requires shell escaping")
     def test_modbus_datatype_whitespace_0(self, host):
-        formula = "\'\"    \"\'"
+        formula = "\"    \""
         key = "modbus_read_registers["+host+",1,2,3,"+formula+"]"
         assert zabbix_get(key) ==  'ZBX_NOTSUPPORTED: Unexpected end of the datatype expression.'
     
