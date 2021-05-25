@@ -1,12 +1,12 @@
 # Use an official Python runtime as a parent image
 FROM python:2.7-slim
 
-COPY requirements.txt ./requirements.txt
+COPY requirements.txt ./
 # Install any needed packages specified in requirements.txt
 RUN pip install -q --trusted-host pypi.python.org -r requirements.txt
 
-# Copy the current directory contents into the container at ./
-ADD  . ./
+# Copy the script
+COPY app.py ./
 
 # Make port 5020 available to the world outside this container (TCP)
 EXPOSE 5020
