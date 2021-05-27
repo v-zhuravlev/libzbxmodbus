@@ -120,7 +120,7 @@ class TestModbusBulk(object):
         assert json.loads(str_from_zabbix) == expected_json
 
     def test_modbus_bulk_BE_with_whitespace(self, host):
-        formula = "\' 1*int32 + 1*uint64 \'"
+        formula = " 1*int32 + 1*uint64 "
         first_reg = "12"
         key = "modbus_read["+host+",1,"+first_reg+",3,"+formula+",BE]"
         expected_json = json.loads("""
